@@ -12,7 +12,7 @@ output:
 ```{r, include=FALSE}
 # TODO: Fix buildmaster so it works for Devon AND Norfolk
 start_time <- Sys.time() # for timing the script
-source("set-up.R") # pull in packages needed
+source(file.path("components", "set-up.R")) # pull in packages needed
 ```
 
 This document was produced automatically at `r start_time`.
@@ -34,14 +34,20 @@ The preset values used to select the study area and filter the origin destinatio
 
 ```{r, echo=FALSE}
 # Create default LA name if none exists
-if(!exists("region")) region <- "Liverpool-City-Region" 
+if(!exists("region")) region <- "Liverpool-City-Region"
+pct_data <- file.path("..", "pct-data")
+pct_bigdata <- file.path("..", "pct-bigdata")
+pct_privatedata <- file.path("..", "pct-privatedata")
+if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
+if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
+if(!file.exists(pct_privatedata)) warning(paste("The pct_privatedata repository has cannot be found in", dirname(getwd())))
 ```
 
 
 ```{r, warning=FALSE}
 # Set local authority and ttwa zone names
 region # name of the region
-region_path <- file.path("pct-data", region)
+region_path <- file.path("..","pct-data", region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines.
@@ -57,27 +63,21 @@ buff_geo_dist <- 250 # buffer (m) for removing line start and end points for net
 The input zones area are summarised in this section.
 
 ```{r plotzones, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
-# mapshape("pct-bigdata/national/msoas.shp")
-# ukmsoas <- shapefile("pct-bigdata/national/msoasmapshaped_25%.shp")
-#ukmsoas <- geojson_read("pct-bigdata/national/msoas.geojson", what = "sp")
-ukmsoas <- shapefile("pct-bigdata/national/msoas.shp")
+ukmsoas <- shapefile(file.path(pct_bigdata, "msoas.shp"))
 ukmsoas <- spTransform(ukmsoas, CRS("+init=epsg:4326"))
 
-# geojson_write(ukmsoas, file = "pct-bigdata/national/msoas.geojson")
-# ukmsoas <- geojson_read("pct-bigdata/national/msoas.geojson", what = "sp")
-
 # Load population-weighted centroids
-cents <- readOGR("pct-bigdata/national/cents.geojson", layer = "OGRGeoJSON")
+cents <- readOGR(file.path(pct_bigdata, "cents.geojson"), layer = "OGRGeoJSON")
 cents$geo_code <- as.character(cents$geo_code)
 
 # Load local authorities and districts
 if(!exists("geo_level")) geo_level <- "regions"
-las <- readOGR(dsn = "pct-bigdata/national/las-pcycle.geojson", layer = "OGRGeoJSON")
+las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
 if(geo_level == "cua"){
-  regions <- readOGR(dsn = "pct-bigdata/national/cuas-mf.geojson", layer = "OGRGeoJSON")
+  regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
   regions$Region <- regions$CTYUA12NM
 }else{
-  regions <- geojson_read("pct-bigdata/national/regions.geojson", what = "sp")
+  regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
 }
 las_cents <- SpatialPoints(coordinates(las))
 
@@ -101,14 +101,6 @@ The selected region was `r as.character(regions$Region[sel_region ])`.
 
 
 ```{r, include=FALSE}
-# lasdat <- SpatialPointsDataFrame(coords = coordinates(las), data = las@data)
-
-# Load counties and unitary authorities
-# cuas <- readOGR(dsn = "pct-bigdata/national/cuas.geojson", layer = "OGRGeoJSON")
-# proj4string(lasdat) <- proj4string(cuas)
-# cuas <- aggregate(lasdat, cuas, mean, na.action = na.omit()) # todo: fix data
-# # tmap::qtm(cuas2,fill = "clc")
-
 # select msoas of interest
 cents <- cents[region_shape,]
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
@@ -128,10 +120,10 @@ mzarea <- round(median(gArea(zones_wgs, byid = T) / 10000), 1) # average area of
 ## Input flow data
 
 ```{r, echo=FALSE, results='hide'}
-# flow <- readRDS("pct-bigdata/national/flow_eng_avlslope.Rds")
-flow <- readRDS("private-data/flowsex-merged.Rds")
 
+flow <- readRDS(file.path(pct_bigdata, "flow.Rds"))
 
+if(file.exists(pct_privatedata)) flow <- readRDS(file.path(pct_privatedate, "flowsex-merged.Rds"))
 # Subset by zones in the study area
 o <- flow$Area.of.residence %in% cents$geo_code
 d <- flow$Area.of.workplace %in% cents$geo_code
@@ -161,7 +153,6 @@ lines(l[l$All > 100,], col = "green")
 ```{r, echo=FALSE}
 l <- l[dsel,]
 l <- l[l$dist > 0, ] # to remove OD pairs of 0 length
-# l <- l[1:30,] # warning: subset lines arbitrarily
 ```
 
 ```{r, echo=FALSE}
@@ -222,12 +213,11 @@ An illustration of these routes is presented below.
 # # # # # # # # # # # # # # #
 
 # Create or load route allocated lines (depending on past loading)
-if(file.exists(paste0("pct-data/", region, "/rf.Rds")) &
-   file.exists(paste0("pct-data/", region, "/rq.Rds"))){
-  rf <- readRDS(paste0("pct-data/", region, "/rf.Rds")) # if you've loaded them
-  rq <- readRDS(paste0("pct-data/", region, "/rq.Rds"))
-  # l <- readRDS(paste0("pct-bigdata/", region, "/l.Rds"))
-  # nrow(rf) == nrow(l)
+if(file.exists(file.path("pct-data", region, "rf.Rds")) &
+   file.exists(file.path("pct-data", region, "rq.Rds"))){
+  rf <- readRDS(file.path("pct-data", region, "rf.Rds")) # if you've loaded them
+  rq <- readRDS(file.path("pct-data", region, "rq.Rds"))
+
 } else {
   # see ?line2route from stplanr package
   # mytoken <- "f3fe3d078ac34737" # warning: not a real key 
@@ -235,8 +225,8 @@ if(file.exists(paste0("pct-data/", region, "/rf.Rds")) &
   rq <- line2route(l, plan = "quietest", silent = T)
   rf$length <- rf$length / 1000 # set length correctly
   rq$length <- rq$length / 1000
-  saveRDS(rf, paste0("pct-data/", region, "/rf.Rds")) # save the routes
-  saveRDS(rq, paste0("pct-data/", region, "/rq.Rds"))
+  saveRDS(rf, file.path("pct-data", region, "rf.Rds")) # save the routes
+  saveRDS(rq, file.path("pct-data", region, "rq.Rds"))
 }
 
 # which paths succeeded (use the line ids)
@@ -301,7 +291,7 @@ if(!nrow(rf) == nrow(l)) print("Warning, lines and routes are different lengths"
 The distance distribution of trips in the study area is displayed in the figure below, which compares the result with the distribution of trips nationwide.
 
 ```{r, echo=FALSE, fig.cap="Distance distribution of all trips in study lines (blue) compared with national average (dotted bars)"}
-luk <- readRDS("pct-bigdata/national/l_sam8.Rds")
+luk <- readRDS(file.path(pct_bigdata, "l_sam8.Rds"))
 
 hdfl <- dplyr::select(l@data, All, dist_fast)
 hdfl$Scope <- "Local"
@@ -353,10 +343,7 @@ to `r nrow(l)`.
 
 l$clc <- l$Bicycle / l$All   
 l$clcar <- (l$Car_driver + l$Car_passenger) / l$All
-<<<<<<< HEAD
 l$clfoot <- l$Foot / l$All   #% walk population
-=======
->>>>>>> parent of 565ffb6... Updated sources links + %walk var added
 
 flow_ttwa <- flow # save OD pairs for the ttwa
 flow <- l@data
@@ -370,18 +357,18 @@ These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
 ```{r, echo=FALSE}
-source("models/aggregate-model.R") # this model creates the variable 'slc'
+source(file.path("components", "model", "aggregate.R")) # this model creates the variable 'slc'
 cormod <- cor(flow$clc, mod_logsqr$fitted.values) # crude indication of goodness-of-fit
 # summary(mod_logsqr)
 
-mod_nat <- readRDS("pct-bigdata/national/mod_logsqr_national_8.Rds")
+mod_nat <- readRDS(file.path(pct-bigdata, "mod_logsqr_national_8.Rds"))
 ```
 
 ## Cycling in the study area
 
 ```{r, echo=FALSE}
 rcycle <- round(100 * sum(l$Bicycle) / sum(l$All), 1)
-rcarusers <- round (100 * sum(l$Car_driver+l$Car_passenger) / sum(l$All), 1))
+rcarusers <- round (100 * sum(l$Car_driver+l$Car_passenger) / sum(l$All), 1)
 
 natcyc <- sum(luk$Bicycle) / sum(luk$All)
 ```
@@ -398,7 +385,6 @@ l$slc <- flow$plc
 l$base_olc <- l$Bicycle
 l$base_slc <- l$slc * l$All
 l$base_sic <- l$base_slc - l$base_olc
-# l$sic2 <- l$slc * l$All - l$Bicycle # identical sic result
 
 # # # # # # # # # # # # #
 # Additional scenarios  #
@@ -413,16 +399,18 @@ l$cdp_slc <-l$All * (l$clc + l$npred) # may be more that 1
 l$cdp_sic <- l$cdp_slc - l$Bicycle
 
 # gendereq scenario
-p_trips_male <- mean(las_in_region$clc_m) # proportion of bicycle trips by males
-
-clc_m <- l$Bicycle * p_trips_male
-pmale_c <- clc_m / l$Male
-slc_gendereq_f <- l$Female * pmale_c
-slc_gendereq <- clc_m + slc_gendereq_f
-
-l$gendereq_slc <- slc_gendereq
-l$gendereq_sic <- l$gendereq_slc - l$base_olc
-
+has_private_data <- file.exists(pct_privatedata)
+if(has_private_data){
+  p_trips_male <- mean(las_in_region$clc_m) # proportion of bicycle trips by males
+  
+  clc_m <- l$Bicycle * p_trips_male
+  pmale_c <- clc_m / l$Male
+  slc_gendereq_f <- l$Female * pmale_c
+  slc_gendereq <- clc_m + slc_gendereq_f
+  
+  l$gendereq_slc <- slc_gendereq
+  l$gendereq_sic <- l$gendereq_slc - l$base_olc
+}
 # Dutch scenario - coefficients calculated from Dutch NTS by A. Goodman
 mod_dutch <- mod_nat
 mod_dutch$coefficients[1] <- -0.3253
@@ -478,7 +466,7 @@ The table below illustrates the same information by distance band.
 
 ```{r, echo=FALSE}
 # names(dfspread)[1:3] <- c("Distance band", 	"All modes", "Observed level (OLC)")
-kable(dfspread, format = "html", digits = 1, )
+kable(dfspread, format = "html", digits = 1)
 ```
 
 
@@ -566,12 +554,6 @@ These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
 ```{r, echo=FALSE, fig.cap="National vs local cycling characteristics with hilliness, captured in the model results"}
-source("models/aggregate-model.R") # this model creates the variable 'slc'
-cormod <- cor(flow$clc, mod_logsqr$fitted.values) # crude indication of goodness-of-fit
-# summary(mod_logsqr)
-
-mod_nat <- readRDS("pct-bigdata/national/mod_logsqr_national_8.Rds")
-
 justdist1 <- data.frame(
   dist_fast = 1:20,
   avslope = 1,
@@ -626,7 +608,6 @@ The value of each segment in the network corresponds to the total number of cycl
 # Scenario names - may need updating
 # nrow(l) == nrow(rf)
 
-
 # proj4string(rf)
 rft <- toptail(rf, toptail_dist = buff_geo_dist)
 if(length(rft) == length(rf)){
@@ -667,25 +648,25 @@ zones@data <- left_join(zones@data, cents@data[,!c_in_z])
 # 
 # # Save objects
 # Save objects # uncomment these lines to save model output
-if(exists("isolated")) file.create(paste0("pct-data/", region, "/isolated"))
-saveRDS(zones, paste0("pct-data/", region, "/z.Rds"))
-saveRDS(cents, paste0("pct-data/", region, "/c.Rds"))
-saveRDS(l, paste0("pct-data/", region, "/l.Rds"))
-saveRDS(rf, paste0("pct-data/", region, "/rf.Rds"))
-saveRDS(rq, paste0("pct-data/", region, "/rq.Rds"))
-saveRDS(rnet, paste0("pct-data/", region, "/rnet.Rds"))
-saveRDS(mod_logsqr, paste0("pct-data/", region, "/model.Rds"))
+if(exists("isolated")) file.create(file.path("pct-data", region, "isolated"))
+saveRDS(zones, file.path("pct-data", region, "z.Rds"))
+saveRDS(cents, file.path("pct-data", region, "c.Rds"))
+saveRDS(l, file.path("pct-data", region, "l.Rds"))
+saveRDS(rf, file.path("pct-data", region, "rf.Rds"))
+saveRDS(rq, file.path("pct-data", region, "rq.Rds"))
+saveRDS(rnet, file.path("pct-data", region, "rnet.Rds"))
+saveRDS(mod_logsqr, file.path("pct-data", region, "model.Rds"))
 
 # 
 # # Save the script that loaded the lines into the data directory
-file.copy("load.Rmd", paste0("pct-data/", region, "/load.Rmd"))
+file.copy("load.Rmd", file.path("pct-data", region, "load.Rmd"))
 
 # Create folder in shiny app folder (assuming it's next to pct)
-dir.create(paste0("../pct-shiny/", region))
-file.copy("../pct-shiny/leeds/ui.R", paste0("../pct-shiny/", region, "/ui.R"))
-server_text <- readLines("../pct-shiny/coventry/server.R")
-server_text <- gsub(pattern = "coventry", replacement = region, x = server_text)
-writeLines(server_text, con = paste0("../pct-shiny/", region, "/server.R"))
+dir.create(file.path("..", "pct-shiny", region))
+file.copy("../pct-shiny/leeds/ui.R", file.path("..", "pct-shiny", region, "ui.R"))
+server_text <- readLines("../pct-shiny/leeds/server.R")
+server_text <- gsub(pattern = "leeds", replacement = region, x = server_text)
+writeLines(server_text, con = file.path("..", "pct-shiny", region, "server.R"))
 ```
 
  ## Time taken
@@ -697,5 +678,4 @@ end_time <- Sys.time()
 
 end_time - start_time
 ```
-
 
