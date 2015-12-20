@@ -48,7 +48,7 @@ cyclestreet_pat() # Check user has cyclestreets API key
 ```{r, warning=FALSE}
 # Set local authority and ttwa zone names
 region # name of the region
-region_path <- file.path("..","pct-data", region)
+region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines.
@@ -214,20 +214,20 @@ An illustration of these routes is presented below.
 # # # # # # # # # # # # # # #
 
 # Create or load route allocated lines (depending on past loading)
-if(file.exists(file.path("pct-data", region, "rf.Rds")) &
-   file.exists(file.path("pct-data", region, "rq.Rds"))){
-  rf <- readRDS(file.path("pct-data", region, "rf.Rds")) # if you've loaded them
-  rq <- readRDS(file.path("pct-data", region, "rq.Rds"))
+if(file.exists(file.path(pct_data, region, "rf.Rds")) &
+   file.exists(file.path(pct_data, region, "rq.Rds"))){
+  rf <- readRDS(file.path(pct_data, region, "rf.Rds")) # if you've loaded them
+  rq <- readRDS(file.path(pct_data, region, "rq.Rds"))
 
 } else {
-  # see ?line2route from stplanr package
+  # see ?line2route from stplanSys.getenv('CYCLESTREET')r package
   # mytoken <- "f3fe3d078ac34737" # warning: not a real key 
   rf <- line2route(l, silent = TRUE)
   rq <- line2route(l, plan = "quietest", silent = T)
   rf$length <- rf$length / 1000 # set length correctly
   rq$length <- rq$length / 1000
-  saveRDS(rf, file.path("pct-data", region, "rf.Rds")) # save the routes
-  saveRDS(rq, file.path("pct-data", region, "rq.Rds"))
+  saveRDS(rf, file.path(pct_data, region, "rf.Rds")) # save the routes
+  saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 }
 
 # which paths succeeded (use the line ids)
@@ -358,11 +358,11 @@ These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
 ```{r, echo=FALSE}
-source(file.path("components", "model", "aggregate.R")) # this model creates the variable 'slc'
+source(file.path("components", "models", "aggregate.R")) # this model creates the variable 'slc'
 cormod <- cor(flow$clc, mod_logsqr$fitted.values) # crude indication of goodness-of-fit
 # summary(mod_logsqr)
 
-mod_nat <- readRDS(file.path(pct-bigdata, "mod_logsqr_national_8.Rds"))
+mod_nat <- readRDS(file.path(pct_bigdata, "mod_logsqr_national_8.Rds"))
 ```
 
 ## Cycling in the study area
@@ -649,18 +649,18 @@ zones@data <- left_join(zones@data, cents@data[,!c_in_z])
 # 
 # # Save objects
 # Save objects # uncomment these lines to save model output
-if(exists("isolated")) file.create(file.path("pct-data", region, "isolated"))
-saveRDS(zones, file.path("pct-data", region, "z.Rds"))
-saveRDS(cents, file.path("pct-data", region, "c.Rds"))
-saveRDS(l, file.path("pct-data", region, "l.Rds"))
-saveRDS(rf, file.path("pct-data", region, "rf.Rds"))
-saveRDS(rq, file.path("pct-data", region, "rq.Rds"))
-saveRDS(rnet, file.path("pct-data", region, "rnet.Rds"))
-saveRDS(mod_logsqr, file.path("pct-data", region, "model.Rds"))
+if(exists("isolated")) file.create(file.path(pct_data, region, "isolated"))
+saveRDS(zones, file.path(pct_data, region, "z.Rds"))
+saveRDS(cents, file.path(pct_data, region, "c.Rds"))
+saveRDS(l, file.path(pct_data, region, "l.Rds"))
+saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
+saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
+saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
+saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 
 # 
 # # Save the script that loaded the lines into the data directory
-file.copy("load.Rmd", file.path("pct-data", region, "load.Rmd"))
+file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
 
 # Create folder in shiny app folder (assuming it's next to pct)
 dir.create(file.path("..", "pct-shiny", region))

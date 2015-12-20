@@ -2,9 +2,6 @@
 # Estimating ECP from aggregate flows #
 # # # # # # # # # # # # # # # # # # # #
 
-# set-up packages
-source("set-up.R")
-
 # Load example flow data with distance and centroids - various sources possible!
 # requires flow level data in the following form:
 # df <- tbl_df(flow)
