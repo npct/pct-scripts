@@ -2,7 +2,7 @@ source("set-up.R")
 library(knitr)
 
 
-la_all <- c("Oxfordshire", "Shropshire")
+la_all <- c("Liverpool-City-Region")
 
 for(i in la_all){
   # What geographic level are we working at (cua or regional)
@@ -12,12 +12,12 @@ for(i in la_all){
   print(i)
   knitr::knit2html(
     input = "load.Rmd",
-    output = file.path("pct-data/", region, "/model-output.html"),
+    output = file.path("../pct-data/", region, "/model-output.html"),
     envir = globalenv()
   )
 }
 
-regions <- geojson_read("pct-bigdata/national/regions.geojson", what = "sp")
+regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 regions$Region
 
 regions$Region[1:10]
