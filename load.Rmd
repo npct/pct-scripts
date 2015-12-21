@@ -173,13 +173,14 @@ That is  **`r pmflow`%** of OD pairs, accounting for
 ## Hilliness of OD pairs
 
 The average hilliness of zones in the study area is
-`r round(mean(zones$avslope), 1)`
-degrees,
-compared with the national average of 
-`r round(mean(ukmsoas$avslope, na.rm = T), 1)`. This data is displayed in the
-figure below.
+`r round(100 * mean(rf$av_incline), 1)`
+percent.
 
 ```{r, echo = FALSE}
+# # It used to say - see below. What to replace this with?
+# compared with the national average of 
+# `r round(mean(ukmsoas$avslope, na.rm = T), 1)`. This data is displayed in the
+# figure below.
 tm_shape(zones) +
   tm_fill("avslope", n = 3, palette = "Oranges")
 ```
@@ -270,11 +271,14 @@ Of the lines allocated to the route network, `sum(!path_ok)` failed.
 # Allocate route factors to OD pairs
 # nz <- which(l$dist > 0) # non-zero lengths = nz
 l$dist_quiet <- l$dist_fast <- l$cirquity <- l$distq_f <- NA
-if(!nrow(rf) == nrow(l)) print("Warning, lines and routes are different lengths")
-  l$dist_fast <- rf$length
-  l$dist_quiet <- rq$length
-  l$cirquity <- rf$length / l$dist
-  l$distq_f <- rq$length / rf$length
+if(!nrow(rf) == nrow(l))
+  print("Warning, lines and routes are different lengths")
+l$dist_fast <- rf$length
+l$dist_quiet <- rq$length
+l$cirquity <- rf$length / l$dist
+l$distq_f <- rq$length / rf$length
+l$avslope <- atan(rf$av_incline) # in radians
+l$avslope <- l$avslope * 180 / pi
 ```
 
 ## Distance distributions
@@ -336,7 +340,6 @@ l$clc <- l$Bicycle / l$All
 l$clcar <- (l$Car_driver + l$Car_passenger) / l$All
 l$clfoot <- l$Foot / l$All   #% walk population
 
-flow_ttwa <- flow # save OD pairs for the ttwa
 flow <- l@data
 ```
 
@@ -372,7 +375,7 @@ of 5.0%.
 ## Scenarios
 
 ```{r, include=FALSE}
-l$slc <- flow$plc
+l$slc <- mod_logsqr$fitted.values
 l$base_olc <- l$Bicycle
 l$base_slc <- l$slc * l$All
 l$base_sic <- l$base_slc - l$base_olc
