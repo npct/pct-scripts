@@ -36,7 +36,7 @@ git clone git@github.com:npct/pct-data.git --depth 1
 git clone git@github.com:npct/pct-shiny.git 
 
 # clone the national level input data
-git clone git@github.com:npct/pct-bigdata.git 
+git clone git@github.com:npct/pct-bigdata.git --depth 1
 ```
 
 The other dependencies are described below.
