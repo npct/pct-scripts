@@ -11,7 +11,6 @@ mod_logsqr <- glm(clc ~ dist_fast + I(dist_fast^0.5), data = flow, weights = All
 summary(mod_logsqr) # goodness of fit
  
 cor(flow$clc, mod_logsqr$fitted.values)
-cor(flow$clc, mod_inf$fitted.values)
  
 #
 # # Binning variables and validation
