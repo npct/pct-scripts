@@ -8,24 +8,31 @@ The main script on this repo is [load.Rmd](https://github.com/npct/pct-load/blob
 This script runs the R code contained within while creating a summary of the data generating process.
 It even reports summary statistics from the data as it is created.
 
-To run `load.Rmd` you should be able to simply hit 'Knit HTML' while is is loaded RStudio.
+To run `load.Rmd` you should be able to simply hit 'Knit HTML' while loaded RStudio.
 There are other dependencies, listed below.
 
 ## Relationship to other pct- folders
 
 The purpose of this repo is to build the data used by [pct-shiny](https://github.com/npct/pct-shiny).
 To do this it creates new folders and creates files in [pct-data](https://github.com/npct/pct-data).
-It relies on open data hosted in [pct-bigdata](https://github.com/npct/pct-bigdata/).
+It relies on open data hosted on [pct-bigdata](https://github.com/npct/pct-bigdata/).
 
 **Each of the these folder should be 'siblings' in the same folder.**
-All of the folders needed to run the Propensity to Cycle Tool, and modify the input data it uses (e.g. to create new scenarios), can be created with the following Linux shell commands:
+All of the folders needed to run the Propensity to Cycle Tool, and modify the input data it uses (e.g. to create new scenarios), can be created with the following shell commands:
 
 
 ```bash
-git clone git@github.com:npct/pct-load.git --depth 1
+# clone the pct data creation scripts
+git clone git@github.com:npct/pct-load.git 
+
+# clone the data (warning - large)
 git clone git@github.com:npct/pct-data.git --depth 1
-git clone git@github.com:npct/pct-shiny.git --depth 1
-git clone git@github.com:npct/pct-bigdata.git --depth 1
+
+# clone the shiny online visualisation framework
+git clone git@github.com:npct/pct-shiny.git 
+
+# clone the national level input data
+git clone git@github.com:npct/pct-bigdata.git 
 ```
 
 The other dependencies are described below.
