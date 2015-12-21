@@ -40,7 +40,12 @@ pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
 if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
-if(!file.exists(pct_privatedata)) warning(paste("The pct_privatedata repository has cannot be found in", dirname(getwd())))
+if(!file.exists(pct_privatedata)){
+  warning(paste("The pct_privatedata repository has cannot be found in", dirname(getwd())))
+  scens <- c("cdp_slc", "dutch_slc", "ebike_slc")
+}else{
+  scens <- c("cdp_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
+}
 if(Sys.getenv("CYCLESTREET") == "") warning("No CycleStreet API key. See ?cyclestreet_pat")
 ```
 
@@ -277,8 +282,8 @@ l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
 l$cirquity <- rf$length / l$dist
 l$distq_f <- rq$length / rf$length
-l$avslope <- atan(rf$av_incline) # in radians
-l$avslope <- l$avslope * 180 / pi
+l$avslope <- atan(rf$av_incline)  # in radians
+l$avslope <- l$avslope * 180 / pi # convert to degrees
 ```
 
 ## Distance distributions
@@ -448,10 +453,10 @@ dfsum <- summarise(group_by(dfsp, scenario, dist_band), Percent = sum(slc) / sum
 dfsum$Percent <- dfsum$Percent 
 dfspread <- spread(dfsum, scenario, Percent)
 dfspread$dist_band <- as.character(dfspread$dist_band)
-dfspreadf <- c("Total", round(colSums(dfspread[2:7])* 100, 1))
-dfspread[3:7] <- do.call(cbind, apply(dfspread[3:7], 2, function(x) round(x / dfspread[2] * 100, 1)))
+dfspreadf <- c("Total", round(colSums(dfspread[2:ncol(dfspread)])* 100, 1))
+dfspread[3:ncol(dfspread)] <- do.call(cbind, apply(dfspread[3:ncol(dfspread)], 2, function(x) round(x / dfspread[2] * 100, 1)))
 dfspread <- rbind(dfspread, dfspreadf)
-dfspread <- dfspread[c(1, 2, 7, 3, 4, 5, 6)]
+# dfspread <- dfspread[c(1, 2, 7, 3, 4, 5, 6)]
 dfspread$All <- round(as.numeric(dfspread$All) * 100, 1)
 dfspread$All[nrow(dfspread)] <- dfspread$All[nrow(dfspread)] / 100
 ```
@@ -612,7 +617,6 @@ rft$base_olc <- l$base_olc
 rnet <- overline(rft, "base_olc")
 # test the resulting plot
 plot(rnet, lwd = rnet$base_olc / mean(rnet$base_olc))
-scens <- c("cdp_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
 for(i in scens){
   rft@data[i] <- l@data[i]
   rnet_tmp <- overline(rft, i)
