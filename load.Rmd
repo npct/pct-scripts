@@ -52,7 +52,7 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines.
-mflow <- 150
+mflow <- 200
 mdist <- 15 # maximum euclidean distance (km) for subsetting lines
 min_zones <- 60 # minumum number of zones in study area before buffer used
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -213,22 +213,12 @@ An illustration of these routes is presented below.
 # Needs CycleStreet.net API #
 # # # # # # # # # # # # # # #
 
-# Create or load route allocated lines (depending on past loading)
-if(file.exists(file.path(pct_data, region, "rf.Rds")) &
-   file.exists(file.path(pct_data, region, "rq.Rds"))){
-  rf <- readRDS(file.path(pct_data, region, "rf.Rds")) # if you've loaded them
-  rq <- readRDS(file.path(pct_data, region, "rq.Rds"))
-
-} else {
-  # see ?line2route from stplanSys.getenv('CYCLESTREET')r package
-  # mytoken <- "f3fe3d078ac34737" # warning: not a real key 
-  rf <- line2route(l, silent = TRUE)
-  rq <- line2route(l, plan = "quietest", silent = T)
-  rf$length <- rf$length / 1000 # set length correctly
-  rq$length <- rq$length / 1000
-  saveRDS(rf, file.path(pct_data, region, "rf.Rds")) # save the routes
-  saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
-}
+rf <- line2route(l, silent = TRUE)
+rq <- line2route(l, plan = "quietest", silent = T)
+rf$length <- rf$length / 1000 # set length correctly
+rq$length <- rq$length / 1000
+# saveRDS(rf, file.path(pct_data, region, "rf.Rds")) # save the routes
+# saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 
 # which paths succeeded (use the line ids)
 path_ok <- row.names(l) %in% row.names(rf) &
@@ -358,7 +348,7 @@ These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
 ```{r, echo=FALSE}
-source(file.path("components", "models", "aggregate.R")) # this model creates the variable 'slc'
+source("models/aggregate.R") # this model creates the variable 'slc'
 cormod <- cor(flow$clc, mod_logsqr$fitted.values) # crude indication of goodness-of-fit
 # summary(mod_logsqr)
 
