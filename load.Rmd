@@ -12,7 +12,7 @@ output:
 ```{r, include=FALSE}
 # TODO: Fix buildmaster so it works for Devon AND Norfolk
 start_time <- Sys.time() # for timing the script
-source(file.path("components", "set-up.R")) # pull in packages needed
+source("set-up.R") # pull in packages needed
 ```
 
 This document was produced automatically at `r start_time`.
@@ -41,7 +41,7 @@ pct_privatedata <- file.path("..", "pct-privatedata")
 if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
 if(!file.exists(pct_privatedata)) warning(paste("The pct_privatedata repository has cannot be found in", dirname(getwd())))
-cyclestreet_pat() # Check user has cyclestreets API key
+if(Sys.getenv("CYCLESTREET") == "") warning("No CycleStreet API key. See ?cyclestreet_pat")
 ```
 
 
