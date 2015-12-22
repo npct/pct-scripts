@@ -2,7 +2,7 @@
 # Estimating ECP from aggregate flows #
 # # # # # # # # # # # # # # # # # # # #
 
-mod_logsqr <- glm(clc ~ dist_fast + I(dist_fast^0.5), data = flow, weights = All, family = "quasipoisson")
+mod_logsqr <- glm(clc ~ dist_fast + I(dist_fast^0.5) + avslope, data = flow, weights = All, family = "quasipoisson")
 
 # # # # # # # #
 # Diagnostics #
