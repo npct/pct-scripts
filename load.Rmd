@@ -225,14 +225,17 @@ rq$length <- rq$length / 1000
 # saveRDS(rf, file.path(pct_data, region, "rf.Rds")) # save the routes
 # saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 
-# which paths succeeded (use the line ids)
+# which paths succeeded 
 path_ok <- row.names(l) %in% row.names(rf) &
                    row.names(l) %in% row.names(rq)
 # summary(path_ok)
-  
+
 l <- l[path_ok,]
 rf <- rf[path_ok,]
 rq <- rq[path_ok,]
+
+# add line id
+l$id <- row.names(l)
 
 # # for testing: reduce to top n lines
 # top_n <- 100 # e.g. top 5, 10, 100
