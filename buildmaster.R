@@ -2,7 +2,7 @@ source("set-up.R")
 library(knitr)
 
 
-la_all <- c("Liverpool-City-Region")
+la_all <- c("liverpool-city-region")
 
 for(i in la_all){
   # What geographic level are we working at (cua or regional)

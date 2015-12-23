@@ -10,7 +10,6 @@ output:
 ---
 
 ```{r, include=FALSE}
-# TODO: Fix buildmaster so it works for Devon AND Norfolk
 start_time <- Sys.time() # for timing the script
 source("set-up.R") # pull in packages needed
 ```
@@ -41,12 +40,13 @@ pct_privatedata <- file.path("..", "pct-privatedata")
 if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
 if(!file.exists(pct_privatedata)){
-  warning(paste("The pct_privatedata repository has cannot be found in", dirname(getwd())))
+  message("The pct_privatedata repository cannot be found")
   scens <- c("cdp_slc", "dutch_slc", "ebike_slc")
 }else{
   scens <- c("cdp_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
 }
-if(Sys.getenv("CYCLESTREET") == "") warning("No CycleStreet API key. See ?cyclestreet_pat")
+if(Sys.getenv("CYCLESTREET") == "")
+  warning("No CycleStreet API key. See ?cyclestreet_pat")
 ```
 
 
@@ -104,7 +104,6 @@ sel_region <- grepl(pattern = region, x = regions$Region, ignore.case = T)
 ```
 
 The selected region was `r as.character(regions$Region[sel_region ])`.
-
 
 ```{r, include=FALSE}
 # select msoas of interest
@@ -409,6 +408,9 @@ if(has_private_data){
   
   l$gendereq_slc <- slc_gendereq
   l$gendereq_sic <- l$gendereq_slc - l$base_olc
+}else{
+  l$gendereq_slc <- NA
+  l$gendereq_sic <- NA
 }
 # Dutch scenario - coefficients calculated from Dutch NTS by A. Goodman
 mod_dutch <- mod_nat
@@ -623,6 +625,8 @@ for(i in scens){
   rnet@data[i] <- rnet_tmp@data[i]
   rft@data[i] <- NULL
 }
+if(!"gendereq_slc" %in% scens)
+  rnet$gendereq_slc <- NA
 # plot(rnet, lwd = rnet$cdp_slc / mean(rnet$base_olc))
 ```
 
