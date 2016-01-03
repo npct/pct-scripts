@@ -619,6 +619,18 @@ if(length(rft) == length(rf)){
   rft <- SpatialLinesDataFrame(rft, rf@data)
 } else print("Error: toptailed lines do not match lines")
 rft$base_olc <- l$base_olc
+
+# simplify line geometries
+shapefile(rft, "rft", overwrite = T)
+mess <- "mapshaper rft.shp -simplify 5% -o"
+system(mess)
+rft2 <- shapefile("rft-ms.shp")
+f_remove <- list.files(pattern = "rft")
+file.remove(f_remove)
+rft2@data <- rft@data
+rft <- rft2
+rm(rft2)
+
 rnet <- overline(rft, "base_olc")
 # test the resulting plot
 plot(rnet, lwd = rnet$base_olc / mean(rnet$base_olc))
