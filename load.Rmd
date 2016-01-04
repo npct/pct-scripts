@@ -11,7 +11,7 @@ output:
 
 ```{r, include=FALSE}
 start_time <- Sys.time() # for timing the script
-source("set-up.R") # pull in packages needed
+source("set-up.R") # load packages needed 
 ```
 
 This document was produced automatically at `r start_time`.
@@ -57,7 +57,7 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines.
-mflow <- 50
+mflow <- 100
 mdist <- 15 # maximum euclidean distance (km) for subsetting lines
 min_zones <- 60 # minumum number of zones in study area before buffer used
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -622,15 +622,15 @@ rft$base_olc <- l$base_olc
 
 # simplify line geometries
 shapefile(rft, "rft", overwrite = T)
-mess <- "mapshaper rft.shp -simplify 5% -o"
-system(mess)
-rft2 <- shapefile("rft-ms.shp")
-f_remove <- list.files(pattern = "rft")
-file.remove(f_remove)
-rft2@data <- rft@data
-rft <- rft2
-rm(rft2)
-
+mapshape("rft.shp", percent = 5)
+if(file.exists("rft-ms.shp")){
+  rft2 <- shapefile("rft-ms.shp")
+  f_remove <- list.files(pattern = "rft")
+  file.remove(f_remove)
+  rft2@data <- rft@data
+  rft <- rft2
+  rm(rft2)
+}
 rnet <- overline(rft, "base_olc")
 # test the resulting plot
 plot(rnet, lwd = rnet$base_olc / mean(rnet$base_olc))

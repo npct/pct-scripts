@@ -46,8 +46,19 @@ If you have issues with any of these, please report them as an [issue](https://g
 
 Some of the examples pull data from the
 [CycleStreets.net API](http://www.cyclestreets.net/api/).
-Once you have a token, you can add it in Ubuntu as
-a session variable using the following in your terminal
+Once you have a token, you can add it to R by
+adding the following line
+to your `.Renviron` file in your home directory:
+
+```{r, engine='bash', eval=FALSE}
+CYCLESTREET=xxx
+```
+
+where `xxx` is the api key.
+
+If the file does not yet exist, you can create it.
+This can also be made available to other programs,
+a session variable using the following in your terminal (tested in Ubuntu):
 
 ```{r, engine='bash', eval = FALSE}
 echo "export CS_API_KEY='my_token'" >> ~/.profile

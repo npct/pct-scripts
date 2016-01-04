@@ -4,6 +4,7 @@ if(!require(devtools)) install.packages("devtools")
 if(!require(stplanr)) install_github("robinlovelace/stplanr")
 pkgs <- c(
   "ggmap",
+  "e1071", # tmap dependency
   "tmap",
   "foreign", # loads external data
   "rgdal",   # for loading and saving geo* data
