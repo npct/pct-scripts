@@ -37,6 +37,7 @@ if(!exists("region")) region <- "Liverpool-City-Region"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
+pct_shiny <- file.path("..", "pct-shiny")
 if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
 if(!file.exists(pct_privatedata)){
@@ -678,12 +679,15 @@ saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 # # Save the script that loaded the lines into the data directory
 file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
 
-# Create folder in shiny app folder (assuming it's next to pct)
-dir.create(file.path("..", "pct-shiny", region))
-file.copy("../pct-shiny/leeds/ui.R", file.path("..", "pct-shiny", region, "ui.R"))
-server_text <- readLines("../pct-shiny/leeds/server.R")
-server_text <- gsub(pattern = "leeds", replacement = region, x = server_text)
-writeLines(server_text, con = file.path("..", "pct-shiny", region, "server.R"))
+# Create folder in shiny app folder
+region_dir <- file.path(file.path(pct_shiny, region))
+dir.create(region_dir)
+ui_text <- 'source("../master/ui.R", local = T, chdir = T)'
+server_text <- paste0('startingCity <- "', region, '"', "\n",
+                      'source("../master/master.R", local = T, chdir = T)')
+write(ui_text, file = file.path(region_dir, "ui.R"))
+write(server_text, file = file.path(region_dir, "server.R"))
+file.symlink(file.path("..", "master","www"), region_dir)
 ```
 
  ## Time taken
