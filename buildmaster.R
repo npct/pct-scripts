@@ -1,15 +1,17 @@
 source("set-up.R")
 library(knitr)
 
-
-la_all <- c("liverpool-city-region")
+sel <- c("cambridge", "hereford", "northumberland", "devon")
+la_all <- regions$Region[charmatch(sel, regions$Region)]
+la_all <- as.character(la_all)
+# la_all <- c("liverpool-city-region")
 
 for(i in la_all){
   # What geographic level are we working at (cua or regional)
   geo_level <- "region"
   isolated <- TRUE
   region <- i
-  print(i)
+  print(i) 
   knitr::knit2html(
     input = "load.Rmd",
     output = file.path("../pct-data/", region, "/model-output.html"),
