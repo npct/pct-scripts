@@ -27,7 +27,7 @@ dput(as.character(regions$Region[2:4]))
 
 # find regions not yet built
 sel <- !regions$Region %in% list.dirs("../pct-data/", full.names = F)
-la_all <- regions@data$Region[sel]
+la_all <- as.character(regions@data$Region[sel])
 
 # old regional units
 # las <- readOGR(dsn = "pct-bigdata/national/cuas-mf.geojson", layer = "OGRGeoJSON")
