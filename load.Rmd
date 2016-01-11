@@ -33,7 +33,7 @@ The preset values used to select the study area and filter the origin destinatio
 
 ```{r, echo=FALSE}
 # Create default LA name if none exists
-if(!exists("region")) region <- "Liverpool-City-Region"
+if(!exists("region")) region <- "liverpool-city-region"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
@@ -65,6 +65,8 @@ max_all_dist <- 5 # maximum distance (km) below which all lines are selected
 min_zones <- 60 # minumum number of zones in study area before buffer used
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
+# save the initial parameters to reproduce results
+save(region, mflow, mdist, buff_dist, buff_geo_dist, file = file.path(region_path, "params.RData"))
 ```
 
 ## Input zone data
@@ -624,6 +626,9 @@ if(length(rft) == length(rf)){
 rft$base_olc <- l$base_olc
 
 # Simplify line geometries (if mapshaper is available)
+# this greatly speeds up the build (due to calls to overline)
+# needs mapshaper installed and available to system():
+# see https://github.com/mbloch/mapshaper/wiki/
 if(mapshape_available())
   rft <- mapshape(rft, percent = 5)
 rnet <- overline(rft, "base_olc")
