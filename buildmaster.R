@@ -4,7 +4,7 @@ library(knitr)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
-la_all <- c("wiltshire")
+la_all <- c("west-midlands")
 
 for(i in la_all){
   # What geographic level are we working at (cua or regional)
@@ -15,7 +15,7 @@ for(i in la_all){
   knitr::knit2html(
     input = "load.Rmd",
     output = file.path("../pct-data/", region, "/model-output.html"),
-    envir = globalenv()
+    envir = globalenv(), force_v1 = TRUE
   )
 }
 
