@@ -57,9 +57,11 @@ region # name of the region
 region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
-# Minimum flow between od pairs, subsetting lines. High means fewer lines.
-mflow <- 100
+# Minimum flow between od pairs, subsetting lines. High means fewer lines
+mflow <- 200
+mflow_short <- 50
 mdist <- 15 # maximum euclidean distance (km) for subsetting lines
+max_all_dist <- 5 # maximum distance (km) below which all lines are selected
 min_zones <- 60 # minumum number of zones in study area before buffer used
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
@@ -97,7 +99,6 @@ region_shape <- spTransform(region_shape, proj4string(cents))
 
 las_in_region <- rgeos::gIntersects(las_cents, region_shape, byid = T)
 las_in_region <- las_in_region[1,]
-summary(las_in_region)
 las_in_region <- las[las_in_region,]
 
 proj4string(cents) <- proj4string(regions) # assign correct CRS
@@ -126,27 +127,33 @@ mzarea <- round(median(gArea(zones_wgs, byid = T) / 10000), 1) # average area of
 ## Input flow data
 
 ```{r, echo=FALSE, results='hide'}
+# load flow dataset, depending on availability
+if(dir.exists(pct_privatedata)){
+  flow <- readRDS(file.path(pct_privatedata, "flowsex-merged.Rds"))}else{
+  flow <- readRDS(file.path(pct_bigdata, "flow.Rds"))} # load open data
 
-flow <- readRDS(file.path(pct_bigdata, "flow.Rds"))
-
-if(file.exists(pct_privatedata)) flow <- readRDS(file.path(pct_privatedate, "flowsex-merged.Rds"))
 # Subset by zones in the study area
 o <- flow$Area.of.residence %in% cents$geo_code
 d <- flow$Area.of.workplace %in% cents$geo_code
 flow <- flow[o & d, ] # subset OD pairs with o and d in study area
-sel <- flow$All > mflow # subset OD pairs by n. people using it
 ```
 
 ```{r distance-dist, echo=FALSE, fig.cap="The study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The black straight green represent the most intensive commuting OD pairs.", echo=FALSE, message=FALSE, warning=FALSE}
+# Calculate line lengths (in km)
+coord_from <- coordinates(cents[match(flow$Area.of.residence, cents$geo_code),])
+coord_to <- coordinates(cents[match(flow$Area.of.workplace, cents$geo_code),])
+# Euclidean distance (km)
+flow$dist <- geosphere::distHaversine(coord_from, coord_to) / 1000
+
+# Subset lines
+dsel <- flow$dist < mdist # all lines less than the upper threshold distance to remove
+dsel_short <- flow$dist < max_all_dist # all lines less than the lower threshold distance
+sel_number <- flow$All > mflow # subset OD pairs by n. people using it
+sel <- (dsel & sel_number) | (dsel_short & flow$All > mflow_short)
+sel <- sel & flow$dist > 0
 flow <- flow[sel, ]
-
+# summary(flow$dist)
 l <- od2line(flow = flow, zones = cents)
-
-# Calculate line lengths
-l <- spTransform(l, CRS("+init=epsg:27700"))
-l$dist <- gLength(l, byid = T) / 1000 # Euclidean distance
-dsel <- l$dist < mdist
-l <- spTransform(l, proj4string(cents))
 
 plot(zones, col = "lightgrey")
 plot(regions, add = T)
@@ -156,10 +163,6 @@ plot(region_shape, border = "red", add = T, lwd = 2)
 lines(l[l$All > 100,], col = "green")
 ```
 
-```{r, echo=FALSE}
-l <- l[dsel,]
-l <- l[l$dist > 0, ] # to remove OD pairs of 0 length
-```
 
 ```{r, echo=FALSE}
 # nrow(flow) # how many OD pairs in the study area?
@@ -191,7 +194,7 @@ tm_shape(zones) +
 ```
 
 ```{r, echo=FALSE}
-# Hilliness of OD pairs
+# # Hilliness of OD pairs - calculated the old way (depreciated)
 # (calculated as the average gradient of the zone
 # of the flow's origin and destination, in degrees)
 # is 
@@ -260,7 +263,6 @@ proj4string(rq) <- proj4string(l)
 ```
 
 ```{r plot-rlines, warning=FALSE, echo = FALSE, fig.cap="Straight and route-lines allocated to the travel network"}
-library(sp)
 plot(l)
 lines(rf, col = "red")
 lines(rq, col = "green")
