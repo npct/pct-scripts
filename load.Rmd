@@ -230,13 +230,15 @@ rf$length <- rf$length / 1000 # set length correctly
 rq$length <- rq$length / 1000
 
 # debug lines which failed
-if(!nrow(l) == nrow(rf) & nrow(l) == nrow(rq)){
+if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
   # which paths succeeded 
   path_ok <- row.names(l) %in% row.names(rf) &
                    row.names(l) %in% row.names(rq)
   # summary(path_ok)
   l <- l[path_ok,]
+  path_ok <- row.names(rf) %in% row.names(l)
   rf <- rf[path_ok,]
+  path_ok <- row.names(rq) %in% row.names(l)
   rq <- rq[path_ok,]
 }
 # saveRDS(rf, file.path(pct_data, region, "rf.Rds")) # save the routes
@@ -256,7 +258,7 @@ lines(rf, col = "red")
 lines(rq, col = "green")
 ```
 
-```{r check-line, warning=FALSE, echo = FALSE, fig.cap="Check a single line"}
+```{r check-line, warning=FALSE, echo = FALSE, fig.cap="Check the final line"}
 plot(l[nrow(l),])
 lines(rf[nrow(l),], col = "red")
 lines(rq[nrow(l),], col = "green")
@@ -325,11 +327,6 @@ further reduces the number of OD pairs from `r sum(sel)`
 to `r nrow(l)`.
 
 ```{r, echo=FALSE}
-# a = 11
-# plot(l[a,])
-# lines(rf[a,], col = "red")
-# lines(rq[a,], col = "green")
-
 # # # # # # # # # # # # # #
 # Estimates slc from olc  #
 # # # # # # # # # # # # # #
