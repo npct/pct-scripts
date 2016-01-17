@@ -33,7 +33,7 @@ The preset values used to select the study area and filter the origin destinatio
 
 ```{r, echo=FALSE}
 # Create default LA name if none exists
-if(!exists("region")) region <- "liverpool-city-region"
+if(!exists("region")) region <- "nottinghamshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
@@ -59,7 +59,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
 mflow <- 200
-mflow_short <- 50
+mflow_short <- 150
 mdist <- 15 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 5 # maximum distance (km) below which all lines are selected
 min_zones <- 60 # minumum number of zones in study area before buffer used
@@ -228,36 +228,22 @@ rf <- line2route(l, silent = TRUE)
 rq <- line2route(l, plan = "quietest", silent = T)
 rf$length <- rf$length / 1000 # set length correctly
 rq$length <- rq$length / 1000
+
+# debug lines which failed
+if(!nrow(l) == nrow(rf) & nrow(l) == nrow(rq)){
+  # which paths succeeded 
+  path_ok <- row.names(l) %in% row.names(rf) &
+                   row.names(l) %in% row.names(rq)
+  # summary(path_ok)
+  l <- l[path_ok,]
+  rf <- rf[path_ok,]
+  rq <- rq[path_ok,]
+}
 # saveRDS(rf, file.path(pct_data, region, "rf.Rds")) # save the routes
 # saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 
-# which paths succeeded 
-path_ok <- row.names(l) %in% row.names(rf) &
-                   row.names(l) %in% row.names(rq)
-# summary(path_ok)
-
-l <- l[path_ok,]
-rf <- rf[path_ok,]
-rq <- rq[path_ok,]
-
 # add line id
 l$id <- row.names(l)
-
-# # for testing: reduce to top n lines
-# top_n <- 100 # e.g. top 5, 10, 100
-# sel_top <- order(l$All, decreasing = T)[1:top_n]
-# l_old <- l
-# l <- l[sel_top,]
-# rf <- rf[sel_top,]
-# rq <- rq[sel_top,]
-
-# # small manual test to check the data is ok
-# i = 2
-# plot(rf[i,])
-# plot(l[i,], add = T)
-# plot(rq[i,], add = T)
-# row.names(l[i,])
-# row.names(rf[i,])
 
 # Process route data
 proj4string(rf) <- proj4string(l)
