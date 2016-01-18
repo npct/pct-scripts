@@ -1,7 +1,8 @@
 # Project settings - libraries you'll need to load
 # NB: devtools allows installation of the latest packages
 if(!require(devtools)) install.packages("devtools")
-if(!require(stplanr)) install_github("robinlovelace/stplanr")
+if(!require(rmapshaper)) install_github("ateucher/rmapshaper")
+
 pkgs <- c(
   "ggmap",
   "e1071", # tmap dependency
@@ -15,7 +16,9 @@ pkgs <- c(
   "stplanr", # Sustainable transport planning with R
   "tidyr", # tidies up your data!
   "readr", # reads your data fast
-  "knitr" # for knitting it all together
+  "knitr", # for knitting it all together
+  "geojsonio",
+  "rmapshaper" # To simplify rnet
   )
 # Which packages do we require?
 # lapply(pkgs, library, character.only = T)

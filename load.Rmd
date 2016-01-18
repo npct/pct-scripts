@@ -489,6 +489,7 @@ for(i in 1:nrow(cents)){
   cents$ebike_slc[i] <- sum(l$ebike_slc[j])
   cents$ebike_sic[i] <- sum(l$ebike_sic[j])
 
+  if(length(j) == 0) next
   cents$av_distance[i] <- sum(l$dist[j] * l$All[j])  / sum(l$All[j])
   cents$cirquity[i] <- sum(l$cirquity[j] * l$All[j], na.rm = T )  / sum(l$All[j])
   cents$distq_f[i] <- sum(l$distq_f[j] * l$All[j], na.rm = T )  / sum(l$All[j])
@@ -612,8 +613,7 @@ rft$base_olc <- l$base_olc
 # this greatly speeds up the build (due to calls to overline)
 # needs mapshaper installed and available to system():
 # see https://github.com/mbloch/mapshaper/wiki/
-if(mapshape_available())
-  rft <- mapshape(rft, percent = 5)
+rft <- ms_simplify(rft, keep = 0.1)
 rnet <- overline(rft, "base_olc")
 object.size(rnet)
 # test the resulting plot
@@ -651,11 +651,16 @@ zones@data <- left_join(zones@data, cents@data[,!c_in_z])
 # Save objects # uncomment these lines to save model output
 if(exists("isolated")) file.create(file.path(pct_data, region, "isolated"))
 saveRDS(zones, file.path(pct_data, region, "z.Rds"))
+geojson_write( ms_simplify(zones, keep = 0.1), file = file.path(pct_data, region, "z"))
 saveRDS(cents, file.path(pct_data, region, "c.Rds"))
 saveRDS(l, file.path(pct_data, region, "l.Rds"))
+geojson_write( ms_simplify(l, keep = 0.1), file = file.path(pct_data, region, "l"))
 saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
+geojson_write( ms_simplify(rf, keep = 0.1), file = file.path(pct_data, region, "rf"))
 saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
+geojson_write( ms_simplify(rq, keep = 0.1), file = file.path(pct_data, region, "rq"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
+geojson_write( ms_simplify(rnet, keep= 0.1), file = file.path(pct_data, region, "rnet"))
 saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 
 # 
