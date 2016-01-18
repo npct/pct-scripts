@@ -638,7 +638,7 @@ if(!"gendereq_slc" %in% scens)
 # Rename columns
 l@data <- rename(l@data, Home = Area.of.residence, Work = Area.of.workplace)
 names(zones@data)
-
+l$clc_perc <- l$clc * 100
 
 # Transfer cents data to zones
 c_in_z <- names(cents) == "avslope"
