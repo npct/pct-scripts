@@ -489,7 +489,6 @@ for(i in 1:nrow(cents)){
   cents$ebike_slc[i] <- sum(l$ebike_slc[j])
   cents$ebike_sic[i] <- sum(l$ebike_sic[j])
 
-  if(length(j) == 0) next
   cents$av_distance[i] <- sum(l$dist[j] * l$All[j])  / sum(l$All[j])
   cents$cirquity[i] <- sum(l$cirquity[j] * l$All[j], na.rm = T )  / sum(l$All[j])
   cents$distq_f[i] <- sum(l$distq_f[j] * l$All[j], na.rm = T )  / sum(l$All[j])
@@ -601,8 +600,8 @@ The value of each segment in the network corresponds to the total number of cycl
 # Scenario names - may need updating
 # nrow(l) == nrow(rf)
 
-# proj4string(rf)
-rft <- toptail(rf, toptail_dist = buff_geo_dist)
+# Stop rnet lines going to centroid (optional)
+# rft <- toptail(rf, toptail_dist = buff_geo_dist) 
 if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
@@ -638,15 +637,14 @@ if(!"gendereq_slc" %in% scens)
 # Rename columns
 l@data <- rename(l@data, Home = Area.of.residence, Work = Area.of.workplace)
 names(zones@data)
-l$clc_perc <- l$clc * 100
 
 # Transfer cents data to zones
 c_in_z <- names(cents) == "avslope"
 zones@data <- left_join(zones@data, cents@data[,!c_in_z])
-# summary(cents)
-# summary(zones)
 
-# 
+# Remove NAN numbers (cause issues with geojson_write)
+zones@data[is.nan(zones$av_distance), c("av_distance", "cirquity", "distq_f")] <- NA
+
 # # Save objects
 # Save objects # uncomment these lines to save model output
 if(exists("isolated")) file.create(file.path(pct_data, region, "isolated"))
@@ -663,7 +661,6 @@ saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
 geojson_write( ms_simplify(rnet, keep= 0.1), file = file.path(pct_data, region, "rnet"))
 saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 
-# 
 # # Save the script that loaded the lines into the data directory
 file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
 
