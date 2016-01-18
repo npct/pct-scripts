@@ -33,7 +33,7 @@ The preset values used to select the study area and filter the origin destinatio
 
 ```{r, echo=FALSE}
 # Create default LA name if none exists
-if(!exists("region")) region <- "nottinghamshire"
+if(!exists("region")) region <- "wiltshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
@@ -523,7 +523,7 @@ l$slc <- l$base_slc / l$All
 nrow(l)
 idsel <- row.names(l)
 rf <- rf[row.names(rf) %in% idsel,]
-rq <- rq[row.names(rf) %in% idsel,]
+rq <- rq[row.names(rq) %in% idsel,]
 
 # Sanity test
 head(l@data[1:5])
