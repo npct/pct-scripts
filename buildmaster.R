@@ -4,19 +4,19 @@ library(knitr)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
-la_all <- c("west-midlands")
+# la_all <- c("liverpool-city-region")
 
-for(i in la_all){
+for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
   geo_level <- "region"
   isolated <- TRUE
-  region <- i
-  print(i) 
-  knitr::knit2html(
+  region <- la_all[k]
+  knitr::knit2html(quiet = T,
     input = "load.Rmd",
     output = file.path("../pct-data/", region, "/model-output.html"),
     envir = globalenv(), force_v1 = TRUE
   )
+  message(paste0("Just built ", region))
 }
 
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
