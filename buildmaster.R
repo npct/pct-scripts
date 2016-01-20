@@ -1,6 +1,7 @@
 source("set-up.R")
 library(knitr)
 
+# select regions of interest (uncomment/change as appropriate)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
@@ -11,7 +12,7 @@ for(k in 1:length(la_all)){
   geo_level <- "region"
   isolated <- TRUE
   region <- la_all[k]
-  knitr::knit2html(quiet = T,
+  knitr::knit2html(quiet = F,
     input = "load.Rmd",
     output = file.path("../pct-data/", region, "/model-output.html"),
     envir = globalenv(), force_v1 = TRUE
