@@ -277,8 +277,7 @@ l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
 l$cirquity <- rf$length / l$dist
 l$distq_f <- rq$length / rf$length
-l$avslope <- atan(rf$av_incline)  # in radians
-l$avslope <- l$avslope * 180 / pi # convert to degrees
+l$avslope <- rf@data$avslope
 ```
 
 ## Distance distributions
