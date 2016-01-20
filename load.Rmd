@@ -268,16 +268,22 @@ Of the lines allocated to the route network, `sum(!path_ok)` failed.
 
 ```{r, echo=FALSE}
 
-# Allocate route factors to OD pairs
-# nz <- which(l$dist > 0) # non-zero lengths = nz
+# Allocate route characteristics to OD pairs
 l$dist_quiet <- l$dist_fast <- l$cirquity <- l$distq_f <- NA
 if(!nrow(rf) == nrow(l))
-  print("Warning, lines and routes are different lengths")
+  stop("Warning, lines and routes are different lengths")
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
 l$cirquity <- rf$length / l$dist
 l$distq_f <- rq$length / rf$length
-l$avslope <- rf@data$avslope
+l$avslope <- rf$av_incline
+l$co2_saving <- rf$co2_saving
+l$calories <- rf$calories
+l$busyness <- rf$busyness
+l$avslope_q <- rq$av_incline
+l$co2_saving_q <- rq$co2_saving
+l$calories_q <- rq$calories
+l$busyness_q <- rq$busyness
 ```
 
 ## Distance distributions

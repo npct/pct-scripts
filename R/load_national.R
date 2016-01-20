@@ -60,13 +60,13 @@ plot(l[sample(nrow(l), 1000),])
 # # # # # # # # # # # # # # #
 saveRDS(l, "../pct-bigdata/ukflow.Rds")
 
-rf <- line2route(l[1:10000,], silent = TRUE)
-saveRDS(rf, "../pct-bigdata/rf.Rds")
-rq <- line2route(l[1:100000,], plan = "quietest", silent = T)
-saveRDS(rf, "../pct-bigdata/rq.Rds")
+rf <- line2route(l, silent = TRUE)
+rq <- line2route(l, plan = "quietest", silent = T)
 rf$length <- rf$length / 1000 # set length correctly
 rq$length <- rq$length / 1000
-Sys.time()
+
+saveRDS(rf, "../pct-bigdata/rf.Rds")
+saveRDS(rf, "../pct-bigdata/rf10000.Rds")
 
 # debug lines which failed
 if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
@@ -89,13 +89,19 @@ proj4string(rf) <- proj4string(l)
 proj4string(rq) <- proj4string(l)
 
 if(!nrow(rf) == nrow(l))
-  print("Warning, lines and routes are different lengths")
+  stop("Warning, lines and routes are different lengths")
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
 l$cirquity <- rf$length / l$dist
 l$distq_f <- rq$length / rf$length
-l$avslope <- rf@data$avslope
-l$avslope <- l$avslope * 180 / pi # convert to degrees
+l$avslope <- rf$av_incline
+l$co2_saving <- rf$co2_saving
+l$calories <- rf$calories
+l$busyness <- rf$busyness
+l$avslope_q <- rq$av_incline
+l$co2_saving_q <- rq$co2_saving
+l$calories_q <- rq$calories
+l$busyness_q <- rq$busyness
 
 end_time <- Sys.time()
 
