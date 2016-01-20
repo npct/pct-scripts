@@ -60,13 +60,53 @@ plot(l[sample(nrow(l), 1000),])
 # # # # # # # # # # # # # # #
 saveRDS(l, "../pct-bigdata/ukflow.Rds")
 
+line2route <- function (ldf, ...) 
+{
+  l <- ldf
+  if (class(ldf) == "SpatialLinesDataFrame") {
+    ldf <- line2df(l)
+  }
+  tryCatch({
+    rf1 <- route_cyclestreet(from = ldf[1, 1:2], to = ldf[1, 
+                                                          3:4], ...)
+    rf <- rf1
+    row.names(rf) <- row.names(l[1, ])
+  }, error = function(e) {
+    warning(paste0("Fail for line number ", 1))
+  })
+  for (i in 2:nrow(ldf)) {
+    tryCatch({
+      if (!exists("rf1")) {
+        rf1 <- route_cyclestreet(from = ldf[i, 1:2], 
+                                 to = ldf[i, 3:4], ...)
+        rf <- rf1
+        row.names(rf) <- row.names(l[i, ])
+      }
+      else {
+        rfnew <- route_cyclestreet(from = ldf[i, 1:2], 
+                                   to = ldf[i, 3:4], ...)
+        row.names(rfnew) <- row.names(l[i, ])
+        rf <- maptools::spRbind(rf, rfnew)
+      }
+    }, error = function(e) {
+      warning(paste0("Fail for line number ", i))
+    })
+    perc_temp <- i%%round(nrow(ldf)/1)
+    if (!is.na(perc_temp) & perc_temp == 0) {
+      message(paste0(round(100 * i/nrow(ldf)), " % out of ", 
+                     nrow(ldf), " distances calculated"))
+    }
+  }
+  rf
+}
+
 rf <- line2route(l, silent = TRUE)
 rq <- line2route(l, plan = "quietest", silent = T)
 rf$length <- rf$length / 1000 # set length correctly
 rq$length <- rq$length / 1000
 
 saveRDS(rf, "../pct-bigdata/rf.Rds")
-saveRDS(rf, "../pct-bigdata/rf10000.Rds")
+saveRDS(rq, "../pct-bigdata/rq.Rds")
 
 # debug lines which failed
 if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){

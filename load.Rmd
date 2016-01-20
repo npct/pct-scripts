@@ -274,6 +274,7 @@ if(!nrow(rf) == nrow(l))
   stop("Warning, lines and routes are different lengths")
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
+l$time_quiet <- rq$time
 l$cirquity <- rf$length / l$dist
 l$distq_f <- rq$length / rf$length
 l$avslope <- rf$av_incline
