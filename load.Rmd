@@ -474,6 +474,9 @@ for(i in 1:nrow(cents)){
   cents$base_olc[i] <- sum(l$Bicycle[j])
   cents$base_slc[i] <- sum(l$base_slc[j])
   cents$base_sic[i] <- sum(l$base_sic[j])
+  
+  cents$base_olcarusers[i] <- sum(l$Car_driver[j]+ l$Car_passenger[j])/sum(l$All[j])
+  # car users % added to centroids
 
   # values for scenarios
   cents$cdp_slc[i] <- sum(l$cdp_slc[j])
