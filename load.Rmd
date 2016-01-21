@@ -33,7 +33,7 @@ The preset values used to select the study area and filter the origin destinatio
 
 ```{r, echo=FALSE}
 # Create default LA name if none exists
-if(!exists("region")) region <- "wiltshire"
+if(!exists("region")) region <- "liverpool-city-region"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
@@ -59,15 +59,15 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 500
-mflow_short <- 250
+mflow <- 100
+mflow_short <- 30
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
 min_zones <- 60 # minumum number of zones in study area before buffer used
-buff_dist <- 5 # buffer (km) used to select additional zones (often zero = ok)
+buff_dist <- 7 # buffer (km) used to select additional zones (often zero = ok)
 buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
 # save the initial parameters to reproduce results
-save(region, mflow, mdist, buff_dist, buff_geo_dist, file = file.path(region_path, "params.RData"))
+save(region, mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist, file = file.path(region_path, "params.RData"))
 ```
 
 ## Input zone data
@@ -97,7 +97,7 @@ las_cents <- SpatialPoints(coordinates(las))
 region_shape <- region_orig <- 
   regions[grep(pattern = region, x = regions$Region, ignore.case = T),]
 region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
-region_shape <- region_shape <- gBuffer(region_shape, width = buff_dist)
+region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
 region_shape <- spTransform(region_shape, proj4string(cents))
 
 las_in_region <- rgeos::gIntersects(las_cents, region_shape, byid = T)
