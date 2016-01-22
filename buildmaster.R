@@ -21,7 +21,8 @@ for(k in 1:length(la_all)){
 }
 
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
-regions$Region
+la_all <- regions$Region
+la_all <- as.character(la_all)
 
 regions$Region[1:10]
 dput(as.character(regions$Region[2:4]))
@@ -29,6 +30,7 @@ dput(as.character(regions$Region[2:4]))
 # find regions not yet built
 sel <- !regions$Region %in% list.dirs("../pct-data/", full.names = F)
 la_all <- as.character(regions@data$Region[sel])
+la_all <- la_all[-grep("liv|greater-m", la_all)]
 
 # old regional units
 # las <- readOGR(dsn = "pct-bigdata/national/cuas-mf.geojson", layer = "OGRGeoJSON")

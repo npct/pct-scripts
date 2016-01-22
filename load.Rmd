@@ -60,7 +60,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
 mflow <- 100
-mflow_short <- 30
+mflow_short <- 50
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
 min_zones <- 60 # minumum number of zones in study area before buffer used
@@ -246,11 +246,7 @@ if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
 # saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 
 # add line id
-l$id <- row.names(l)
-
-# Process route data
-proj4string(rf) <- proj4string(l)
-proj4string(rq) <- proj4string(l)
+l$id <- paste(l@data$Area.of.residence, l@data$Area.of.workplace)
 ```
 
 ```{r plot-rlines, warning=FALSE, echo = FALSE, fig.cap="Straight and route-lines allocated to the travel network"}
@@ -268,11 +264,7 @@ lines(rq[nrow(l),], col = "green")
 Of the lines allocated to the route network, `sum(!path_ok)` failed.
 
 ```{r, echo=FALSE}
-
 # Allocate route characteristics to OD pairs
-l$dist_quiet <- l$dist_fast <- l$cirquity <- l$distq_f <- NA
-if(!nrow(rf) == nrow(l))
-  stop("Warning, lines and routes are different lengths")
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
 l$time_quiet <- rq$time

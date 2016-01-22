@@ -9,8 +9,8 @@ source("set-up.R")
 flow <- readRDS("../pct-bigdata/flow.Rds")
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 300
-mflow_short <- 30
+mflow <- 50
+mflow_short <- 20
 mdist <- 30 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km euclidean) below which mflow_short lines are selected
 
@@ -60,48 +60,8 @@ plot(l[sample(nrow(l), 1000),])
 # # # # # # # # # # # # # # #
 saveRDS(l, "../pct-bigdata/ukflow.Rds")
 
-line2route <- function (ldf, ...) 
-{
-  l <- ldf
-  if (class(ldf) == "SpatialLinesDataFrame") {
-    ldf <- line2df(l)
-  }
-  tryCatch({
-    rf1 <- route_cyclestreet(from = ldf[1, 1:2], to = ldf[1, 
-                                                          3:4], ...)
-    rf <- rf1
-    row.names(rf) <- row.names(l[1, ])
-  }, error = function(e) {
-    warning(paste0("Fail for line number ", 1))
-  })
-  for (i in 2:nrow(ldf)) {
-    tryCatch({
-      if (!exists("rf1")) {
-        rf1 <- route_cyclestreet(from = ldf[i, 1:2], 
-                                 to = ldf[i, 3:4], ...)
-        rf <- rf1
-        row.names(rf) <- row.names(l[i, ])
-      }
-      else {
-        rfnew <- route_cyclestreet(from = ldf[i, 1:2], 
-                                   to = ldf[i, 3:4], ...)
-        row.names(rfnew) <- row.names(l[i, ])
-        rf <- maptools::spRbind(rf, rfnew)
-      }
-    }, error = function(e) {
-      warning(paste0("Fail for line number ", i))
-    })
-    perc_temp <- i%%round(nrow(ldf)/1)
-    if (!is.na(perc_temp) & perc_temp == 0) {
-      message(paste0(round(100 * i/nrow(ldf)), " % out of ", 
-                     nrow(ldf), " distances calculated"))
-    }
-  }
-  rf
-}
-
-rf <- line2route(l, silent = TRUE)
-rq <- line2route(l, plan = "quietest", silent = T)
+rf <- line2route(l, silent = TRUE, n_print = 100)
+rq <- line2route(l, plan = "quietest", silent = T, n_print = 100)
 rf$length <- rf$length / 1000 # set length correctly
 rq$length <- rq$length / 1000
 
@@ -124,12 +84,6 @@ if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
 # add line id
 l$id <- row.names(l)
 
-# Process route data
-proj4string(rf) <- proj4string(l)
-proj4string(rq) <- proj4string(l)
-
-if(!nrow(rf) == nrow(l))
-  stop("Warning, lines and routes are different lengths")
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
 l$cirquity <- rf$length / l$dist
@@ -147,3 +101,6 @@ end_time <- Sys.time()
 
 end_time - start_time
 
+saveRDS(l@data, "../pct-bigdata/l50-20-30-7.Rds")
+library(readr)
+write_csv(l@data, "../pct-bigdata/l50-20-30-7.csv")
