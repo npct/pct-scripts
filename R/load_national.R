@@ -9,8 +9,8 @@ source("set-up.R")
 flow <- readRDS("../pct-bigdata/flow.Rds")
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 50
-mflow_short <- 20
+mflow <- 10
+mflow_short <- 10
 mdist <- 30 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km euclidean) below which mflow_short lines are selected
 
@@ -58,7 +58,7 @@ plot(l[sample(nrow(l), 1000),])
 # Warning: time-consuming!  #
 # Needs CycleStreet.net API #
 # # # # # # # # # # # # # # #
-saveRDS(l, "../pct-bigdata/ukflow.Rds")
+saveRDS(l, "../pct-bigdata/ukflow-30-all.Rds")
 
 rf <- line2route(l, silent = TRUE, n_print = 100)
 rq <- line2route(l, plan = "quietest", silent = T, n_print = 100)
@@ -81,11 +81,10 @@ if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
   rq <- rq[path_ok,]
 }
 
-# add line id
-l$id <- row.names(l)
-
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
+l$time_fast <- rf$time
+l$time_quiet <- rq$time
 l$cirquity <- rf$length / l$dist
 l$distq_f <- rq$length / rf$length
 l$avslope <- rf$av_incline

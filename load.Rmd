@@ -267,6 +267,7 @@ Of the lines allocated to the route network, `sum(!path_ok)` failed.
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
+l$time_fast <- rf$time
 l$time_quiet <- rq$time
 l$cirquity <- rf$length / l$dist
 l$distq_f <- rq$length / rf$length
