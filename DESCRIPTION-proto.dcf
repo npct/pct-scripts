@@ -1,0 +1,34 @@
+Package: pct
+Type: Package
+Title: Propensity to cycle tool
+Version: 0.1.1
+Date: 2016-01-14
+Authors@R: c(
+    person("Robin", "Lovelace", email = "rob00x@gmail.com", role = c("aut", "cre")),
+    person("Nikolai", "Berkoff"),
+    person("Ali", "Abbas"),
+    person("Alvaro", "Ullich")
+    )
+Maintainer: Robin Lovelace <rob00x@gmail.com>
+Description: Estimates the geographical distribution of cycling potential.
+License: AGPL
+BugReports: https://github.com/npct/pct-shiny/issues
+Imports:
+  ggmap,
+  e1071, # tmap dependency
+  tmap,
+  foreign, # loads external data
+  rgdal,   # for loading and saving geo* data
+  dplyr,   # for manipulating data rapidly
+  rgeos,   # GIS functionality
+  raster,  # GIS functions
+  maptools, # GIS functions
+  stplanr, # Sustainable transport planning with R
+  tidyr, # tidies up your data!
+  readr, # reads your data fast
+  knitr, # for knitting it all together
+  geojsonio,
+  rmapshaper # To simplify rnet
+URL: https://github.com/ropensci/stplanr
+SystemRequirements: GNU make
+RoxygenNote: 5.0.1
