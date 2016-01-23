@@ -50,8 +50,6 @@ if(Sys.getenv("CYCLESTREET") == "")
   warning("No CycleStreet API key. See ?cyclestreet_pat")
 ```
 
-
-
 ```{r, warning=FALSE}
 # Set local authority and ttwa zone names
 region # name of the region
@@ -59,8 +57,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 100
-mflow_short <- 50
+mflow <- 500
+mflow_short <- 250
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
 min_zones <- 60 # minumum number of zones in study area before buffer used
@@ -647,7 +645,7 @@ c_in_z <- names(cents) == "avslope"
 zones@data <- left_join(zones@data, cents@data[,!c_in_z])
 
 # Remove NAN numbers (cause issues with geojson_write)
-zones@data[is.nan(zones$av_distance), c("av_distance", "cirquity", "distq_f")] <- NA
+zones@data[is.nan(zones$av_distance), c("av_distance", "cirquity", "distq_f", "base_olcarusers")] <- NA
 
 # # Save objects
 # Save objects # uncomment these lines to save model output
