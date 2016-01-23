@@ -662,7 +662,7 @@ geojson_write( ms_simplify(rf, keep = 0.1), file = file.path(pct_data, region, "
 saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 geojson_write( ms_simplify(rq, keep = 0.1), file = file.path(pct_data, region, "rq"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
-geojson_write( ms_simplify(rnet, keep= 0.1), file = file.path(pct_data, region, "rnet"))
+geojson_write( ms_simplify(rnet, keep= 0.6), file = file.path(pct_data, region, "rnet"))
 saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 
 # # Save the script that loaded the lines into the data directory
