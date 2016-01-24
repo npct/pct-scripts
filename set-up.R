@@ -82,7 +82,7 @@ if(!require(geojsonio)) {
 
 # Install jpeg
 if(!require(jpeg)) {
-  install.packages("json", clean = TRUE)
+  install.packages("jpeg", clean = TRUE)
   if(!require(jpeg)) {
     cat("---- COULD NOT INSTALL PCT DEPENDENCY: jpeg ----\n")
     cat("This is usually caused by missing libjpeg headers.  Try installing:\n")
