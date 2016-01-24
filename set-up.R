@@ -47,8 +47,8 @@ update.packages()
 if(!require(devtools)) {
   install.packages("devtools", clean = TRUE)
   if (!require(devtools)) {
-    cat("---- COULD NOT INSTALL PCT DEPENDENCY: devtools ----\n")
-    cat("This is usually caused by missing libgdal and libproj headers.  Try installing:\n")
+    cat("---- COULD NOT INSTALL PCT DEPENDENCY: rgdal ----\n")
+    cat("This is usually caused by missing libcurl headers.  Try installing:\n")
     cat("\t* deb: libcurl4-openssl-dev (Debian, Ubuntu, etc)\n")
     cat("\t* rpm: libcurl-devel (Fedora, CentOS, RHEL)\n")
     cat("---- ABORTING ----\n")
@@ -60,8 +60,8 @@ if(!require(devtools)) {
 if(!require(rgdal)) {
   install.packages("rgdal", clean = TRUE)
   if (!require(rgdal)) {
-    cat("---- COULD NOT INSTALL PCT DEPENDENCY: rgdal ----\n")
-    cat("This is usually caused by missing libcurl headers.  Try installing:\n")
+    cat("---- COULD NOT INSTALL PCT DEPENDENCY: devtools ----\n")
+    cat("This is usually caused by missing libgdal and libproj headers.  Try installing:\n")
     cat("\t* rpm: gdal-devel proj-devel proj-nad proj-epsg (Fedora, CentOS, RHEL)\n")
     cat("---- ABORTING ----\n")
     stop()
