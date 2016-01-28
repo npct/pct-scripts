@@ -332,8 +332,6 @@ to `r nrow(l)`.
 l$clc <- l$Bicycle / l$All   
 l$clcar <- (l$Car_driver + l$Car_passenger) / l$All
 l$clfoot <- l$Foot / l$All   #% walk population
-
-flow <- l@data
 ```
 
 ## The flow model
@@ -344,7 +342,8 @@ These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
 ```{r, echo=FALSE}
-source("models/aggregate.R") # this model creates the variable 'slc'
+l$slc <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.0062 * dist_fastsq) + (-31.9249 * ned_avslope) + (1.0989 * interact) + (-6.6162 * interactsqrt) + (2.4783 * dutch) + (-0.0706 * dutch*dist_fast) + (0.0286 * ebike) + (0.0902 * ebike*dist_fast) + (-0.0014 * ebike*dist_fastsq) 
+
 cormod <- cor(flow$clc, mod_logsqr$fitted.values) # crude indication of goodness-of-fit
 # summary(mod_logsqr)
 
