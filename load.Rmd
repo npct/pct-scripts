@@ -58,7 +58,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
 mflow <- 500
-mflow_short <- 250
+mflow_short <- 500
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
 min_zones <- 60 # minumum number of zones in study area before buffer used
@@ -342,9 +342,20 @@ These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
 ```{r, echo=FALSE}
-l$slc <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.0062 * dist_fastsq) + (-31.9249 * ned_avslope) + (1.0989 * interact) + (-6.6162 * interactsqrt) + (2.4783 * dutch) + (-0.0706 * dutch*dist_fast) + (0.0286 * ebike) + (0.0902 * ebike*dist_fast) + (-0.0014 * ebike*dist_fastsq) 
+# Parameter creation for model
+dist_fastsq <- l$dist_fast^2
+dist_fastsqrt <- l$dist_fast^0.5
+ned_avslope <- l$avslope - 0.003
+interact <- l$dist_fast * ned_avslope
+interactsq <- dist_fastsq * ned_avslope
+interactsqrt <- dist_fastsqrt * ned_avslope
 
-cormod <- cor(flow$clc, mod_logsqr$fitted.values) # crude indication of goodness-of-fit
+logit_p <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.0062 * dist_fastsq) + (-31.9249 * ned_avslope) + (1.0989 * interact) + (-6.6162 * interactsqrt)
+
+# + (2.4783 * dutch) + (-0.0706 * dutch*dist_fast) + (0.0286 * ebike) + (0.0902 * ebike*dist_fast) + (-0.0014 * ebike*dist_fastsq) 
+
+l$slc <- exp(logit_p) / (1 + exp(logit_p))
+cormod <- cor(flow$clc, l$slc) # crude indication of goodness-of-fit
 # summary(mod_logsqr)
 
 mod_nat <- readRDS(file.path(pct_bigdata, "mod_logsqr_national_8.Rds"))
