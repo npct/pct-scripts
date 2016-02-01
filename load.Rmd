@@ -11,7 +11,7 @@ output:
 
 ```{r, include=FALSE}
 start_time <- Sys.time() # for timing the script
-source("set-up.R") # load packages needed 
+source("set-up.R") # load packages needed
 ```
 
 This document was produced automatically at `r start_time`.
@@ -92,7 +92,7 @@ if(geo_level == "cua"){
 las_cents <- SpatialPoints(coordinates(las))
 
 # create region shape (and add buffer in m)
-region_shape <- region_orig <- 
+region_shape <- region_orig <-
   regions[grep(pattern = region, x = regions$Region, ignore.case = T),]
 region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
 region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
@@ -174,7 +174,7 @@ pmflowa <- round(sum(flow$All[sel]) / sum(flow$All) * 100, 1)
 ```
 
 There are **`r nrow(flow)`** OD pairs with origins and destinations in the study
-area. Of these, **`r sum(sel)`** meet the criteria that at least `r mflow` people 
+area. Of these, **`r sum(sel)`** meet the criteria that at least `r mflow` people
 reported travelling between these two areas in the 2011 Census.
 That is  **`r pmflow`%** of OD pairs, accounting for
 **`r pmflowa`%** of commutes in the study area.
@@ -187,7 +187,7 @@ percent.
 
 ```{r, echo = FALSE}
 # # It used to say - see below. What to replace this with?
-# compared with the national average of 
+# compared with the national average of
 # `r round(mean(ukmsoas$avslope, na.rm = T), 1)`. This data is displayed in the
 # figure below.
 tm_shape(zones) +
@@ -198,7 +198,7 @@ tm_shape(zones) +
 # # Hilliness of OD pairs - calculated the old way (depreciated)
 # (calculated as the average gradient of the zone
 # of the flow's origin and destination, in degrees)
-# is 
+# is
 # `r round(mean(flow$avslope * flow$All / mean(flow$All), na.rm = T), 2)`.
 # The UK
 # average is xx degrees
@@ -206,7 +206,7 @@ tm_shape(zones) +
 
 ## Lines allocated to the road network
 
-We use CycleStreets.net to estimate optimal routes. 
+We use CycleStreets.net to estimate optimal routes.
 An illustration of these routes is presented below.
 
 ```{r flow-vars, echo=FALSE}
@@ -230,7 +230,7 @@ rq$length <- rq$length / 1000
 
 # debug lines which failed
 if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
-  # which paths succeeded 
+  # which paths succeeded
   path_ok <- row.names(l) %in% row.names(rf) &
                    row.names(l) %in% row.names(rq)
   # summary(path_ok)
@@ -301,11 +301,11 @@ ggplot(histdf) +
     position = "identity", colour = "black", binwidth = 0.5) +
   scale_fill_manual(values = c("lightblue", NA)) +
   scale_linetype(c(1, 2), guide = "none") +
-  scale_y_continuous() + 
-  # scale_y_continuous(labels = percent) + 
-  xlab("Route distance (km)") + 
-  ylab("Proportion of trips in each band") + 
-  xlim(c(0,13)) + 
+  scale_y_continuous() +
+  # scale_y_continuous(labels = percent) +
+  xlab("Route distance (km)") +
+  ylab("Proportion of trips in each band") +
+  xlim(c(0,13)) +
   theme_bw()
 
 pl5kmuk <- round(sum(luk$All[luk$dist_fast < 5]) /
@@ -329,7 +329,7 @@ to `r nrow(l)`.
 # Estimates slc from olc  #
 # # # # # # # # # # # # # #
 
-l$clc <- l$Bicycle / l$All   
+l$clc <- l$Bicycle / l$All
 l$clcar <- (l$Car_driver + l$Car_passenger) / l$All
 l$clfoot <- l$Foot / l$All   #% walk population
 ```
@@ -352,7 +352,7 @@ interactsqrt <- dist_fastsqrt * ned_avslope
 
 logit_p <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.0062 * dist_fastsq) + (-31.9249 * ned_avslope) + (1.0989 * interact) + (-6.6162 * interactsqrt)
 
-# + (2.4783 * dutch) + (-0.0706 * dutch*dist_fast) + (0.0286 * ebike) + (0.0902 * ebike*dist_fast) + (-0.0014 * ebike*dist_fastsq) 
+# + (2.4783 * dutch) + (-0.0706 * dutch*dist_fast) + (0.0286 * ebike) + (0.0902 * ebike*dist_fast) + (-0.0014 * ebike*dist_fastsq)
 
 l$slc <- exp(logit_p) / (1 + exp(logit_p))
 cormod <- cor(flow$clc, l$slc) # crude indication of goodness-of-fit
@@ -399,12 +399,12 @@ l$cdp_sic <- l$cdp_slc - l$Bicycle
 has_private_data <- file.exists(pct_privatedata)
 if(has_private_data){
   p_trips_male <- mean(las_in_region$clc_m) # proportion of bicycle trips by males
-  
+
   clc_m <- l$Bicycle * p_trips_male
   pmale_c <- clc_m / l$Male
   slc_gendereq_f <- l$Female * pmale_c
   slc_gendereq <- clc_m + slc_gendereq_f
-  
+
   l$gendereq_slc <- slc_gendereq
   l$gendereq_sic <- l$gendereq_slc - l$base_olc
 }else{
@@ -434,15 +434,15 @@ dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
 # head(dfsp)
 dfsp$scenario <- factor(dfsp$scenario)
  summary(dfsp$scenario)
-dfsp$scenario <- 
+dfsp$scenario <-
   factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(5, 4, 1, 2, 3, 6)])
-scalenum <- sum(l$All) 
+scalenum <- sum(l$All)
 ```
 
 ```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
 ggplot(dfsp) +
   geom_freqpoly(aes(dist_fast, weight = slc,
-    color = scenario), binwidth = 1) + 
+    color = scenario), binwidth = 1) +
   ylab("Total number of trips") +
   xlab("Route distance (km)") +
   scale_color_discrete(name = "Mode and\nscenario\n(cycling)") +
@@ -451,7 +451,7 @@ ggplot(dfsp) +
 
 dfsp$dist_band <- cut(dfsp$dist_fast, c(0, 2, 5, 10, 20))
 dfsum <- summarise(group_by(dfsp, scenario, dist_band), Percent = sum(slc) / sum(l$All))
-dfsum$Percent <- dfsum$Percent 
+dfsum$Percent <- dfsum$Percent
 dfspread <- spread(dfsum, scenario, Percent)
 dfspread$dist_band <- as.character(dfspread$dist_band)
 dfspreadf <- c("Total", round(colSums(dfspread[2:ncol(dfspread)])* 100, 1))
@@ -483,14 +483,14 @@ for(i in 1:nrow(cents)){
   cents$base_olc[i] <- sum(l$Bicycle[j])
   cents$base_slc[i] <- sum(l$base_slc[j])
   cents$base_sic[i] <- sum(l$base_sic[j])
-  
+
   cents$base_olcarusers[i] <- sum(l$Car_driver[j]+ l$Car_passenger[j])/sum(l$All[j])
   # car users % added to centroids
 
   # values for scenarios
   cents$cdp_slc[i] <- sum(l$cdp_slc[j])
   cents$cdp_sic[i] <- sum(l$cdp_sic[j])
-  
+
   cents$gendereq_slc[i] <- sum(l$gendereq_slc[j])
   cents$gendereq_sic[i] <- sum(l$gendereq_sic[j])
 
@@ -507,11 +507,11 @@ for(i in 1:nrow(cents)){
 
 # names(l) # which line names can be added for non-directional OD pairs?
 # dput(c(names(l)[addids], c("cdp_slc", "cdp_sic")))
-addidsn <- c("All", "Work.mainly.at.or.from.home", "Underground..metro..light.rail..tram", 
-"Train", "Bus..minibus.or.coach", "Taxi", "Motorcycle..scooter.or.moped", 
-"Driving.a.car.or.van", "Passenger.in.a.car.or.van", "Bicycle", 
-"On.foot", "Other.method.of.travel.to.work", "base_olc", "base_slc", 
-"base_sic", "gendereq_slc", "gendereq_sic", "dutch_slc", "dutch_sic", 
+addidsn <- c("All", "Work.mainly.at.or.from.home", "Underground..metro..light.rail..tram",
+"Train", "Bus..minibus.or.coach", "Taxi", "Motorcycle..scooter.or.moped",
+"Driving.a.car.or.van", "Passenger.in.a.car.or.van", "Bicycle",
+"On.foot", "Other.method.of.travel.to.work", "base_olc", "base_slc",
+"base_sic", "gendereq_slc", "gendereq_sic", "dutch_slc", "dutch_sic",
 "ebike_slc", "ebike_sic", "cdp_slc", "cdp_sic")
 addids <- which(names(l) %in% addidsn)
 # addids <- c(3:14, 23:31)
@@ -604,7 +604,7 @@ kable(dfcos, digits = 3)
 
 ## Network analysis
 
-Now we aggregate the overlapping routes to create a route network.  
+Now we aggregate the overlapping routes to create a route network.
 The value of each segment in the network corresponds to the total number of cyclists who we estimate to use the segment.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="The route network, with widths proportional to the current estimated number of commuter cyclists"}
@@ -613,7 +613,7 @@ The value of each segment in the network corresponds to the total number of cycl
 
 rft <- rf
 # Stop rnet lines going to centroid (optional)
-# rft <- toptail(rf, toptail_dist = buff_geo_dist) 
+# rft <- toptail(rf, toptail_dist = buff_geo_dist)
 if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
@@ -673,14 +673,14 @@ saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
 
 # Create folder in shiny app folder
-region_dir <- file.path(file.path(pct_shiny, region))
+region_dir <- file.path(file.path(pct_shiny, "regions_www", region))
 dir.create(region_dir)
-ui_text <- 'source("../master/ui.R", local = T, chdir = T)'
+ui_text <- 'source("../../ui-base.R", local = T, chdir = T)'
 server_text <- paste0('startingCity <- "', region, '"', "\n",
-                      'source("../master/master.R", local = T, chdir = T)')
+                      'source("../../server-base.R", local = T, chdir = T)')
 write(ui_text, file = file.path(region_dir, "ui.R"))
 write(server_text, file = file.path(region_dir, "server.R"))
-file.symlink(file.path("..", "master","www"), region_dir)
+file.symlink(file.path("..", "..","www"), region_dir)
 ```
 
  ## Time taken
