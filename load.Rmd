@@ -57,11 +57,10 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 100
-mflow_short <- 100
+mflow <- 1
+mflow_short <- 1
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
-min_zones <- 60 # minumum number of zones in study area before buffer used
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
 # save the initial parameters to reproduce results
@@ -84,7 +83,6 @@ las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRG
 
 # Load local authorities and districts
 if(!exists("geo_level")) geo_level <- "regions"
-
 if(geo_level == "cua"){
   regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
   regions$Region <- regions$CTYUA12NM
@@ -95,24 +93,24 @@ if(geo_level == "cua"){
 # create region shape (and add buffer in m)
 region_shape <- region_orig <-
   regions[grep(pattern = region, x = regions$Region, ignore.case = T),]
-region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
-region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
-region_shape <- spTransform(region_shape, proj4string(cents))
+
+# Only transform if needed
+if(buff_dist > 0){
+  region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
+  region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
+  region_shape <- spTransform(region_shape, proj4string(cents))
+}
 
 las_in_region <- rgeos::gIntersects(las_cents, region_shape, byid = T)
 las_in_region <- las_in_region[1,]
 las_in_region <- las[las_in_region,]
-
-# Assign correct CRS
-proj4string(cents) <- proj4string(regions) 
-sel_region <- grepl(pattern = region, x = regions$Region, ignore.case = T)
 ```
 
-The selected region was `r as.character(regions$Region[sel_region ])`.
+The selected region is `r region`.
 
 ```{r, include=FALSE}
 # select msoas of interest
-proj4string(region_shape) <- proj4string(cents)
+region_shape <- spTransform(region_shape, CRSobj = proj4string(cents))
 cents <- cents[region_shape,]
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 ```
@@ -657,9 +655,11 @@ c_in_z <- names(cents) == "avslope"
 zones@data <- left_join(zones@data, cents@data[,!c_in_z])
 
 # Remove NAN numbers (cause issues with geojson_write)
-na_cols  <- names(zones) %in%
-  c("av_distance", "cirquity", "distq_f", "base_olcarusers", "gendereq_slc", "gendereq_sic")
-zones@data[, na_cols] <- NA
+na_cols  <- which(names(zones) %in%
+  c("av_distance", "cirquity", "distq_f", "base_olcarusers", "gendereq_slc", "gendereq_sic"))
+for(ii in na_cols){
+  zones@data[[ii]][is.nan(zones@data[[ii]])] <- NA
+}
 
 # # Save objects
 # Save objects # uncomment these lines to save model output
@@ -677,7 +677,7 @@ saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
 
 # Create folder in shiny app folder
-region_dir <- file.path(file.path(pct_shiny, "regions_www", region))
+region_dir <- file.path(file.path(pct_shiny, region))
 dir.create(region_dir)
 ui_text <- 'source("../../ui-base.R", local = T, chdir = T)'
 server_text <- paste0('startingCity <- "', region, '"', "\n",
