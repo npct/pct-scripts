@@ -37,7 +37,7 @@ if(!exists("region")) region <- "liverpool-city-region"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
-pct_shiny <- file.path("..", "pct-shiny", "regions_www")
+pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
 if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
 if(!file.exists(pct_privatedata)){
@@ -677,7 +677,7 @@ saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
 
 # Create folder in shiny app folder
-region_dir <- file.path(file.path(pct_shiny, region))
+region_dir <- file.path(file.path(pct_shiny_regions, region))
 dir.create(region_dir)
 ui_text <- 'source("../../ui-base.R", local = T, chdir = T)'
 server_text <- paste0('startingCity <- "', region, '"', "\n",
