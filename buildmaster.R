@@ -1,6 +1,10 @@
 source("set-up.R")
 library(knitr)
 
+regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
+la_all <- regions$Region
+la_all <- as.character(la_all)
+
 # select regions of interest (uncomment/change as appropriate)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
@@ -20,16 +24,10 @@ for(k in 1:length(la_all)){
   message(paste0("Just built ", region))
 }
 
-regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
-la_all <- regions$Region
-la_all <- as.character(la_all)
-
-regions$Region[1:10]
-dput(as.character(regions$Region[2:4]))
 
 # find regions not yet built
-sel <- !regions$Region %in% list.dirs("../pct-data/", full.names = F)
-la_all <- as.character(regions@data$Region[sel])
+# sel <- !regions$Region %in% list.dirs("../pct-data/", full.names = F)
+# la_all <- as.character(regions@data$Region[sel])
 la_all <- la_all[-grep("liv|greater-m", la_all)]
 
 # old regional units
