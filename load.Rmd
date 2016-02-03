@@ -613,7 +613,7 @@ The value of each segment in the network corresponds to the total number of cycl
 
 rft <- rf
 # Stop rnet lines going to centroid (optional)
-# rft <- toptail(rf, toptail_dist = buff_geo_dist)
+rft <- toptail(rf, toptail_dist = buff_geo_dist)
 if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
