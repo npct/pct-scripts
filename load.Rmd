@@ -37,7 +37,7 @@ if(!exists("region")) region <- "liverpool-city-region"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
-pct_shiny <- file.path("..", "pct-shiny")
+pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
 if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
 if(!file.exists(pct_privatedata)){
@@ -57,12 +57,11 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 500
-mflow_short <- 500
+mflow <- 1
+mflow_short <- 1
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
-min_zones <- 60 # minumum number of zones in study area before buffer used
-buff_dist <- 7 # buffer (km) used to select additional zones (often zero = ok)
+buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
 # save the initial parameters to reproduce results
 save(region, mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist, file = file.path(region_path, "params.RData"))
@@ -79,37 +78,39 @@ ukmsoas <- spTransform(ukmsoas, CRS("+init=epsg:4326"))
 # Load population-weighted centroids
 cents <- readOGR(file.path(pct_bigdata, "cents.geojson"), layer = "OGRGeoJSON")
 cents$geo_code <- as.character(cents$geo_code)
+las_cents <- SpatialPoints(coordinates(las))
+las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
 
 # Load local authorities and districts
 if(!exists("geo_level")) geo_level <- "regions"
-las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
 if(geo_level == "cua"){
   regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
   regions$Region <- regions$CTYUA12NM
-}else{
-  regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
 }
-las_cents <- SpatialPoints(coordinates(las))
+
+# regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
 
 # create region shape (and add buffer in m)
 region_shape <- region_orig <-
   regions[grep(pattern = region, x = regions$Region, ignore.case = T),]
-region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
-region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
-region_shape <- spTransform(region_shape, proj4string(cents))
+
+# Only transform if needed
+if(buff_dist > 0){
+  region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
+  region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
+  region_shape <- spTransform(region_shape, proj4string(cents))
+}
 
 las_in_region <- rgeos::gIntersects(las_cents, region_shape, byid = T)
 las_in_region <- las_in_region[1,]
 las_in_region <- las[las_in_region,]
-
-proj4string(cents) <- proj4string(regions) # assign correct CRS
-sel_region <- grepl(pattern = region, x = regions$Region, ignore.case = T)
 ```
 
-The selected region was `r as.character(regions$Region[sel_region ])`.
+The selected region is `r region`.
 
 ```{r, include=FALSE}
 # select msoas of interest
+region_shape <- spTransform(region_shape, CRSobj = proj4string(cents))
 cents <- cents[region_shape,]
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 ```
@@ -178,6 +179,7 @@ area. Of these, **`r sum(sel)`** meet the criteria that at least `r mflow` peopl
 reported travelling between these two areas in the 2011 Census.
 That is  **`r pmflow`%** of OD pairs, accounting for
 **`r pmflowa`%** of commutes in the study area.
+
 
 ## Hilliness of OD pairs
 
@@ -355,7 +357,7 @@ logit_p <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.006
 # + (2.4783 * dutch) + (-0.0706 * dutch*dist_fast) + (0.0286 * ebike) + (0.0902 * ebike*dist_fast) + (-0.0014 * ebike*dist_fastsq)
 
 l$slc <- exp(logit_p) / (1 + exp(logit_p))
-cormod <- cor(flow$clc, l$slc) # crude indication of goodness-of-fit
+cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
 # summary(mod_logsqr)
 
 mod_nat <- readRDS(file.path(pct_bigdata, "mod_logsqr_national_8.Rds"))
@@ -378,7 +380,6 @@ of 5.0%.
 ## Scenarios
 
 ```{r, include=FALSE}
-l$slc <- mod_logsqr$fitted.values
 l$base_olc <- l$Bicycle
 l$base_slc <- l$slc * l$All
 l$base_sic <- l$base_slc - l$base_olc
@@ -390,7 +391,7 @@ l$base_sic <- l$base_slc - l$base_olc
 # Additional scenarios
 # Replace with source("models/aggregate-model-dutch|gendereq|ebike.R"))
 set.seed(2015)
-l$npred <- exp(predict(mod_nat, flow))
+l$npred <- exp(predict(mod_nat, l@data))
 
 l$cdp_slc <-l$All * (l$clc + l$npred) # may be more that 1
 l$cdp_sic <- l$cdp_slc - l$Bicycle
@@ -416,13 +417,13 @@ mod_dutch <- mod_nat
 mod_dutch$coefficients[1] <- -0.3253
 mod_dutch$coefficients[2] <- -0.3543
 mod_dutch$coefficients[3] <- 0.7750
-l$dutch_slc <- l$All * exp(predict(mod_dutch, flow))
+l$dutch_slc <- l$All * exp(predict(mod_dutch, l@data))
 l$dutch_sic <- l$dutch_slc - l$base_olc
 
 mod_ebike <- mod_dutch
 mod_ebike$coefficients[2] <- -0.3
 
-l$ebike_slc <- l$All * exp(predict(mod_ebike, flow))
+l$ebike_slc <- l$All * exp(predict(mod_ebike, l@data))
 l$ebike_sic <- l$ebike_slc - l$base_olc
 
 dfscen <- dplyr::select(l@data, contains("slc"), All, olc = Bicycle, dist_fast)
@@ -540,8 +541,7 @@ head(l@data[1:5])
 ```
 
 ```{r, echo=FALSE, results='hide', fig.cap="Illustration of OD pairs on travel network"}
-zbuf <- spTransform(region_shape, CRS("+init=epsg:4326"))
-plot(zbuf)
+plot(region_shape)
 plot(zones, add = T)
 points(cents, col = "red")
 lines(l, col = "black")
@@ -655,7 +655,11 @@ c_in_z <- names(cents) == "avslope"
 zones@data <- left_join(zones@data, cents@data[,!c_in_z])
 
 # Remove NAN numbers (cause issues with geojson_write)
-zones@data[is.nan(zones$av_distance), c("av_distance", "cirquity", "distq_f", "base_olcarusers")] <- NA
+na_cols  <- which(names(zones) %in%
+  c("av_distance", "cirquity", "distq_f", "base_olcarusers", "gendereq_slc", "gendereq_sic"))
+for(ii in na_cols){
+  zones@data[[ii]][is.nan(zones@data[[ii]])] <- NA
+}
 
 # # Save objects
 # Save objects # uncomment these lines to save model output
@@ -673,7 +677,7 @@ saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
 
 # Create folder in shiny app folder
-region_dir <- file.path(file.path(pct_shiny, "regions_www", region))
+region_dir <- file.path(file.path(pct_shiny_regions, region))
 dir.create(region_dir)
 ui_text <- 'source("../../ui-base.R", local = T, chdir = T)'
 server_text <- paste0('startingCity <- "', region, '"', "\n",
