@@ -57,8 +57,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 1
-mflow_short <- 1
+mflow <- 500
+mflow_short <- 250
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -86,9 +86,11 @@ if(!exists("geo_level")) geo_level <- "regions"
 if(geo_level == "cua"){
   regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
   regions$Region <- regions$CTYUA12NM
+} else if(geo_level == "custom"){
+  # if you use a custom geometry, regions should already be saved from buildmaster.R
+} else{
+  regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
 }
-
-# regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
 
 # create region shape (and add buffer in m)
 region_shape <- region_orig <-
