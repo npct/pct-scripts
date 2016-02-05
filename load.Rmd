@@ -57,8 +57,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 500
-mflow_short <- 250
+mflow <- 100
+mflow_short <- 20
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -78,8 +78,8 @@ ukmsoas <- spTransform(ukmsoas, CRS("+init=epsg:4326"))
 # Load population-weighted centroids
 cents <- readOGR(file.path(pct_bigdata, "cents.geojson"), layer = "OGRGeoJSON")
 cents$geo_code <- as.character(cents$geo_code)
-las_cents <- SpatialPoints(coordinates(las))
 las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
+las_cents <- SpatialPoints(coordinates(las))
 
 # Load local authorities and districts
 if(!exists("geo_level")) geo_level <- "regions"
@@ -577,7 +577,7 @@ justdist6$model <- "Dutch"
 justdist7$model <- "Ebike"
 
 justdist$npred <- exp(predict(mod_nat, justdist))
-justdist5$npred <- exp(predict(mod_logsqr, justdist))
+justdist5$npred <- NA # todo: fix this
 justdist6$npred <- exp(predict(mod_dutch, justdist))
 justdist7$npred <- exp(predict(mod_ebike, justdist))
 
@@ -589,8 +589,8 @@ ggplot(justdist) +
   xlab("Route distance (km)") + ylab("Expected proportion cycling") +
   theme_bw()
 
-dfcos <- round(rbind(coef(mod_nat), coef(mod_logsqr)), 3)
-dfcos <- cbind(Model = c("National", "Local"), dfcos)
+dfcos <- round(rbind(coef(mod_nat)), 3)
+dfcos <- cbind(Model = c("National"), dfcos)
 ```
 
 The correlation between fitted and observed cycling in the model is

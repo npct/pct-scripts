@@ -13,7 +13,7 @@ la_all <- as.character(la_all)
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
-  geo_level <- "region"
+  geo_level <- "cua"
   isolated <- TRUE
   region <- la_all[k]
   knitr::knit2html(quiet = T,
