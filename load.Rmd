@@ -57,8 +57,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 100
-mflow_short <- 20
+mflow <- 500
+mflow_short <- 50
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which all lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -226,7 +226,7 @@ An illustration of these routes is presented below.
 # Warning: time-consuming!  #
 # Needs CycleStreet.net API #
 # # # # # # # # # # # # # # #
-
+l <- l[1:100,]
 rf <- line2route(l, silent = TRUE)
 rq <- line2route(l, plan = "quietest", silent = T)
 rf$length <- rf$length / 1000 # set length correctly
@@ -382,9 +382,8 @@ of 5.0%.
 ## Scenarios
 
 ```{r, include=FALSE}
-l$base_olc <- l$Bicycle
 l$base_slc <- l$slc * l$All
-l$base_sic <- l$base_slc - l$base_olc
+l$base_sic <- l$base_slc - l$Bicycle
 
 # # # # # # # # # # # # #
 # Additional scenarios  #
@@ -409,7 +408,7 @@ if(has_private_data){
   slc_gendereq <- clc_m + slc_gendereq_f
 
   l$gendereq_slc <- slc_gendereq
-  l$gendereq_sic <- l$gendereq_slc - l$base_olc
+  l$gendereq_sic <- l$gendereq_slc - l$Bicycle
 }else{
   l$gendereq_slc <- NA
   l$gendereq_sic <- NA
@@ -420,13 +419,13 @@ mod_dutch$coefficients[1] <- -0.3253
 mod_dutch$coefficients[2] <- -0.3543
 mod_dutch$coefficients[3] <- 0.7750
 l$dutch_slc <- l$All * exp(predict(mod_dutch, l@data))
-l$dutch_sic <- l$dutch_slc - l$base_olc
+l$dutch_sic <- l$dutch_slc - l$Bicycle
 
 mod_ebike <- mod_dutch
 mod_ebike$coefficients[2] <- -0.3
 
 l$ebike_slc <- l$All * exp(predict(mod_ebike, l@data))
-l$ebike_sic <- l$ebike_slc - l$base_olc
+l$ebike_sic <- l$ebike_slc - l$Bicycle
 
 dfscen <- dplyr::select(l@data, contains("slc"), All, olc = Bicycle, dist_fast)
 dfscen <- dfscen[-which(names(dfscen) == "slc")]
@@ -483,7 +482,7 @@ for(i in 1:nrow(cents)){
   # all OD pairs originating from centroid i
   j <- which(l$Area.of.residence == cents$geo_code[i])
 
-  cents$base_olc[i] <- sum(l$Bicycle[j])
+  cents$Bicycle[i] <- sum(l$Bicycle[j])
   cents$base_slc[i] <- sum(l$base_slc[j])
   cents$base_sic[i] <- sum(l$base_sic[j])
 
@@ -509,11 +508,13 @@ for(i in 1:nrow(cents)){
 }
 
 # names(l) # which line names can be added for non-directional OD pairs?
-# dput(c(names(l)[addids], c("cdp_slc", "cdp_sic")))
-addidsn <- c("All", "Work.mainly.at.or.from.home", "Underground..metro..light.rail..tram",
-"Train", "Bus..minibus.or.coach", "Taxi", "Motorcycle..scooter.or.moped",
-"Driving.a.car.or.van", "Passenger.in.a.car.or.van", "Bicycle",
-"On.foot", "Other.method.of.travel.to.work", "base_olc", "base_slc",
+l$Rail <- l$Light_rail + l$Train
+l$Other <- l$Other + l$Taxi
+l$Taxi <- l$Light_rail <- l$Train <- NULL # remove aggregated categories
+
+addidsn <- c("All", "From_home", "Bus",
+"Rail", "Taxi", "Motorbike", "Car_driver", "Car_passenger", "Bicycle",
+"Foot", "Other", "base_slc",
 "base_sic", "gendereq_slc", "gendereq_sic", "dutch_slc", "dutch_sic",
 "ebike_slc", "ebike_sic", "cdp_slc", "cdp_sic")
 addids <- which(names(l) %in% addidsn)
@@ -528,8 +529,10 @@ addids <- which(names(l) %in% addidsn)
 # nrow(l)
 
 # 4: by aggregating 2 way OD pairs
-l <- onewayid(l, attrib = c(addids))
+l <- onewayid(l, attrib = addids)
 
+# remove origin and destinations now they are redundant
+l$Area.of.residence <- l$Area.of.workplace <- NULL
 l$clc <- l$Bicycle / l$All
 l$slc <- l$base_slc / l$All
 
@@ -620,17 +623,17 @@ if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
 } else print("Error: toptailed lines do not match lines")
-rft$base_olc <- l$base_olc
+rft$Bicycle <- l$Bicycle
 
 # Simplify line geometries (if mapshaper is available)
 # this greatly speeds up the build (due to calls to overline)
 # needs mapshaper installed and available to system():
 # see https://github.com/mbloch/mapshaper/wiki/
 rft <- ms_simplify(rft, keep = 0.1)
-rnet <- overline(rft, "base_olc")
+rnet <- overline(rft, "Bicycle")
 # object.size(rnet)
 # test the resulting plot
-plot(rnet, lwd = rnet$base_olc / mean(rnet$base_olc))
+plot(rnet, lwd = rnet$Bicycle / mean(rnet$Bicycle))
 for(i in scens){
   rft@data[i] <- l@data[i]
   rnet_tmp <- overline(rft, i)
@@ -639,7 +642,7 @@ for(i in scens){
 }
 if(!"gendereq_slc" %in% scens)
   rnet$gendereq_slc <- NA
-# plot(rnet, lwd = rnet$cdp_slc / mean(rnet$base_olc))
+# plot(rnet, lwd = rnet$cdp_slc / mean(rnet$Bicycle))
 ```
 
 
@@ -648,9 +651,13 @@ if(!"gendereq_slc" %in% scens)
 # Save the data #
 # # # # # # # # #
 
-# Rename columns
-l@data <- rename(l@data, Home = Area.of.residence, Work = Area.of.workplace)
-names(zones@data)
+# Rename columns...
+# names(zones@data)
+
+# Data preprocessing
+l
+# Remove private/superfluous variables
+l$Male <- l$Female <- l$From_home <- NULL
 
 # Transfer cents data to zones
 c_in_z <- names(cents) == "avslope"
