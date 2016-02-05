@@ -42,9 +42,9 @@ if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be fou
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
 if(!file.exists(pct_privatedata)){
   message("The pct_privatedata repository cannot be found")
-  scens <- c("cdp_slc", "dutch_slc", "ebike_slc")
+  scens <- c("govtarget_slc", "dutch_slc", "ebike_slc")
 }else{
-  scens <- c("cdp_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
+  scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
 }
 if(Sys.getenv("CYCLESTREET") == "")
   warning("No CycleStreet API key. See ?cyclestreet_pat")
@@ -394,8 +394,8 @@ l$base_sic <- l$base_slc - l$Bicycle
 set.seed(2015)
 l$npred <- exp(predict(mod_nat, l@data))
 
-l$cdp_slc <-l$All * (l$clc + l$npred) # may be more that 1
-l$cdp_sic <- l$cdp_slc - l$Bicycle
+l$govtarget_slc <-l$All * (l$clc + l$npred) # may be more that 1
+l$govtarget_sic <- l$govtarget_slc - l$Bicycle
 
 # gendereq scenario
 has_private_data <- file.exists(pct_privatedata)
@@ -490,8 +490,8 @@ for(i in 1:nrow(cents)){
   # car users % added to centroids
 
   # values for scenarios
-  cents$cdp_slc[i] <- sum(l$cdp_slc[j])
-  cents$cdp_sic[i] <- sum(l$cdp_sic[j])
+  cents$govtarget_slc[i] <- sum(l$govtarget_slc[j])
+  cents$govtarget_sic[i] <- sum(l$govtarget_sic[j])
 
   cents$gendereq_slc[i] <- sum(l$gendereq_slc[j])
   cents$gendereq_sic[i] <- sum(l$gendereq_sic[j])
@@ -516,7 +516,7 @@ addidsn <- c("All", "From_home", "Bus",
 "Rail", "Taxi", "Motorbike", "Car_driver", "Car_passenger", "Bicycle",
 "Foot", "Other", "base_slc",
 "base_sic", "gendereq_slc", "gendereq_sic", "dutch_slc", "dutch_sic",
-"ebike_slc", "ebike_sic", "cdp_slc", "cdp_sic")
+"ebike_slc", "ebike_sic", "govtarget_slc", "govtarget_sic")
 addids <- which(names(l) %in% addidsn)
 # addids <- c(3:14, 23:31)
 # summary(l[addids])
@@ -642,7 +642,7 @@ for(i in scens){
 }
 if(!"gendereq_slc" %in% scens)
   rnet$gendereq_slc <- NA
-# plot(rnet, lwd = rnet$cdp_slc / mean(rnet$Bicycle))
+# plot(rnet, lwd = rnet$govtarget_slc / mean(rnet$Bicycle))
 ```
 
 
