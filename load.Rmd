@@ -360,9 +360,6 @@ logit_p <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.006
 
 l$slc <- exp(logit_p) / (1 + exp(logit_p))
 cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
-# summary(mod_logsqr)
-
-mod_nat <- readRDS(file.path(pct_bigdata, "mod_logsqr_national_8.Rds"))
 ```
 
 ## Cycling in the study area
@@ -383,17 +380,12 @@ of 5.0%.
 
 ```{r, include=FALSE}
 l$base_slc <- l$slc * l$All
-l$base_sic <- l$base_slc - l$Bicycle
 
 # # # # # # # # # # # # #
 # Additional scenarios  #
 # # # # # # # # # # # # #
 
-# Additional scenarios
 # Replace with source("models/aggregate-model-dutch|gendereq|ebike.R"))
-set.seed(2015)
-l$npred <- exp(predict(mod_nat, l@data))
-
 l$govtarget_slc <-l$All * (l$clc + l$npred) # may be more that 1
 l$govtarget_sic <- l$govtarget_slc - l$Bicycle
 
@@ -507,10 +499,10 @@ for(i in 1:nrow(cents)){
   cents$distq_f[i] <- sum(l$distq_f[j] * l$All[j], na.rm = T )  / sum(l$All[j])
 }
 
-# names(l) # which line names can be added for non-directional OD pairs?
 l$Rail <- l$Light_rail + l$Train
-l$Other <- l$Other + l$Taxi
-l$Taxi <- l$Light_rail <- l$Train <- NULL # remove aggregated categories
+l$Other <- l$Other + l$Taxi + l$Motorbike
+# Remove aggregated categories
+l$Taxi <- l$Light_rail <- l$Train <- l$Motorbike <- NULL 
 
 addidsn <- c("All", "From_home", "Bus",
 "Rail", "Taxi", "Motorbike", "Car_driver", "Car_passenger", "Bicycle",
@@ -657,7 +649,8 @@ if(!"gendereq_slc" %in% scens)
 # Data preprocessing
 l
 # Remove private/superfluous variables
-l$Male <- l$Female <- l$From_home <- NULL
+l$Male <- l$Female <- l$From_home <- l$calories <-
+  l$co2_saving_q <-l$co2_saving_q <- NULL
 
 # Transfer cents data to zones
 c_in_z <- names(cents) == "avslope"
