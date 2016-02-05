@@ -477,9 +477,11 @@ for(i in 1:nrow(cents)){
   cents$Bicycle[i] <- sum(l$Bicycle[j])
   cents$base_slc[i] <- sum(l$base_slc[j])
   cents$base_sic[i] <- sum(l$base_sic[j])
-
-  cents$base_olcarusers[i] <- sum(l$Car_driver[j]+ l$Car_passenger[j])/sum(l$All[j])
+  
   # car users % added to centroids
+  cents$All[i] <- sum(l$All[j])
+  cents$Car[i] <- sum(l$Car_driver[j])
+  cents$base_olcarusers[i] <- cents$Car[i] / cents$All[i]
 
   # values for scenarios
   cents$govtarget_slc[i] <- sum(l$govtarget_slc[j])
@@ -643,14 +645,9 @@ if(!"gendereq_slc" %in% scens)
 # Save the data #
 # # # # # # # # #
 
-# Rename columns...
-# names(zones@data)
-
-# Data preprocessing
-l
-# Remove private/superfluous variables
+# Remove/change private/superfluous variables
 l$Male <- l$Female <- l$From_home <- l$calories <-
-  l$co2_saving_q <-l$co2_saving_q <- NULL
+  l$co2_saving_q <-l$calories_q <- l$busyness_q <- NULL
 
 # Transfer cents data to zones
 c_in_z <- names(cents) == "avslope"
