@@ -386,7 +386,7 @@ l$base_slc <- l$slc * l$All
 # # # # # # # # # # # # #
 
 # Replace with source("models/aggregate-model-dutch|gendereq|ebike.R"))
-l$govtarget_slc <-l$All * (l$clc + l$npred) # may be more that 1
+l$govtarget_slc <- l$Bicycle + l$base_slc # may be more that 1
 l$govtarget_sic <- l$govtarget_slc - l$Bicycle
 
 # gendereq scenario
