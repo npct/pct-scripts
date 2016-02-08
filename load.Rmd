@@ -58,9 +58,9 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
 mflow <- 500
-mflow_short <- 50
+mflow_short <- 250
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
-max_all_dist <- 7 # maximum distance (km) below which all lines are selected
+max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
 # save the initial parameters to reproduce results
@@ -72,24 +72,23 @@ save(region, mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist, 
 The input zones area are summarised in this section.
 
 ```{r plotzones, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
-ukmsoas <- shapefile(file.path(pct_bigdata, "msoas.shp"))
-ukmsoas <- spTransform(ukmsoas, CRS("+init=epsg:4326"))
-
+if(!exists("ukmsoas")) ukmsoas <- shapefile(file.path(pct_bigdata, "msoas.shp"))
 # Load population-weighted centroids
-cents <- readOGR(file.path(pct_bigdata, "cents.geojson"), layer = "OGRGeoJSON")
-cents$geo_code <- as.character(cents$geo_code)
+if(!exists("centsa"))
+  centsa <- readOGR(file.path(pct_bigdata, "cents.geojson"), "OGRGeoJSON")
+centsa$geo_code <- as.character(centsa$geo_code)
 las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
 las_cents <- SpatialPoints(coordinates(las))
 
 # Load local authorities and districts
 if(!exists("geo_level")) geo_level <- "regions"
 if(geo_level == "cua"){
-  regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
-  regions$Region <- regions$CTYUA12NM
+  regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
 } else if(geo_level == "custom"){
   # if you use a custom geometry, regions should already be saved from buildmaster.R
 } else{
-  regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
+    regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
+  regions$Region <- regions$CTYUA12NM
 }
 
 # create region shape (and add buffer in m)
@@ -100,7 +99,7 @@ region_shape <- region_orig <-
 if(buff_dist > 0){
   region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
   region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
-  region_shape <- spTransform(region_shape, proj4string(cents))
+  region_shape <- spTransform(region_shape, proj4string(centsa))
 }
 
 las_in_region <- rgeos::gIntersects(las_cents, region_shape, byid = T)
@@ -112,8 +111,7 @@ The selected region is `r region`.
 
 ```{r, include=FALSE}
 # select msoas of interest
-region_shape <- spTransform(region_shape, CRSobj = proj4string(cents))
-cents <- cents[region_shape,]
+cents <- centsa[region_shape,]
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 ```
 
@@ -132,14 +130,20 @@ mzarea <- round(median(gArea(zones_wgs, byid = T) / 10000), 1) # average area of
 
 ```{r, echo=FALSE, results='hide'}
 # load flow dataset, depending on availability
+if(!exists("flow_nat")){
 if(dir.exists(pct_privatedata)){
-  flow <- readRDS(file.path(pct_privatedata, "flowsex-merged.Rds"))}else{
-  flow <- readRDS(file.path(pct_bigdata, "flow.Rds"))} # load open data
+  flow_nat <- readRDS(file.path(pct_privatedata, "flowsex-merged.Rds"))
+  } else{
+  flow_nat <- readRDS(file.path(pct_bigdata, "flow.Rds"))
+  } # load open data
+}
 
 # Subset by zones in the study area
-o <- flow$Area.of.residence %in% cents$geo_code
-d <- flow$Area.of.workplace %in% cents$geo_code
-flow <- flow[o & d, ] # subset OD pairs with o and d in study area
+o <- flow_nat$Area.of.residence %in% cents$geo_code
+d <- flow_nat$Area.of.workplace %in% cents$geo_code
+flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
+n_flow_region <- nrow(flow)
+n_commutes_region <- sum(flow$All)
 ```
 
 ```{r distance-dist, echo=FALSE, fig.cap="The study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The black straight green represent the most intensive commuting OD pairs.", echo=FALSE, message=FALSE, warning=FALSE}
@@ -148,13 +152,13 @@ coord_from <- coordinates(cents[match(flow$Area.of.residence, cents$geo_code),])
 coord_to <- coordinates(cents[match(flow$Area.of.workplace, cents$geo_code),])
 # Euclidean distance (km)
 flow$dist <- geosphere::distHaversine(coord_from, coord_to) / 1000
+flow <- flow[flow$dist > 0,] # remove 0 dist flows
 
 # Subset lines
-dsel <- flow$dist < mdist # all lines less than the upper threshold distance to remove
-dsel_short <- flow$dist < max_all_dist # all lines less than the lower threshold distance
-sel_number <- flow$All > mflow # subset OD pairs by n. people using it
-sel <- (dsel & sel_number) | (dsel_short & flow$All > mflow_short)
-sel <- sel & flow$dist > 0
+# subset OD pairs by n. people using it
+sel_long <- flow$All > mflow & flow$dist < mdist 
+sel_short <- flow$dist < max_all_dist & flow$All > mflow_short
+sel <- sel_long | sel_short
 flow <- flow[sel, ]
 # summary(flow$dist)
 l <- od2line(flow = flow, zones = cents)
@@ -171,17 +175,16 @@ lines(l[l$All > 100,], col = "green")
 ```{r, echo=FALSE}
 # nrow(flow) # how many OD pairs in the study area?
 # proportion of OD pairs in min-flow based subset
-pmflow <- round(sum(sel) / nrow(flow) * 100, 1)
+pmflow <- round(nrow(l) / n_flow_region * 100, 1)
 # % all trips covered
-pmflowa <- round(sum(flow$All[sel]) / sum(flow$All) * 100, 1)
+pmflowa <- round(sum(l$All) / n_commutes_region * 100, 1)
 ```
 
-There are **`r nrow(flow)`** OD pairs with origins and destinations in the study
-area. Of these, **`r sum(sel)`** meet the criteria that at least `r mflow` people
-reported travelling between these two areas in the 2011 Census.
-That is  **`r pmflow`%** of OD pairs, accounting for
-**`r pmflowa`%** of commutes in the study area.
-
+There are **`r n_flow_region`** OD pairs with origins and destinations in the study
+area. Of these, `r sum(sel_long)` meet the criteria that at least `r mflow` people travelled to work along OD pairs up to `r mdist` km in the 2011 Census. The additional selection criteria that at least `r mflow_short` people travelled to work along OD pairs up to `r max_all_dist` km was met by `r sum(sel_short)` OD pairs.
+Adding those (overlapping) selection criteria resulted in
+**`r nrow(flow)`** or **`r pmflow`%** of all inter-zone OD pairs were selected in the region, accounting for
+**`r pmflowa`%** of inter-zone commutes in the study area.
 
 ## Hilliness of OD pairs
 
@@ -213,7 +216,7 @@ tm_shape(zones) +
 We use CycleStreets.net to estimate optimal routes.
 An illustration of these routes is presented below.
 
-```{r flow-vars, echo=FALSE}
+```{r flow-vars, echo=FALSE, message=FALSE}
 # # # # # # # # # # # # # # # # # #
 # Calculate flow-level variables: #
 # distances and olc for ag. model #
@@ -262,7 +265,7 @@ lines(rf[nrow(l),], col = "red")
 lines(rq[nrow(l),], col = "green")
 ```
 
-Of the lines allocated to the route network, `sum(!path_ok)` failed.
+Of the lines allocated to the route network, `r sum(!path_ok)` failed.
 
 ```{r, echo=FALSE}
 # Allocate route characteristics to OD pairs
@@ -392,7 +395,7 @@ l$govtarget_sic <- l$govtarget_slc - l$Bicycle
 has_private_data <- file.exists(pct_privatedata)
 if(has_private_data){
   p_trips_male <- mean(las_in_region$clc_m) # proportion of bicycle trips by males
-
+  
   clc_m <- l$Bicycle * p_trips_male
   pmale_c <- clc_m / l$Male
   slc_gendereq_f <- l$Female * pmale_c
@@ -685,9 +688,9 @@ write(server_text, file = file.path(region_dir, "server.R"))
 file.symlink(file.path("..", "..","www"), region_dir)
 ```
 
- ## Time taken
+## Time taken
 
-The time taken to run the analysis for this area is presented below.
+The time taken to run the analysis for this area is presented below:
 
 ```{r}
 end_time <- Sys.time()

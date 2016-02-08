@@ -2,8 +2,7 @@ source("set-up.R")
 library(knitr)
 
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
-la_all <- regions$Region
-la_all <- as.character(la_all)
+la_all <- regions$Region <- as.character(regions$Region)
 
 # select regions of interest (uncomment/change as appropriate)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
@@ -14,7 +13,7 @@ la_all <- as.character(la_all)
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
   geo_level <- "cua"
-  isolated <- TRUE
+  isolated <- FALSE
   region <- la_all[k]
   knitr::knit2html(quiet = T,
     input = "load.Rmd",
