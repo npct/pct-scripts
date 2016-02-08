@@ -2,13 +2,16 @@
 # Estimating ECP from aggregate flows #
 # # # # # # # # # # # # # # # # # # # #
 
-logit_interact_formula <- clc_logit ~ dist_fast +
-  I(dist_fast^2) +                     # sqr term
+# this formula can be modified using any variables present in l@data
+logit_interact_formula <- formula(
+  clc_logit ~                          # the dependent variable (logit(pcycle))
+  dist_fast +                          # linear distance term
   I(dist_fast^0.5) +                   # sqrt term
+  I(dist_fast^2) +                     # sqr term
   I(avslope - 0.003) +                 # avslope term
   I(dist_fast * (avslope - 0.003)) +   # dist/slope 'interact'
-  I(dist_fast^2 * (avslope - 0.003)) + # 'interactsq' term
   I(dist_fast^0.5 * (avslope - 0.003)) # 'interactsqrt' term
+)
 
 # # The components of the above formula (for clarity)
 # l$dist_fastsq <- l$dist_fast^2
@@ -19,8 +22,6 @@ logit_interact_formula <- clc_logit ~ dist_fast +
 # l$interactsqrt <- dist_fastsqrt * ned_avslope
 # # Hardcoded model (verbose)
 # logit_p <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.0062 * dist_fastsq) + (-31.9249 * ned_avslope) + (1.0989 * interact) + (-6.6162 * interactsqrt)
-
-logit_p_local <- 
 
 # mod_logsqr <- glm(clc ~ dist_fast + I(dist_fast^0.5) + avslope, data = flow, weights = All, family = "quasipoisson")
 
