@@ -111,6 +111,8 @@ The selected region is `r region`.
 
 ```{r, include=FALSE}
 # select msoas of interest
+if(proj4string(region_shape) != proj4string(centsa))
+  region_shape <- spTransform(region_shape, proj4string(centsa))
 cents <- centsa[region_shape,]
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 ```
