@@ -2,15 +2,35 @@
 # Estimating ECP from aggregate flows #
 # # # # # # # # # # # # # # # # # # # #
 
-mod_logsqr <- glm(clc ~ dist_fast + I(dist_fast^0.5) + avslope, data = flow, weights = All, family = "quasipoisson")
+logit_interact_formula <- clc_logit ~ dist_fast +
+  I(dist_fast^2) +                     # sqr term
+  I(dist_fast^0.5) +                   # sqrt term
+  I(avslope - 0.003) +                 # avslope term
+  I(dist_fast * (avslope - 0.003)) +   # dist/slope 'interact'
+  I(dist_fast^2 * (avslope - 0.003)) + # 'interactsq' term
+  I(dist_fast^0.5 * (avslope - 0.003)) # 'interactsqrt' term
+
+# # The components of the above formula (for clarity)
+# l$dist_fastsq <- l$dist_fast^2
+# l$dist_fastsqrt <- l$dist_fast^0.5
+# l$ned_avslope <- l$avslope - 0.003
+# l$interact <- l$dist_fast * ned_avslope
+# l$interactsq <- dist_fastsq * ned_avslope
+# l$interactsqrt <- dist_fastsqrt * ned_avslope
+# # Hardcoded model (verbose)
+# logit_p <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.0062 * dist_fastsq) + (-31.9249 * ned_avslope) + (1.0989 * interact) + (-6.6162 * interactsqrt)
+
+logit_p_local <- 
+
+# mod_logsqr <- glm(clc ~ dist_fast + I(dist_fast^0.5) + avslope, data = flow, weights = All, family = "quasipoisson")
 
 # # # # # # # #
 # Diagnostics #
 # # # # # # # #
 
-summary(mod_logsqr) # goodness of fit
- 
-cor(flow$clc, mod_logsqr$fitted.values)
+# summary(mod_logsqr) # goodness of fit
+#  
+# cor(flow$clc, mod_logsqr$fitted.values)
  
 #
 # # Binning variables and validation
