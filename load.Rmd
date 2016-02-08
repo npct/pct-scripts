@@ -57,8 +57,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 500
-mflow_short <- 250
+mflow <- 100
+mflow_short <- 25
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -172,7 +172,6 @@ plot(region_orig, lwd = 5, add = T)
 plot(region_shape, border = "red", add = T, lwd = 2)
 lines(l[l$All > 100,], col = "green")
 ```
-
 
 ```{r, echo=FALSE}
 # nrow(flow) # how many OD pairs in the study area?
@@ -351,10 +350,17 @@ These can be seen in the model script which is available
 
 ```{r, echo=FALSE}
 # Parameter creation for model
-l$clc[l$clc == 0] <- 0.000001 # for logit link to work
-l$Bicycle_logit <- log(l$clc / (1 - l$clc))
+l$clc[l$clc < 0.001] <- 0.001 # for logit link to work
+l$clc_logit <- log(l$clc / (1 - l$clc))
 
-l$slc <- exp(logit_p) / (1 + exp(logit_p))
+source("models.R")
+mod_local <- lm(formula = logit_interact_formula, data = l@data)
+logit_loc <- predict(object = mod_local, data = l@data)
+l$local_slc <- exp(logit_loc) / (1 + exp(logit_loc))
+mod_nat <- mod_local
+mod_nat$coefficients <- c(-3.2941, -0.4659, 1.3430, 0.0062, -31.9249, 1.0989, -6.6162)
+logit_nat <- predict(object = mod_nat, data = l@data)
+l$slc <- exp(logit_nat) / (1 + exp(logit_nat))
 cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
 ```
 
@@ -363,7 +369,6 @@ cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
 ```{r, echo=FALSE}
 rcycle <- round(100 * sum(l$Bicycle) / sum(l$All), 1)
 rcarusers <- round (100 * sum(l$Car_driver+l$Car_passenger) / sum(l$All), 1)
-
 natcyc <- sum(luk$Bicycle) / sum(luk$All)
 ```
 
@@ -402,17 +407,14 @@ if(has_private_data){
   l$gendereq_sic <- NA
 }
 # Dutch scenario - coefficients calculated from Dutch NTS by A. Goodman
-mod_dutch <- mod_nat
-mod_dutch$coefficients[1] <- -0.3253
-mod_dutch$coefficients[2] <- -0.3543
-mod_dutch$coefficients[3] <- 0.7750
-l$dutch_slc <- l$All * exp(predict(mod_dutch, l@data))
+logit_dutch <- logit_nat + 2.4783 -0.0706 * l$dist_fast
+l$dutch_slc <- exp(logit_dutch) / (1 + exp(logit_dutch)) * l$All
 l$dutch_sic <- l$dutch_slc - l$Bicycle
 
-mod_ebike <- mod_dutch
-mod_ebike$coefficients[2] <- -0.3
+# Ebike scenario
+logit_ebike <- logit_dutch + 0.0286 + 0.0902 * l$dist_fast - 0.0014 * l$dist_fast^2
 
-l$ebike_slc <- l$All * exp(predict(mod_ebike, l@data))
+l$ebike_slc <- exp(logit_ebike) / (1 + exp(logit_ebike)) * l$All
 l$ebike_sic <- l$ebike_slc - l$Bicycle
 
 dfscen <- dplyr::select(l@data, contains("slc"), All, olc = Bicycle, dist_fast)
