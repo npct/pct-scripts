@@ -351,16 +351,8 @@ These can be seen in the model script which is available
 
 ```{r, echo=FALSE}
 # Parameter creation for model
-dist_fastsq <- l$dist_fast^2
-dist_fastsqrt <- l$dist_fast^0.5
-ned_avslope <- l$avslope - 0.003
-interact <- l$dist_fast * ned_avslope
-interactsq <- dist_fastsq * ned_avslope
-interactsqrt <- dist_fastsqrt * ned_avslope
-
-logit_p <- -3.2941 + (-0.4659 * l$dist_fast) + (1.3430 * dist_fastsqrt) + (0.0062 * dist_fastsq) + (-31.9249 * ned_avslope) + (1.0989 * interact) + (-6.6162 * interactsqrt)
-
-# + (2.4783 * dutch) + (-0.0706 * dutch*dist_fast) + (0.0286 * ebike) + (0.0902 * ebike*dist_fast) + (-0.0014 * ebike*dist_fastsq)
+l$clc[l$clc == 0] <- 0.000001 # for logit link to work
+l$Bicycle_logit <- log(l$clc / (1 - l$clc))
 
 l$slc <- exp(logit_p) / (1 + exp(logit_p))
 cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
@@ -651,7 +643,10 @@ if(!"gendereq_slc" %in% scens)
 
 # Remove/change private/superfluous variables
 l$Male <- l$Female <- l$From_home <- l$calories <-
-  l$co2_saving_q <-l$calories_q <- l$busyness_q <- NULL
+  l$co2_saving_q <-l$calories_q <- l$busyness_q <- 
+  # data used in the model - superflous for pct-shiny
+  l$dist_fastsq <- l$dist_fastsqrt <- l$ned_avslope <- 
+  l$interact <- l$interactsq <- l$interactsqrt <- NULL
 
 # Transfer cents data to zones
 c_in_z <- names(cents) == "avslope"
