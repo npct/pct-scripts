@@ -17,9 +17,11 @@ la_all <- regions$Region <- as.character(regions$Region)
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
-  geo_level <- "custom"
-  isolated <- TRUE
+  geo_level <- "regional"
+  isolated <- FALSE
   region <- la_all[k]
+  if(geo_level == "regional")
+    file.remove(file.path("..", "pct-data", region, "isolated"))
   message(paste0("Building for ", region))
   knitr::knit2html(quiet = T,
     input = "load.Rmd",
