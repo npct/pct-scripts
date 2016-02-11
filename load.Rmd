@@ -57,8 +57,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 100
-mflow_short <- 25
+mflow <- 20
+mflow_short <- 1
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
