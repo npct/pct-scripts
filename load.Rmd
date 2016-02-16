@@ -40,12 +40,7 @@ pct_privatedata <- file.path("..", "pct-privatedata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
 if(!file.exists(pct_data)) stop(paste("The pct-data repository has cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository has cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
-if(!file.exists(pct_privatedata)){
-  message("The pct_privatedata repository cannot be found")
-  scens <- c("govtarget_slc", "dutch_slc", "ebike_slc")
-}else{
-  scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
-}
+scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
 if(Sys.getenv("CYCLESTREET") == "")
   warning("No CycleStreet API key. See ?cyclestreet_pat")
 ```
@@ -56,14 +51,17 @@ region # name of the region
 region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
-# Minimum flow between od pairs, subsetting lines. High means fewer lines
+# Minimum flow between od pairs to show. High means fewer lines
 mflow <- 20
 mflow_short <- 1
+
+# Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
-# save the initial parameters to reproduce results
+
+# Save the initial parameters to reproduce results
 save(region, mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist, file = file.path(region_path, "params.RData"))
 ```
 
@@ -72,17 +70,19 @@ save(region, mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist, 
 The input zones area are summarised in this section.
 
 ```{r plotzones, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
-if(!exists("ukmsoas")) ukmsoas <- shapefile(file.path(pct_bigdata, "msoas.shp"))
-# Load population-weighted centroids
-if(!exists("centsa"))
+if(!exists("ukmsoas")) # MSOA zones
+  ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
+if(!exists("centsa")) # Population-weighted centroids
   centsa <- readOGR(file.path(pct_bigdata, "cents.geojson"), "OGRGeoJSON")
 centsa$geo_code <- as.character(centsa$geo_code)
-las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
-las_cents <- SpatialPoints(coordinates(las))
+if(!exists("las"))
+  las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
+if(!exists("las_cents"))
+  las_cents <- SpatialPoints(coordinates(las))
 
 # Load local authorities and districts
 if(!exists("geo_level")) geo_level <- "regions"
-if(geo_level == "cua"){
+if(geo_level == "regions"){
   regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
 } else if(geo_level == "custom"){
   # if you use a custom geometry, regions should already be saved from buildmaster.R
@@ -102,7 +102,7 @@ if(buff_dist > 0){
   region_shape <- spTransform(region_shape, proj4string(centsa))
 }
 
-las_in_region <- rgeos::gIntersects(las_cents, region_shape, byid = T)
+las_in_region <- gIntersects(las_cents, region_shape, byid = T)
 las_in_region <- las_in_region[1,]
 las_in_region <- las[las_in_region,]
 ```
