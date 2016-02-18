@@ -52,8 +52,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs to show. High means fewer lines
-mflow <- 20
-mflow_short <- 1
+mflow <- 200
+mflow_short <- 200
 
 # Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -132,14 +132,14 @@ mzarea <- round(median(gArea(zones_wgs, byid = T) / 10000), 1) # average area of
 
 ```{r, echo=FALSE, results='hide'}
 # load flow dataset, depending on availability
-if(!exists("flow_nat")){
-if(dir.exists(pct_privatedata)){
-  flow_nat <- readRDS(file.path(pct_privatedata, "flowsex-merged.Rds"))
-  } else{
-  flow_nat <- readRDS(file.path(pct_bigdata, "flow.Rds"))
-  } # load open data
-}
+if(!exists("flow_nat"))
+  flow_nat <- readRDS(file.path(pct_bigdata, "pct_lines_oneway_shapes.Rds"))
+summary(flow_nat$dutch_slc / flow_nat$All)
 
+if(!exists("rf_nat"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
+if(!exists("rq_nat"))
+  rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
 # Subset by zones in the study area
 o <- flow_nat$Area.of.residence %in% cents$geo_code
 d <- flow_nat$Area.of.workplace %in% cents$geo_code
@@ -150,11 +150,11 @@ n_commutes_region <- sum(flow$All)
 
 ```{r distance-dist, echo=FALSE, fig.cap="The study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The black straight green represent the most intensive commuting OD pairs.", echo=FALSE, message=FALSE, warning=FALSE}
 # Calculate line lengths (in km)
-coord_from <- coordinates(cents[match(flow$Area.of.residence, cents$geo_code),])
-coord_to <- coordinates(cents[match(flow$Area.of.workplace, cents$geo_code),])
+# coord_from <- coordinates(cents[match(flow$Area.of.residence, cents$geo_code),])
+# coord_to <- coordinates(cents[match(flow$Area.of.workplace, cents$geo_code),])
 # Euclidean distance (km)
-flow$dist <- geosphere::distHaversine(coord_from, coord_to) / 1000
-flow <- flow[flow$dist > 0,] # remove 0 dist flows
+# flow$dist <- geosphere::distHaversine(coord_from, coord_to) / 1000
+# flow <- flow[flow$dist > 0,] # remove 0 dist flows - only if < 0 exit
 
 # Subset lines
 # subset OD pairs by n. people using it
@@ -163,7 +163,8 @@ sel_short <- flow$dist < max_all_dist & flow$All > mflow_short
 sel <- sel_long | sel_short
 flow <- flow[sel, ]
 # summary(flow$dist)
-l <- od2line(flow = flow, zones = cents)
+# l <- od2line(flow = flow, zones = cents)
+l <- flow
 
 plot(zones, col = "lightgrey")
 plot(regions, add = T)
@@ -202,16 +203,6 @@ tm_shape(zones) +
   tm_fill("avslope", n = 3, palette = "Oranges")
 ```
 
-```{r, echo=FALSE}
-# # Hilliness of OD pairs - calculated the old way (depreciated)
-# (calculated as the average gradient of the zone
-# of the flow's origin and destination, in degrees)
-# is
-# `r round(mean(flow$avslope * flow$All / mean(flow$All), na.rm = T), 2)`.
-# The UK
-# average is xx degrees
-```
-
 ## Lines allocated to the road network
 
 We use CycleStreets.net to estimate optimal routes.
@@ -230,34 +221,15 @@ An illustration of these routes is presented below.
 # Warning: time-consuming!  #
 # Needs CycleStreet.net API #
 # # # # # # # # # # # # # # #
-rf <- line2route(l, silent = TRUE)
-rq <- line2route(l, plan = "quietest", silent = T)
-rf$length <- rf$length / 1000 # set length correctly
-rq$length <- rq$length / 1000
-
-# debug lines which failed
-if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
-  # which paths succeeded
-  path_ok <- row.names(l) %in% row.names(rf) &
-                   row.names(l) %in% row.names(rq)
-  # summary(path_ok)
-  l <- l[path_ok,]
-  path_ok <- row.names(rf) %in% row.names(l)
-  rf <- rf[path_ok,]
-  path_ok <- row.names(rq) %in% row.names(l)
-  rq <- rq[path_ok,]
-}
-# saveRDS(rf, file.path(pct_data, region, "rf.Rds")) # save the routes
-# saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
-
-# add line id
-l$id <- paste(l@data$Area.of.residence, l@data$Area.of.workplace)
+l$id <- gsub(" ", "", l$id)
+rf <- rf_nat[rf_nat$id %in% l$id,]
+rq <- rq_nat[rf_nat$id %in% l$id,]
 ```
 
 ```{r plot-rlines, warning=FALSE, echo = FALSE, fig.cap="Straight and route-lines allocated to the travel network"}
-plot(l)
-lines(rf, col = "red")
-lines(rq, col = "green")
+plot(l[seq(1, nrow(l), length.out = 100),])
+lines(rf[seq(1, nrow(l), length.out = 100),], col = "red")
+lines(rq[seq(1, nrow(l), length.out = 100),], col = "green")
 ```
 
 ```{r check-line, warning=FALSE, echo = FALSE, fig.cap="Check the final line"}
@@ -265,8 +237,6 @@ plot(l[nrow(l),])
 lines(rf[nrow(l),], col = "red")
 lines(rq[nrow(l),], col = "green")
 ```
-
-Of the lines allocated to the route network, `r sum(!path_ok)` failed.
 
 ```{r, echo=FALSE}
 # Allocate route characteristics to OD pairs
@@ -332,13 +302,13 @@ further reduces the number of OD pairs from `r sum(sel)`
 to `r nrow(l)`.
 
 ```{r, echo=FALSE}
-# # # # # # # # # # # # # #
-# Estimates slc from olc  #
-# # # # # # # # # # # # # #
-
-l$clc <- l$Bicycle / l$All
-l$clcar <- (l$Car_driver + l$Car_passenger) / l$All
-l$clfoot <- l$Foot / l$All   #% walk population
+# # # # # # # # # # # # # # #
+# # Estimates slc from olc  #
+# # # # # # # # # # # # # # #
+# 
+# l$clc <- l$Bicycle / l$All
+# l$clcar <- (l$Car_driver + l$Car_passenger) / l$All
+# l$clfoot <- l$Foot / l$All   #% walk population
 ```
 
 ## The flow model
@@ -349,26 +319,27 @@ These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
 ```{r, echo=FALSE}
-# Parameter creation for model
-l$clc[l$clc < 0.001] <- 0.001 # for logit link to work
-l$clc_logit <- log(l$clc / (1 - l$clc))
-
-source("models.R")
-mod_local <- lm(formula = logit_interact_formula, data = l@data)
-logit_loc <- predict(object = mod_local, data = l@data)
-l$local_slc <- exp(logit_loc) / (1 + exp(logit_loc))
-mod_nat <- mod_local
-mod_nat$coefficients <- c(-3.2941, -0.4659, 1.3430, 0.0062, -31.9249, 1.0989, -6.6162)
-logit_nat <- predict(object = mod_nat, data = l@data)
-l$slc <- exp(logit_nat) / (1 + exp(logit_nat))
-cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
+# # Parameter creation for model
+# l$clc[l$clc < 0.001] <- 0.001 # for logit link to work
+# l$clc_logit <- log(l$clc / (1 - l$clc))
+# 
+# source("models.R")
+# mod_local <- lm(formula = logit_interact_formula, data = l@data)
+# logit_loc <- predict(object = mod_local, data = l@data)
+# l$local_slc <- exp(logit_loc) / (1 + exp(logit_loc))
+# mod_nat <- mod_local
+# mod_nat$coefficients <- c(-3.2941, -0.4659, 1.3430, 0.0062, -31.9249, 1.0989, -6.6162)
+# logit_nat <- predict(object = mod_nat, data = l@data)
+# l$slc <- exp(logit_nat) / (1 + exp(logit_nat))
+# cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
 ```
 
 ## Cycling in the study area
 
 ```{r, echo=FALSE}
 rcycle <- round(100 * sum(l$Bicycle) / sum(l$All), 1)
-rcarusers <- round (100 * sum(l$Car_driver+l$Car_passenger) / sum(l$All), 1)
+# rcarusers <- round (100 * sum(l$Car_driver+l$Car_passenger) / sum(l$All), 1)
+rcarusers <- NA # when we don't have car drivers
 natcyc <- sum(luk$Bicycle) / sum(luk$All)
 ```
 
@@ -380,46 +351,46 @@ of 5.0%.
 ## Scenarios
 
 ```{r, include=FALSE}
-l$base_slc <- l$slc * l$All
-
-# # # # # # # # # # # # #
-# Additional scenarios  #
-# # # # # # # # # # # # #
-
-# Replace with source("models/aggregate-model-dutch|gendereq|ebike.R"))
-l$govtarget_slc <- l$Bicycle + l$base_slc # may be more that 1
-l$govtarget_sic <- l$govtarget_slc - l$Bicycle
-
-# gendereq scenario
-has_private_data <- file.exists(pct_privatedata)
-if(has_private_data){
-  p_trips_male <- mean(las_in_region$clc_m) # proportion of bicycle trips by males
-  
-  clc_m <- l$Bicycle * p_trips_male
-  pmale_c <- clc_m / l$Male
-  slc_gendereq_f <- l$Female * pmale_c
-  slc_gendereq <- clc_m + slc_gendereq_f
-
-  l$gendereq_slc <- slc_gendereq
-  l$gendereq_sic <- l$gendereq_slc - l$Bicycle
-}else{
-  l$gendereq_slc <- NA
-  l$gendereq_sic <- NA
-}
-# Dutch scenario - coefficients calculated from Dutch NTS by A. Goodman
-logit_dutch <- logit_nat + 2.4783 -0.0706 * l$dist_fast
-l$dutch_slc <- exp(logit_dutch) / (1 + exp(logit_dutch)) * l$All
-l$dutch_sic <- l$dutch_slc - l$Bicycle
-
-# Ebike scenario
-logit_ebike <- logit_dutch + 0.0286 + 0.0902 * l$dist_fast - 0.0014 * l$dist_fast^2
-
-l$ebike_slc <- exp(logit_ebike) / (1 + exp(logit_ebike)) * l$All
-l$ebike_sic <- l$ebike_slc - l$Bicycle
+# l$base_slc <- l$slc * l$All
+# 
+# # # # # # # # # # # # # #
+# # Additional scenarios  #
+# # # # # # # # # # # # # #
+# 
+# # Replace with source("models/aggregate-model-dutch|gendereq|ebike.R"))
+# l$govtarget_slc <- l$Bicycle + l$base_slc # may be more that 1
+# l$govtarget_sic <- l$govtarget_slc - l$Bicycle
+# 
+# # gendereq scenario
+# has_private_data <- file.exists(pct_privatedata)
+# if(has_private_data){
+#   p_trips_male <- mean(las_in_region$clc_m) # proportion of bicycle trips by males
+#   
+#   clc_m <- l$Bicycle * p_trips_male
+#   pmale_c <- clc_m / l$Male
+#   slc_gendereq_f <- l$Female * pmale_c
+#   slc_gendereq <- clc_m + slc_gendereq_f
+# 
+#   l$gendereq_slc <- slc_gendereq
+#   l$gendereq_sic <- l$gendereq_slc - l$Bicycle
+# }else{
+#   l$gendereq_slc <- NA
+#   l$gendereq_sic <- NA
+# }
+# # Dutch scenario - coefficients calculated from Dutch NTS by A. Goodman
+# logit_dutch <- logit_nat + 2.4783 -0.0706 * l$dist_fast
+# l$dutch_slc <- exp(logit_dutch) / (1 + exp(logit_dutch)) * l$All
+# l$dutch_sic <- l$dutch_slc - l$Bicycle
+# 
+# # Ebike scenario
+# logit_ebike <- logit_dutch + 0.0286 + 0.0902 * l$dist_fast - 0.0014 * l$dist_fast^2
+# 
+# l$ebike_slc <- exp(logit_ebike) / (1 + exp(logit_ebike)) * l$All
+# l$ebike_sic <- l$ebike_slc - l$Bicycle
 
 dfscen <- dplyr::select(l@data, contains("slc"), All, olc = Bicycle, dist_fast)
-dfscen <- dfscen[-which(names(dfscen) == "slc")]
-dfscen <- dfscen[-which(names(dfscen) == "base_slc")]
+# dfscen <- dfscen[-which(names(dfscen) == "slc")]
+# dfscen <- dfscen[-which(names(dfscen) == "base_slc")]
 # head(dfscen)
 
 dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
@@ -461,82 +432,6 @@ The table below illustrates the same information by distance band.
 kable(dfspread, format = "html", digits = 1)
 ```
 
-
-```{r, include=FALSE}
-# # # # # # # # # # # # # # # # # #
-# Extract area-level commute data #
-# # # # # # # # # # # # # # # # # #
-
-for(i in 1:nrow(cents)){
-
-  # all OD pairs originating from centroid i
-  j <- which(l$Area.of.residence == cents$geo_code[i])
-
-  cents$Bicycle[i] <- sum(l$Bicycle[j])
-  cents$base_slc[i] <- sum(l$base_slc[j])
-  cents$base_sic[i] <- sum(l$base_sic[j])
-  
-  # car users % added to centroids
-  cents$All[i] <- sum(l$All[j])
-  cents$Car[i] <- sum(l$Car_driver[j])
-  cents$base_olcarusers[i] <- cents$Car[i] / cents$All[i]
-
-  # values for scenarios
-  cents$govtarget_slc[i] <- sum(l$govtarget_slc[j])
-  cents$govtarget_sic[i] <- sum(l$govtarget_sic[j])
-
-  cents$gendereq_slc[i] <- sum(l$gendereq_slc[j])
-  cents$gendereq_sic[i] <- sum(l$gendereq_sic[j])
-
-  cents$dutch_slc[i] <- sum(l$dutch_slc[j])
-  cents$dutch_sic[i] <- sum(l$dutch_sic[j])
-
-  cents$ebike_slc[i] <- sum(l$ebike_slc[j])
-  cents$ebike_sic[i] <- sum(l$ebike_sic[j])
-
-  cents$av_distance[i] <- sum(l$dist[j] * l$All[j])  / sum(l$All[j])
-  cents$cirquity[i] <- sum(l$cirquity[j] * l$All[j], na.rm = T )  / sum(l$All[j])
-  cents$distq_f[i] <- sum(l$distq_f[j] * l$All[j], na.rm = T )  / sum(l$All[j])
-}
-
-l$Rail <- l$Light_rail + l$Train
-l$Other <- l$Other + l$Taxi + l$Motorbike
-# Remove aggregated categories
-l$Taxi <- l$Light_rail <- l$Train <- l$Motorbike <- NULL 
-
-addidsn <- c("All", "From_home", "Bus",
-"Rail", "Taxi", "Motorbike", "Car_driver", "Car_passenger", "Bicycle",
-"Foot", "Other", "base_slc",
-"base_sic", "gendereq_slc", "gendereq_sic", "dutch_slc", "dutch_sic",
-"ebike_slc", "ebike_sic", "govtarget_slc", "govtarget_sic")
-addids <- which(names(l) %in% addidsn)
-# addids <- c(3:14, 23:31)
-# summary(l[addids])
-
-
-# Aggregate bi-directional OD pairs
-
-# Subset by zone bounding box
-# l <- l[as.logical(gContains(zone, l, byid = T)),]
-# nrow(l)
-
-# 4: by aggregating 2 way OD pairs
-l <- onewayid(l, attrib = addids)
-
-# remove origin and destinations now they are redundant
-l$Area.of.residence <- l$Area.of.workplace <- NULL
-l$clc <- l$Bicycle / l$All
-l$slc <- l$base_slc / l$All
-
-nrow(l)
-idsel <- row.names(l)
-rf <- rf[row.names(rf) %in% idsel,]
-rq <- rq[row.names(rq) %in% idsel,]
-
-# Sanity test
-head(l@data[1:5])
-```
-
 ```{r, echo=FALSE, results='hide', fig.cap="Illustration of OD pairs on travel network"}
 plot(region_shape)
 plot(zones, add = T)
@@ -544,59 +439,6 @@ points(cents, col = "red")
 lines(l, col = "black")
 lines(rq, col = "green")
 lines(rf, col = "blue")
-```
-
-## Flow model results
-
-To estimate the potential rate of cycling under different scenarios
-regression models operating at the flow level are used.
-These can be seen in the model script which is available
-[online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
-
-```{r, echo=FALSE, fig.cap="National vs local cycling characteristics with hilliness, captured in the model results"}
-justdist1 <- data.frame(
-  dist_fast = 1:20,
-  avslope = 1,
-  type = "Flat")
-
-justdist2 <- justdist1
-justdist2$avslope <- 1.5
-justdist2$type <- "Hilly"
-
-justdist <- rbind(justdist1, justdist2) # for prediction
-justdist$model <- "National"
-
-justdist5 <- justdist6 <- justdist7 <- justdist # replicate
-justdist5$model <- "Local"
-justdist6$model <- "Dutch"
-justdist7$model <- "Ebike"
-
-justdist$npred <- exp(predict(mod_nat, justdist))
-justdist5$npred <- NA # todo: fix this
-justdist6$npred <- exp(predict(mod_dutch, justdist))
-justdist7$npred <- exp(predict(mod_ebike, justdist))
-
-justdist <- rbind(justdist, justdist5, justdist6, justdist7)
-
-ggplot(justdist) +
-  geom_line(aes(dist_fast, npred, color = model, linetype = type),
-    size = 1.5) +
-  xlab("Route distance (km)") + ylab("Expected proportion cycling") +
-  theme_bw()
-
-dfcos <- round(rbind(coef(mod_nat)), 3)
-dfcos <- cbind(Model = c("National"), dfcos)
-```
-
-The correlation between fitted and observed cycling in the model is
-`r round(cormod, 2)`, compared with 0.39 nationally.
-
-The values for the coefficients are presented in the table below.
-
-```{r, echo=FALSE}
-dfcos <- data.frame(dfcos)
-names(dfcos) <- c("Model", "Alpha", "Distance", "Dist^0.5", "Hills", "Dist/Hills")
-kable(dfcos, digits = 3)
 ```
 
 ## Network analysis
@@ -610,7 +452,7 @@ The value of each segment in the network corresponds to the total number of cycl
 
 rft <- rf
 # Stop rnet lines going to centroid (optional)
-rft <- toptail(rf, toptail_dist = buff_geo_dist)
+rft <- toptailgs(rf, toptail_dist = buff_geo_dist)
 if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
@@ -649,6 +491,9 @@ l$Male <- l$Female <- l$From_home <- l$calories <-
   # data used in the model - superflous for pct-shiny
   l$dist_fastsq <- l$dist_fastsqrt <- l$ned_avslope <- 
   l$interact <- l$interactsq <- l$interactsqrt <- NULL
+
+# Add needed vars
+l$clc <- l$clcar <- NA
 
 # Transfer cents data to zones
 c_in_z <- names(cents) == "avslope"
