@@ -81,18 +81,19 @@ if(!exists("las_cents"))
   las_cents <- SpatialPoints(coordinates(las))
 
 # Load local authorities and districts
-if(!exists("geo_level")) geo_level <- "regions"
-if(geo_level == "regions"){
-  regions <- readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
-} else if(geo_level == "custom"){
-  # if you use a custom geometry, regions should already be saved from buildmaster.R
-} else{
-    regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
-  regions$Region <- regions$CTYUA12NM
-}
+if(!exists("geo_level")) geo_level <- "regional"
+# if you use a custom geometry, regions should already be saved from buildmaster.R
 
-# create region shape (and add buffer in m)
-region_shape <- region_orig <-
+if(!exists("regions")){
+  if (geo_level == "regional")
+    regions <-
+  readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
+  else {
+    regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
+    regions$Region <- regions$CTYUA12NM
+  }
+}
+region_shape <- region_orig <- # create region shape (and add buffer in m)
   regions[grep(pattern = region, x = regions$Region, ignore.case = T),]
 
 # Only transform if needed
@@ -516,7 +517,6 @@ saveRDS(l, file.path(pct_data, region, "l.Rds"))
 saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
 saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
-saveRDS(mod_logsqr, file.path(pct_data, region, "model.Rds"))
 
 # # Save the script that loaded the lines into the data directory
 file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
