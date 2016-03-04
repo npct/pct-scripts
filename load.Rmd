@@ -53,7 +53,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs to show. High means fewer lines
 mflow <- 500
-mflow_short <- 500
+mflow_short <- 1000
 
 # Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -192,7 +192,7 @@ Adding those (overlapping) selection criteria resulted in
 ## Hilliness of OD pairs
 
 The average hilliness of zones in the study area is
-`r round(100 * mean(rf$av_incline), 1)`
+`r round(100 * mean(zones$avslope), 1)`
 percent.
 
 ```{r, echo = FALSE}
@@ -209,19 +209,7 @@ tm_shape(zones) +
 We use CycleStreets.net to estimate optimal routes.
 An illustration of these routes is presented below.
 
-```{r flow-vars, echo=FALSE, message=FALSE}
-# # # # # # # # # # # # # # # # # #
-# Calculate flow-level variables: #
-# distances and olc for ag. model #
-# # # # # # # # # # # # # # # # # #
-
-# Calculate distances (eventually use route distance)
-
-# # # # # # # # # # # # # # #
-# Allocate OD pairs2network #
-# Warning: time-consuming!  #
-# Needs CycleStreet.net API #
-# # # # # # # # # # # # # # #
+```{r flow-vars}
 l$id <- gsub(" ", "", l$id)
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rf_nat$id %in% l$id,]
@@ -319,22 +307,6 @@ regression models operating at the flow level are used.
 These can be seen in the model script which is available
 [online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
 
-```{r, echo=FALSE}
-# # Parameter creation for model
-# l$clc[l$clc < 0.001] <- 0.001 # for logit link to work
-# l$clc_logit <- log(l$clc / (1 - l$clc))
-# 
-# source("models.R")
-# mod_local <- lm(formula = logit_interact_formula, data = l@data)
-# logit_loc <- predict(object = mod_local, data = l@data)
-# l$local_slc <- exp(logit_loc) / (1 + exp(logit_loc))
-# mod_nat <- mod_local
-# mod_nat$coefficients <- c(-3.2941, -0.4659, 1.3430, 0.0062, -31.9249, 1.0989, -6.6162)
-# logit_nat <- predict(object = mod_nat, data = l@data)
-# l$slc <- exp(logit_nat) / (1 + exp(logit_nat))
-# cormod <- cor(l$clc, l$slc) # crude indication of goodness-of-fit
-```
-
 ## Cycling in the study area
 
 ```{r, echo=FALSE}
@@ -352,50 +324,8 @@ of 5.0%.
 ## Scenarios
 
 ```{r, include=FALSE}
-# l$base_slc <- l$slc * l$All
-# 
-# # # # # # # # # # # # # #
-# # Additional scenarios  #
-# # # # # # # # # # # # # #
-# 
-# # Replace with source("models/aggregate-model-dutch|gendereq|ebike.R"))
-# l$govtarget_slc <- l$Bicycle + l$base_slc # may be more that 1
-# l$govtarget_sic <- l$govtarget_slc - l$Bicycle
-# 
-# # gendereq scenario
-# has_private_data <- file.exists(pct_privatedata)
-# if(has_private_data){
-#   p_trips_male <- mean(las_in_region$clc_m) # proportion of bicycle trips by males
-#   
-#   clc_m <- l$Bicycle * p_trips_male
-#   pmale_c <- clc_m / l$Male
-#   slc_gendereq_f <- l$Female * pmale_c
-#   slc_gendereq <- clc_m + slc_gendereq_f
-# 
-#   l$gendereq_slc <- slc_gendereq
-#   l$gendereq_sic <- l$gendereq_slc - l$Bicycle
-# }else{
-#   l$gendereq_slc <- NA
-#   l$gendereq_sic <- NA
-# }
-# # Dutch scenario - coefficients calculated from Dutch NTS by A. Goodman
-# logit_dutch <- logit_nat + 2.4783 -0.0706 * l$dist_fast
-# l$dutch_slc <- exp(logit_dutch) / (1 + exp(logit_dutch)) * l$All
-# l$dutch_sic <- l$dutch_slc - l$Bicycle
-# 
-# # Ebike scenario
-# logit_ebike <- logit_dutch + 0.0286 + 0.0902 * l$dist_fast - 0.0014 * l$dist_fast^2
-# 
-# l$ebike_slc <- exp(logit_ebike) / (1 + exp(logit_ebike)) * l$All
-# l$ebike_sic <- l$ebike_slc - l$Bicycle
-
 dfscen <- dplyr::select(l@data, contains("slc"), All, olc = Bicycle, dist_fast)
-# dfscen <- dfscen[-which(names(dfscen) == "slc")]
-# dfscen <- dfscen[-which(names(dfscen) == "base_slc")]
-# head(dfscen)
-
 dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
-# head(dfsp)
 dfsp$scenario <- factor(dfsp$scenario)
  summary(dfsp$scenario)
 dfsp$scenario <-
@@ -448,8 +378,6 @@ Now we aggregate the overlapping routes to create a route network.
 The value of each segment in the network corresponds to the total number of cyclists who we estimate to use the segment.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="The route network, with widths proportional to the current estimated number of commuter cyclists"}
-# Scenario names - may need updating
-# nrow(l) == nrow(rf)
 
 rft <- rf
 # Stop rnet lines going to centroid (optional)
@@ -477,7 +405,6 @@ for(i in scens){
 }
 if(!"gendereq_slc" %in% scens)
   rnet$gendereq_slc <- NA
-# plot(rnet, lwd = rnet$govtarget_slc / mean(rnet$Bicycle))
 ```
 
 
