@@ -30,6 +30,16 @@ for(k in 1:length(la_all)){
 # la_all <- as.character(regions@data$Region[sel])
 la_all <- la_all[-grep("liv|greater-m", la_all)]
 
+if(grepl("^(.?$|[^n].+)", readline("Would you like to commit the pct-data repo (Y/n)?  "), ignore.case = T)){
+  commitMessage <- readline("Please enter the commit message: ")
+  if(commitMessage = ""){ commitMessage <- "Updating the data, auto commiting"}
+  wd <- getwd()
+  setwd(file.path("..", "pct-data"))
+  system2("git", c("add", "-A"))
+  system2("git", c("commit", "-m", paste0("'", commitMessage, "'")))
+  setwd(wd)
+}
+
 # old regional units
 # las <- readOGR(dsn = "pct-bigdata/national/cuas-mf.geojson", layer = "OGRGeoJSON")
 # las_names <- las$CTYUA12NM
