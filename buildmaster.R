@@ -8,7 +8,7 @@ la_all <- regions$Region <- as.character(regions$Region)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
-la_all <- c("kent") # just one region
+# la_all <- c("london") # just one region
 # la_all <- la_all[2:3]
 
 # # For custom regions:
