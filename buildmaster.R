@@ -8,7 +8,7 @@ la_all <- regions$Region <- as.character(regions$Region)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
-la_all <- c("kent") # just one region
+# la_all <- c("london") # just one region
 # la_all <- la_all[2:3]
 
 # # For custom regions:
@@ -29,6 +29,13 @@ for(k in 1:length(la_all)){
     output = file.path("../pct-data/", region, "/model-output.html"),
     envir = globalenv(), force_v1 = TRUE
   )
+  # Re read the model output file
+  moutput <- readLines(file.path("../pct-data/", region, "/model-output.html"))
+  # Remove all style and javascript tags
+  moutput <- moutput[-c(5:200)]
+  # Re-write the model output file
+  write(moutput, file.path("../pct-data/", region, "/model-output.html"))
+  
   message(paste0("Just built ", region))
 }
 
