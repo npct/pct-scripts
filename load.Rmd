@@ -52,8 +52,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs to show. High means fewer lines
-mflow <- 500
-mflow_short <- 1000
+mflow <- 10
+mflow_short <- 10
 
 # Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -210,6 +210,7 @@ We use CycleStreets.net to estimate optimal routes.
 An illustration of these routes is presented below.
 
 ```{r flow-vars}
+rf$id <- paste
 l$id <- gsub(" ", "", l$id)
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rf_nat$id %in% l$id,]
@@ -324,7 +325,7 @@ of 5.0%.
 ## Scenarios
 
 ```{r, include=FALSE}
-dfscen <- dplyr::select(l@data, contains("slc"), All, olc = Bicycle, dist_fast)
+dfscen <- dplyr::select(l@data, contains("slc"), -contains("co2"), All, olc = Bicycle, dist_fast)
 dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
 dfsp$scenario <- factor(dfsp$scenario)
  summary(dfsp$scenario)
@@ -345,19 +346,23 @@ ggplot(dfsp) +
 
 dfsp$dist_band <- cut(dfsp$dist_fast, c(0, 2, 5, 10, 40))
 dfsum <- group_by(dfsp, scenario, dist_band) %>% 
-  summarise(Percent = sum(slc) / sum(l$All))
-dfspread <- spread(dfsum, scenario, Percent)[c(1, 4, 2, 3, 5, 6, 7)]
-dfnames <- as.character(dfspread$dist_band)
-dfnames[5] <- "Total"
-dfspread <- dfspread[2:7]
-dfspread[5,] <- colSums(dfspread)
-dfspread[,2:ncol(dfspread)] <- do.call(cbind, apply(dfspread[2:ncol(dfspread)], 2, function(x) x / dfspread[1]))
-dfspread <- dfspread * 100
-names(dfspread) <- c("|  All", "|  govtarget", "|  gendereq", "|  dutch", "|  ebike", "|  Observed level")
-dfspread <- cbind(data.frame(Distance = dfnames), dfspread)
+  summarise(percent = sum(slc) / sum(l$All))
+all_scen <- group_by(dfsp, scenario) %>% summarise(all = sum(slc))
+dfsum <- data.frame(dfsum)
+dfspread <- spread(dfsum, dist_band, percent)
+names(dfspread)[6] <- "Total"
+dfspread[,6] <- rowSums(dfspread[2:5])
+dfspread[,2:ncol(dfspread)] <- do.call(cbind, apply(dfspread[2:ncol(dfspread)], 2, function(x) x / dfspread[6]))
+dfspread[2:ncol(dfspread)] <- dfspread[2:ncol(dfspread)] * 100
+names(dfspread) <- c("|  Scenario", "|  0 - <2", "|  2 - <5", "|  5 - <10", "|  10+", "|  Total")
+dfspread$`|  Total` <- all_scen$all
+dfspread$`|  Total` <- round(dfspread$`|  Total`)
+dfspread <- dfspread[c(6, 1, 2, 4, 5, 3),]
+levels(dfspread$`|  Scenario`)[6] <- "Recorded level"
+levels(dfspread$`|  Scenario`) <- gsub("_slc", "", levels(dfspread$`|  Scenario`))
 ```
 
-The table below illustrates the same information by distance band.
+The table below illustrates the same information in terms of the % of cyclists in each scenario by each distance band.
 
 ```{r, echo=FALSE}
 kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distances bands.")
