@@ -210,7 +210,6 @@ We use CycleStreets.net to estimate optimal routes.
 An illustration of these routes is presented below.
 
 ```{r flow-vars}
-rf$id <- paste
 l$id <- gsub(" ", "", l$id)
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rf_nat$id %in% l$id,]
