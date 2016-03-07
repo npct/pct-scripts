@@ -210,7 +210,8 @@ We use CycleStreets.net to estimate optimal routes.
 An illustration of these routes is presented below.
 
 ```{r flow-vars}
-l$id <- gsub(" ", "", l$id)
+rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
+rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rf_nat$id %in% l$id,]
 ```
@@ -327,17 +328,16 @@ of 5.0%.
 dfscen <- dplyr::select(l@data, contains("slc"), -contains("co2"), All, olc = Bicycle, dist_fast)
 dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
 dfsp$scenario <- factor(dfsp$scenario)
- summary(dfsp$scenario)
 dfsp$scenario <-
-  factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(5, 4, 1, 2, 3, 6)])
-levels(dfsp$scenario)[6] <- c("olc (2011)")
-levels(dfsp$scenario)[3] <- c("All modes")
+  factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(1, 3, 2, 4, 5, 6)])
+levels(dfsp$scenario)[1] <- c("All modes")
+levels(dfsp$scenario)[6] <- c("Current (2011)")
 scalenum <- sum(l$All)
 ```
 
 ```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
 levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
-dfsp$scenario <- factor(dfsp$scenario, levels(dfsp$scenario)[c(6, 1, 2, 4, 5, 3)])
+levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
 ggplot(dfsp) +
   geom_freqpoly(aes(dist_fast, weight = slc,
     color = scenario), binwidth = 1) +
@@ -349,26 +349,21 @@ ggplot(dfsp) +
 
 dfsp$dist_band <- cut(dfsp$dist_fast, c(0, 2, 5, 10, 40))
 dfsum <- group_by(dfsp, scenario, dist_band) %>% 
-  summarise(percent = sum(slc) / sum(l$All))
+  summarise(percent = sum(slc))
 all_scen <- group_by(dfsp, scenario) %>% summarise(all = sum(slc))
 dfsum <- data.frame(dfsum)
 dfspread <- spread(dfsum, dist_band, percent)
-names(dfspread)[6] <- "Total"
-dfspread[,6] <- rowSums(dfspread[2:5])
-dfspread[,2:ncol(dfspread)] <- do.call(cbind, apply(dfspread[2:ncol(dfspread)], 2, function(x) x / dfspread[6]))
-dfspread[2:ncol(dfspread)] <- dfspread[2:ncol(dfspread)] * 100
-names(dfspread) <- c("|  Scenario", "|  0 - <2", "|  2 - <5", "|  5 - <10", "|  10+", "|  Total")
-dfspread$`|  Total` <- all_scen$all
-dfspread$`|  Total` <- round(dfspread$`|  Total`)
-dfspread <- dfspread[c(6, 1, 2, 4, 5, 3),]
-levels(dfspread$`|  Scenario`)[6] <- "Recorded level"
-levels(dfspread$`|  Scenario`) <- gsub("_slc", "", levels(dfspread$`|  Scenario`))
+dfspread[2:ncol(dfspread)] <- t(apply(dfspread[2:ncol(dfspread)], 1, function(x) x / sum(x)  * 100))
+names(dfspread) <- c("Scenario", "|  0 - 2 km", "|  2 - 5 km", "|  5 - 10 km", "|  10 + km")
+dfspread$`|  N. trips/day` <- round(all_scen$all)
+dfspread$`|  % trips cycled` <- all_scen$all / all_scen$all[1] * 100
+dfspread$`|  % trips < 20km cycled`[1] <- NA
 ```
 
 The table below illustrates the same information in terms of the % of cyclists in each scenario by each distance band.
 
 ```{r, echo=FALSE}
-kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column).")
+kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column).", row.names = F)
 ```
 
 ```{r, echo=FALSE, results='hide', fig.cap="Illustration of OD pairs on travel network"}
@@ -428,8 +423,11 @@ l$Male <- l$Female <- l$From_home <- l$calories <-
   l$dist_fastsq <- l$dist_fastsqrt <- l$ned_avslope <- 
   l$interact <- l$interactsq <- l$interactsqrt <- NULL
 
-# Add needed vars - TODO update
-l$clc <- l$clcar <- NA
+# Make average slope a percentage
+l$avslope <- l$avslope * 100
+
+# Creation of clc current cycling variable (temp)
+l$clc <- l$Bicycle / l$All * 100
 
 # Transfer cents data to zones
 cents@data$avslope <- NULL
