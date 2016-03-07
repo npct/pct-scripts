@@ -330,6 +330,8 @@ dfsp$scenario <- factor(dfsp$scenario)
  summary(dfsp$scenario)
 dfsp$scenario <-
   factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(5, 4, 1, 2, 3, 6)])
+levels(dfsp$scenario)[6] <- c("olc (2011)")
+levels(dfsp$scenario)[3] <- c("All modes")
 scalenum <- sum(l$All)
 ```
 
@@ -339,7 +341,7 @@ dfsp$scenario <- factor(dfsp$scenario, levels(dfsp$scenario)[c(6, 1, 2, 4, 5, 3)
 ggplot(dfsp) +
   geom_freqpoly(aes(dist_fast, weight = slc,
     color = scenario), binwidth = 1) +
-  ylab("Total number of trips") +
+  ylab("Number of trips per day") +
   xlab("Route distance (km)") +
   scale_color_discrete(name = "Mode and\nscenario\n(cycling)") +
   xlim(c(0,12)) +
