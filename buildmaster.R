@@ -33,11 +33,13 @@ la_all <- la_all[-grep("liv|greater-m", la_all)]
 if(grepl("^(.?$|[^n].+)", readline("Would you like to commit the pct-data repo (Y/n)?  "), ignore.case = T)){
   commitMessage <- readline("Please enter the commit message: ")
   if(commitMessage = ""){ commitMessage <- "Updating the data, auto commiting"}
-  wd <- getwd()
-  setwd(file.path("..", "pct-data"))
-  system2("git", c("add", "-A"))
-  system2("git", c("commit", "-m", paste0("'", commitMessage, "'")))
-  setwd(wd)
+  gitDir <- file.path("..", "pct-data", ".git")
+  system2("git", c("--git-dir", gitDir, "--work-tree", gitDir,
+                   "add", "-A"))
+  system2("git", c("--git-dir", gitDir, "--work-tree", gitDir,
+                   "commit", "-m", paste0("'", commitMessage, "'")))
+  system2("git", c("--git-dir", gitDir, "--work-tree", gitDir,
+                   "rev-parse", "--short", "HEAD", ">|", file.path("..", "pct-shiny", "data_sha")), wait=T)
 }
 
 # old regional units
