@@ -9,8 +9,8 @@ source("set-up.R")
 flow <- readRDS("../pct-bigdata/flow.Rds")
 
 # Minimum flow between od pairs, subsetting lines. High means fewer lines
-mflow <- 10
-mflow_short <- 10
+mflow <- 0
+mflow_short <- 0
 mdist <- 30 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km euclidean) below which mflow_short lines are selected
 
@@ -41,8 +41,10 @@ flow$dist <- geosphere::distHaversine(coord_from, coord_to) / 1000
 # Subset lines
 dsel <- flow$dist < mdist # all lines less than the upper threshold distance to remove
 dsel_short <- flow$dist < max_all_dist # all lines less than the lower threshold distance
-sel_number <- flow$All > mflow # subset OD pairs by n. people using it
-sel <- (dsel & sel_number) | (dsel_short & flow$All > mflow_short)
+# sel_number <- flow$All > mflow # subset OD pairs by n. people using it
+sel_number <- flow$All <= 10 # subset OD pairs by n. people using it
+# sel <- (dsel & sel_number) | (dsel_short & flow$All > mflow_short)
+sel <- (dsel & sel_number) 
 sel <- sel & flow$dist > 0
 
 sum(sel)
@@ -58,15 +60,15 @@ plot(l[sample(nrow(l), 1000),])
 # Warning: time-consuming!  #
 # Needs CycleStreet.net API #
 # # # # # # # # # # # # # # #
-saveRDS(l, "../pct-bigdata/ukflow-30-all.Rds")
+# saveRDS(l, "../pct-bigdata/ukflow-30-all.Rds")
 
 rf <- line2route(l, silent = TRUE, n_print = 100)
-rq <- line2route(l, plan = "quietest", silent = T, n_print = 100)
 rf$length <- rf$length / 1000 # set length correctly
-rq$length <- rq$length / 1000
+saveRDS(rf, "../pct-bigdata/rf_less10.Rds")
 
-saveRDS(rf, "../pct-bigdata/rf.Rds")
-saveRDS(rq, "../pct-bigdata/rq.Rds")
+rq <- line2route(l, plan = "quietest", silent = T, n_print = 100)
+rq$length <- rq$length / 1000
+saveRDS(rq, "../pct-bigdata/rq_less10.Rds")
 
 # debug lines which failed
 if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
@@ -80,6 +82,11 @@ if(!(nrow(l) == nrow(rf) & nrow(l) == nrow(rq))){
   path_ok <- row.names(rq) %in% row.names(l)
   rq <- rq[path_ok,]
 }
+
+plot(l[nrow(l),])
+plot(rf[nrow(l),], add = T)
+plot(rq[nrow(l),], add = T)
+
 
 l$dist_fast <- rf$length
 l$dist_quiet <- rq$length
@@ -96,10 +103,8 @@ l$co2_saving_q <- rq$co2_saving
 l$calories_q <- rq$calories
 l$busyness_q <- rq$busyness
 
-end_time <- Sys.time()
-
-end_time - start_time
-
-saveRDS(l@data, "../pct-bigdata/l50-20-30-7.Rds")
+# l@data$dist_fast <- l@data$dist_fast * 1000
+# l@data$dist_quiet <- l@data$dist_quiet * 1000
 library(readr)
-write_csv(l@data, "../pct-bigdata/l50-20-30-7.csv")
+write_csv(l@data, "C:/Users/georl/Dropbox/PCT/l_less10.csv")
+saveRDS(l, "../pct-bigdata/l_less10.Rds")
