@@ -33,7 +33,7 @@ The preset values used to select the study area and filter the origin destinatio
 
 ```{r, echo=FALSE}
 # Create default LA name if none exists
-if(!exists("region")) region <- "liverpool-city-region"
+if(!exists("region")) region <- "kent"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
@@ -73,7 +73,7 @@ The input zones area are summarised in this section.
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
 if(!exists("centsa")) # Population-weighted centroids
-  centsa <- readOGR(file.path(pct_bigdata, "cents.geojson"), "OGRGeoJSON")
+  centsa <- readOGR(file.path(pct_bigdata, "cents-scenarios.geojson"), "OGRGeoJSON")
 centsa$geo_code <- as.character(centsa$geo_code)
 if(!exists("las"))
   las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
