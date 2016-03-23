@@ -8,7 +8,7 @@ la_all <- regions$Region <- as.character(regions$Region)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
-# la_all <- c("london") # just one region
+la_all <- c("kent") # just one region
 # la_all <- la_all[2:3]
 
 # # For custom regions:
@@ -47,7 +47,7 @@ la_all <- la_all[-grep("liv|greater-m", la_all)]
 
 if(grepl("^(.?$|[^n].+)", readline("Would you like to commit the pct-data repo (Y/n)?  "), ignore.case = T)){
   commitMessage <- readline("Please enter the commit message: ")
-  if(commitMessage = ""){ commitMessage <- "Updating the data, auto commiting"}
+  if(commitMessage == ""){ commitMessage <- "Updating the data, auto commiting"}
   gitDir <- file.path("..", "pct-data", ".git")
   system2("git", c("--git-dir", gitDir, "--work-tree", gitDir,
                    "add", "-A"))
