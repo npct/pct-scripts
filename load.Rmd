@@ -436,6 +436,10 @@ for(i in c("Bicycle", scens)){
   zones@data[nm] = NULL
 }
 
+# Are the lines contained by a single zone?
+gtest = gContains(zones, rnet, byid = TRUE)
+rnet$Singlezone = rowSums(gtest)
+rnet@data[rnet$Singlezone == 0, grep(pattern = "upto", names(rnet))] = NA
 
 if(!"gendereq_slc" %in% scens)
   rnet$gendereq_slc <- NA
