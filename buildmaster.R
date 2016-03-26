@@ -46,10 +46,10 @@ for(k in 1:length(la_all)){
 la_all <- la_all[-grep("liv|greater-m", la_all)]
 
 # old regional units
-las <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
-las_names <- las$CTYUA12NM
-las$Region <- tolower(as.character(las_names))
-la_all <- region <- "leeds"
-regions <- las[las$Region == region,]
-plot(regions)
+# las <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
+# las_names <- las$CTYUA12NM
+# las$Region <- tolower(as.character(las_names))
+# la_all <- region <- "leeds"
+# regions <- las[las$Region == region,]
+# plot(regions)
 # dput(las_names[1:4])
