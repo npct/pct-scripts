@@ -24,8 +24,7 @@ run time and the key outputs for each region.
 The aim is to inform users of the NPCT's interactive map how the results were generated.
 This document assumes some technical knowledge in the area of transport planning.
 
-The code underlying the NPCT is open source, under the conditions of the MIT License.
-Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) and be modified by others provided attribution to the original.
+Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others provided attribution to the original.
 
 ## Initial parameters
 
@@ -52,8 +51,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs to show. High means fewer lines
-mflow <- 200
-mflow_short <- 200
+mflow <- 10
+mflow_short <- 10
 
 # Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -354,16 +353,19 @@ all_scen <- group_by(dfsp, scenario) %>% summarise(all = sum(slc))
 dfsum <- data.frame(dfsum)
 dfspread <- spread(dfsum, dist_band, percent)
 dfspread[2:ncol(dfspread)] <- t(apply(dfspread[2:ncol(dfspread)], 1, function(x) x / sum(x)  * 100))
+if(ncol(dfspread) == 6) # fix to remove excess column
+  dfspread[6] <- NULL
+dfspread[1,6]
 names(dfspread) <- c("Scenario", "|  0 - 2 km", "|  2 - 5 km", "|  5 - 10 km", "|  10 + km")
 dfspread$`|  N. trips/day` <- round(all_scen$all)
 dfspread$`|  % trips cycled` <- all_scen$all / all_scen$all[1] * 100
-dfspread$`|  % trips < 20km cycled`[1] <- NA
+dfspread$`|  % trips cycled`[1] <- NA
 ```
 
 The table below illustrates the same information in terms of the % of cyclists in each scenario by each distance band.
 
 ```{r, echo=FALSE}
-kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column).", row.names = F)
+kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column). The first row of data provides summary statistics (e.g. % trips by each distance band) for all modes. The subsequent rows report data on cycling only.", row.names = F)
 ```
 
 ```{r, echo=FALSE, results='hide', fig.cap="Illustration of OD pairs on travel network"}
@@ -401,9 +403,11 @@ rnet <- overline(rft, "Bicycle")
 # test the resulting plot
 plot(rnet, lwd = rnet$Bicycle / mean(rnet$Bicycle))
 if(require(foreach) & require(doParallel)){
-  registerDoParallel()
+  cl <- makeCluster(4)
+  registerDoParallel(cl)
+  # foreach::getDoParWorkers()
     # create list in parallel
-    rft_data_list <- foreach(i = scens) %dopar% {
+    rft_data_list <- foreach(i = scens) %do% {
       rft@data[i] <- l@data[i]
       rnet_tmp <- overline(rft, i)
       rnet_tmp@data[i]
