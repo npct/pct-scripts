@@ -51,14 +51,14 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs to show. High means fewer lines
-mflow <- 10
-mflow_short <- 10
+mflow <- 200
+mflow_short <- 100
 
 # Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
-buff_geo_dist <- 250 # buffer (m) for removing line start and end points for network
+buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 
 # Save the initial parameters to reproduce results
 save(region, mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist, file = file.path(region_path, "params.RData"))
@@ -407,9 +407,9 @@ if(require(foreach) & require(doParallel)){
   registerDoParallel(cl)
   # foreach::getDoParWorkers()
     # create list in parallel
-    rft_data_list <- foreach(i = scens) %do% {
+    rft_data_list <- foreach(i = scens) %dopar% {
       rft@data[i] <- l@data[i]
-      rnet_tmp <- overline(rft, i)
+      rnet_tmp <- stplanr::overline(rft, i) 
       rnet_tmp@data[i]
     }
     # save the results back into rnet with normal for loop
@@ -430,8 +430,8 @@ if(require(foreach) & require(doParallel)){
 rnet_osgb = spTransform(rnet, CRS("+init=epsg:27700"))
 rnet_cents = SpatialLinesMidPoints(rnet_osgb)
 rnet_cents = spTransform(rnet_cents, CRS("+init=epsg:4326"))
-plot(rnet[1,])
-points(rnet_cents[1,])
+# plot(rnet[1,])
+# points(rnet_cents[1,])
 proj4string(rnet) = proj4string(zones)
 for(i in c("Bicycle", scens)){
   nm = paste0(i, "_upto") # new variable name
