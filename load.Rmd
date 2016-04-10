@@ -51,8 +51,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs to show. High means fewer lines
-mflow <-10
-mflow_short <- 10
+mflow <-50
+mflow_short <- 30
 
 # Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -502,7 +502,7 @@ server_text <- paste0('startingCity <- "', region, '"\n',
                       'source(file.path(shinyRoot, "server-base.R"), local = T)')
 write(ui_text, file = file.path(region_dir, "ui.R"))
 write(server_text, file = file.path(region_dir, "server.R"))
-file.symlink(file.path("..", "..","www"), region_dir)
+if(!file.exists( file.path(region_dir, "www"))){ file.symlink(file.path("..", "..","www"), region_dir) }
 ```
 
 ## Time taken
