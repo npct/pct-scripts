@@ -12,6 +12,7 @@ output:
 ```{r, include=FALSE}
 start_time <- Sys.time() # for timing the script
 source("set-up.R") # load packages needed
+knitr::opts_chunk$set(message = FALSE)
 ```
 
 This document was produced automatically at `r start_time`.
