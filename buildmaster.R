@@ -4,19 +4,20 @@ library(knitr)
 # For PCT regions:
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
+la_all = la_all[-which(la_all == "london")]
 # select regions of interest (uncomment/change as appropriate)
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
-la_all <- c("kent") # just one region
-# la_all <- la_all[2:3]
+# la_all <- c("kent") # just one region
+la_all <- la_all[1:20]
 
 # # For custom regions:
 # regions <- shapefile("/tmp/Study_Areas.shp")
 # regions$Region <- tolower(regions$Name) # add region names
 # la_all <- regions$Region
 
-for(k in 1:length(la_all)){
+for(k in 7:length(la_all)){
   # What geographic level are we working at (cua or regional)
   geo_level <- "regional"
   isolated <- FALSE
