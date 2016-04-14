@@ -43,11 +43,7 @@ for(k in 1:length(la_all)){
 }
 
 # # Update the data sha
-# old = setwd("../pct-data/")
-# (newsha = system("git rev-parse --short HEAD", intern = T))
-# setwd("../pct-shiny/")
-# writeLines(newsha, "data_sha")
-# setwd(old)
+# source("update_sha.R")
 
 # las <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
 # las_names <- las$CTYUA12NM
