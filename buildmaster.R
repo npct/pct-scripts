@@ -9,7 +9,7 @@ la_all = la_all[-which(la_all == "london")]
 # sel <- c("cambridge", "hereford", "northumberland", "devon")
 # la_all <- regions$Region[charmatch(sel, regions$Region)]
 # la_all <- as.character(la_all)
-la_all <- c("london-east") # just one region
+la_all <- c("kent") # just one region
 # la_all <- la_all[1:20]
 
 # # For custom regions:
@@ -43,8 +43,9 @@ for(k in 1:length(la_all)){
 }
 
 # # Update the data sha
-# newsha = system("git rev-parse --short HEAD", intern = T)
-# old = setwd("../pct-shiny/")
+# old = setwd("../pct-data/")
+# (newsha = system("git rev-parse --short HEAD", intern = T))
+# setwd("../pct-shiny/")
 # writeLines(newsha, "data_sha")
 # setwd(old)
 
