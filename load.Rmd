@@ -398,7 +398,7 @@ rft$Bicycle <- l$Bicycle
 # this greatly speeds up the build (due to calls to overline)
 # needs mapshaper installed and available to system():
 # see https://github.com/mbloch/mapshaper/wiki/
-rft <- ms_simplify(rft, keep = 0.1)
+rft <- ms_simplify(rft, keep = 0.06)
 rnet <- overline(rft, "Bicycle")
 # object.size(rnet)
 # test the resulting plot
