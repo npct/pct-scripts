@@ -16,6 +16,8 @@ It even reports summary statistics from the data as it is created.
 To run `load.Rmd` you should be able to simply hit 'Knit HTML' while loaded RStudio.
 There are other dependencies, listed below.
 
+**Note: `rq.Rds` and `rf.Rds` must be downloaded from here before the build: https://github.com/npct/pct-bigdata/releases **
+
 ## Relationship to other pct- folders
 
 The purpose of this repo is to build the data used by [pct-shiny](https://github.com/npct/pct-shiny).

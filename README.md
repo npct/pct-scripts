@@ -11,6 +11,8 @@ It even reports summary statistics from the data as it is created.
 To run `load.Rmd` you should be able to simply hit 'Knit HTML' while loaded RStudio.
 There are other dependencies, listed below.
 
+**Note: `rq.Rds` and `rf.Rds` must be downloaded from here before the build: https://github.com/npct/pct-bigdata/releases **
+
 ## Relationship to other pct- folders
 
 The purpose of this repo is to build the data used by [pct-shiny](https://github.com/npct/pct-shiny).
@@ -32,7 +34,7 @@ git clone git@github.com:npct/pct-data.git --depth 1
 git clone git@github.com:npct/pct-shiny.git 
 
 # clone the national level input data
-git clone git@github.com:npct/pct-bigdata.git 
+git clone git@github.com:npct/pct-bigdata.git --depth 1
 ```
 
 The other dependencies are described below.
@@ -42,8 +44,20 @@ If you have issues with any of these, please report them as an [issue](https://g
 
 Some of the examples pull data from the
 [CycleStreets.net API](http://www.cyclestreets.net/api/).
-Once you have a token, you can add it in Ubuntu as
-a session variable using the following in your terminal
+Once you have a token, you can add it to R by
+adding the following line
+to your `.Renviron` file in your home directory:
+
+
+```bash
+CYCLESTREET=xxx
+```
+
+where `xxx` is the api key.
+
+If the file does not yet exist, you can create it.
+This can also be made available to other programs,
+a session variable using the following in your terminal (tested in Ubuntu):
 
 
 ```bash
