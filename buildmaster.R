@@ -38,7 +38,7 @@ for(k in 1:length(la_all)){
   moutput <- moutput[-c(5:200)]
   # Re-write the model output file
   write(moutput, file.path("../pct-data/", region, "/model-output.html"))
-  
+
   message(paste0("Just built ", region))
 }
 

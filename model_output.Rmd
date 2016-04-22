@@ -1,0 +1,219 @@
+---
+title: "National Propensity to Cycle Tool - local results"
+author: "Created by the NPCT team"
+output:
+  html_document:
+    fig_caption: yes
+    highlight: pygments
+    theme: null
+    toc: yes
+---
+
+```{r, include=FALSE}
+start_time <- Sys.time() # for timing the script
+source("build_region.R")
+knitr::opts_chunk$set(message = FALSE)
+```
+
+This document was produced automatically at `r start_time`.
+
+## Introduction
+
+The results of the National Propensity to Cycle Tool (NPCT) scenarios are based on a model.
+This document presents information about the input data, model diagnostics,
+run time and the key outputs for each region.
+The aim is to inform users of the NPCT's interactive map how the results were generated.
+This document assumes some technical knowledge in the area of transport planning.
+
+Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others provided attribution to the original.
+
+## Initial parameters
+
+The preset values used to select the study area and filter the origin destination data are described in this section.
+
+```{r, warning=FALSE}
+# Set local authority and ttwa zone names
+region # name of the region
+mflow # Minimum flow between od pairs to show. High means fewer lines
+mflow_short # Minimum flow between od pairs to show. High means fewer lines
+
+# Distances
+mdist # maximum euclidean distance (km) for subsetting lines
+max_all_dist  # maximum distance (km) below which more lines are selected
+buff_dist  # buffer (km) used to select additional zones (often zero = ok)
+buff_geo_dist # buffer (m) for removing line start and end points for network
+```
+
+## Input zone data
+
+The input zones area are summarised in this section.
+
+The selected region is `r region`.
+
+The characteristics of zones are as follows:
+
+- Number of zones: `r nzones`, compared with 6791 in England
+- Median area of zones: `r mzarea` ha, compared with 300 ha across England
+
+## Input flow data
+
+```{r distance-dist, echo=FALSE, fig.cap="The study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The black straight green represent the most intensive commuting OD pairs.", echo=FALSE, message=FALSE, warning=FALSE}
+
+plot(zones, col = "lightgrey")
+plot(regions, add = T)
+plot(las_in_region, border = "blue", add = T, lwd = 2)
+plot(region_orig, lwd = 5, add = T)
+plot(region_shape, border = "red", add = T, lwd = 2)
+lines(l[l$All > 100,], col = "green")
+```
+
+There are **`r n_flow_region`** OD pairs with origins and destinations in the study
+area. Of these, `r sum(sel_long)` meet the criteria that at least `r mflow` people travelled to work along OD pairs up to `r mdist` km in the 2011 Census. The additional selection criteria that at least `r mflow_short` people travelled to work along OD pairs up to `r max_all_dist` km was met by `r sum(sel_short)` OD pairs.
+Adding those (overlapping) selection criteria resulted in
+**`r nrow(flow)`** or **`r pmflow`%** of all inter-zone OD pairs were selected in the region, accounting for
+**`r pmflowa`%** of inter-zone commutes in the study area.
+
+## Hilliness of OD pairs
+
+The average hilliness of zones in the study area is
+`r round(100 * mean(zones$avslope), 1)`
+percent.
+
+```{r, echo = FALSE}
+# # It used to say - see below. What to replace this with?
+# compared with the national average of
+# `r round(mean(ukmsoas$avslope, na.rm = T), 1)`. This data is displayed in the
+# figure below.
+tm_shape(zones) +
+  tm_fill("avslope", n = 3, palette = "Oranges")
+```
+
+## Lines allocated to the road network
+
+We use CycleStreets.net to estimate optimal routes.
+An illustration of these routes is presented below.
+
+```{r plot-rlines, warning=FALSE, echo = FALSE, fig.cap="Straight and route-lines allocated to the travel network"}
+plot(l[seq(1, nrow(l), length.out = 100),])
+lines(rf[seq(1, nrow(l), length.out = 100),], col = "red")
+lines(rq[seq(1, nrow(l), length.out = 100),], col = "green")
+```
+
+```{r check-line, warning=FALSE, echo = FALSE, fig.cap="Check the final line"}
+plot(l[nrow(l),])
+lines(rf[nrow(l),], col = "red")
+lines(rq[nrow(l),], col = "green")
+```
+
+## Distance distributions
+
+The distance distribution of trips in the study area is displayed in the figure below, which compares the result with the distribution of trips nationwide.
+
+```{r, echo=FALSE, fig.cap="Distance distribution of all trips in study lines (blue) compared with national average (dotted bars)"}
+ggplot(histdf) +
+  geom_histogram(aes(dist_fast, weight = All, fill = Scope, linetype = Scope),
+    position = "identity", colour = "black", binwidth = 0.5) +
+  scale_fill_manual(values = c("lightblue", NA)) +
+  scale_linetype(c(1, 2), guide = "none") +
+  scale_y_continuous() +
+  # scale_y_continuous(labels = percent) +
+  xlab("Route distance (km)") +
+  ylab("Proportion of trips in each band") +
+  xlim(c(0,13)) +
+  theme_bw()
+
+pl5kmuk <- round(sum(luk$All[luk$dist_fast < 5]) /
+    sum(luk$All) * 100, 1)
+pl5km <- round(sum(l$All[l$dist_fast < 5]) /
+    sum(l$All) * 100, 1)
+```
+
+From the nationwide sample of trips, `r pl5kmuk`% of trips are less than 5km.
+
+In the case study area
+`r pl5km`% of sampled trips are less than 5km.
+
+Subsetting by distance (set
+to `r mdist` km) and removing inter-zone OD pairs
+further reduces the number of OD pairs from `r sum(sel)`
+to `r nrow(l)`.
+
+## The flow model
+
+To estimate the potential rate of cycling under different scenarios
+regression models operating at the flow level are used.
+These can be seen in the model script which is available
+[online](https://github.com/npct/pct/blob/master/models/aggregate-model.R).
+
+## Cycling in the study area
+
+The overall rate of cycling in the OD pairs in the study area
+(after subsetting for distance) is `r rcycle`%, compared a
+rate from the national data (of equally short OD pairs)
+of 5.0%.
+
+## Scenarios
+
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
+levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
+levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
+ggplot(dfsp) +
+  geom_freqpoly(aes(dist_fast, weight = slc,
+    color = scenario), binwidth = 1) +
+  ylab("Number of trips per day") +
+  xlab("Route distance (km)") +
+  scale_color_discrete(name = "Mode and\nscenario\n(cycling)") +
+  xlim(c(0,12)) +
+  theme_bw()
+
+dfsp$dist_band <- cut(dfsp$dist_fast, c(0, 2, 5, 10, 40))
+dfsum <- group_by(dfsp, scenario, dist_band) %>% 
+  summarise(percent = sum(slc))
+all_scen <- group_by(dfsp, scenario) %>% summarise(all = sum(slc))
+dfsum <- data.frame(dfsum)
+dfspread <- spread(dfsum, dist_band, percent)
+dfspread[2:ncol(dfspread)] <- t(apply(dfspread[2:ncol(dfspread)], 1, function(x) x / sum(x)  * 100))
+if(ncol(dfspread) == 6) # fix to remove excess column
+  dfspread[6] <- NULL
+dfspread[1,6]
+names(dfspread) <- c("Scenario", "|  0 - 2 km", "|  2 - 5 km", "|  5 - 10 km", "|  10 + km")
+dfspread$`|  N. trips/day` <- round(all_scen$all)
+dfspread$`|  % trips cycled` <- all_scen$all / all_scen$all[1] * 100
+dfspread$`|  % trips cycled`[1] <- NA
+```
+
+The table below illustrates the same information in terms of the % of cyclists in each scenario by each distance band.
+
+```{r, echo=FALSE}
+kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column). The first row of data provides summary statistics (e.g. % trips by each distance band) for all modes. The subsequent rows report data on cycling only.", row.names = F)
+```
+
+```{r, echo=FALSE, results='hide', fig.cap="Illustration of OD pairs on travel network"}
+plot(region_shape)
+plot(zones, add = T)
+points(cents, col = "red")
+lines(l, col = "black")
+lines(rq, col = "green")
+lines(rf, col = "blue")
+```
+
+## Network analysis
+
+Now we aggregate the overlapping routes to create a route network.
+The value of each segment in the network corresponds to the total number of cyclists who we estimate to use the segment.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="The route network, with widths proportional to the current estimated number of commuter cyclists"}
+
+# test the rnet plot
+plot(rnet, lwd = rnet$Bicycle / mean(rnet$Bicycle))
+```
+
+## Time taken
+
+The time taken to run the analysis for this area is presented below:
+
+```{r}
+end_time - start_time
+```
+
