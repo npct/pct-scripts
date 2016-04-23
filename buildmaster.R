@@ -7,7 +7,7 @@ la_all <- regions$Region <- as.character(regions$Region)
 la_all = la_all[-which(la_all == "london")]
 # select regions of interest (uncomment/change as appropriate)
 # la_all <- c("cambridge", "hereford", "northumberland", "devon")
-la_all <- c("kent") # just one region
+la_all <- c("cambrige") # just one region
 
 # # For custom regions:
 # regions <- shapefile("/tmp/Study_Areas.shp")
@@ -28,13 +28,13 @@ for(k in 1:length(la_all)){
   message(paste0("Building for ", region))
   source("build_region.R")
   
-  # Write the model output files
-  message(paste0("Writing the output file for ", region))
-  knitr::knit2html(quiet = T,
-    input = "load.Rmd",
-    output = file.path("../pct-data/", region, "/model-output.html"),
-    envir = globalenv(), force_v1 = TRUE
-  )
+  # Write the model output files (comment out to not report data)
+  # message(paste0("Writing the output file for ", region))
+  # knitr::knit2html(quiet = T,
+  #   input = "load.Rmd",
+  #   output = file.path("../pct-data/", region, "/model-output.html"),
+  #   envir = globalenv(), force_v1 = TRUE
+  # )
   # Re read the model output file
   moutput <- readLines(file.path("../pct-data/", region, "/model-output.html"))
   # Remove all style and javascript tags
