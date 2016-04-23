@@ -246,7 +246,6 @@ for(ii in na_cols){
 
 # # Save objects
 # Save objects # uncomment these lines to save model output
-if(exists("isolated")) file.create(file.path(pct_data, region, "isolated"))
 saveRDS(zones, file.path(pct_data, region, "z.Rds"))
 geojson_write( ms_simplify(zones, keep = 0.1), file = file.path(pct_data, region, "z"))
 saveRDS(cents, file.path(pct_data, region, "c.Rds"))

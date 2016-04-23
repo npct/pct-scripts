@@ -20,8 +20,7 @@ for(k in 1:length(la_all)){
   isolated <- FALSE # make the region not isolated (default)
   if(grepl(pattern = "london", region))
     isolated <- TRUE
-  if(geo_level == "regional")
-    file.remove(file.path("..", "pct-data", region, "isolated"))
+  if(isolated) file.create(file.path(pct_data, region, "isolated"))
   
   # Build the regions (comment out if the data has already been build)
   message(paste0("Building for ", region))
