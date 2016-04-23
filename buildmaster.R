@@ -6,8 +6,7 @@ regions <- readOGR("../pct-bigdata/regions-london.geojson", layer = "OGRGeoJSON"
 la_all <- regions$Region <- as.character(regions$Region)
 la_all = la_all[-which(la_all == "london")]
 # select regions of interest (uncomment/change as appropriate)
-# la_all <- c("cambridge", "hereford", "northumberland", "devon")
-la_all <- c("cambrige") # just one region
+la_all <- c("cambridgeshire") # just one region
 
 # # For custom regions:
 # regions <- shapefile("/tmp/Study_Areas.shp")
