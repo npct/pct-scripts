@@ -11,8 +11,17 @@ output:
 
 ```{r, include=FALSE}
 start_time <- Sys.time() # for timing the script
-source("build_region.R")
 knitr::opts_chunk$set(message = FALSE)
+
+# Read-in the data
+pct_data <- file.path("..", "pct-data")
+file.create(file.path(pct_data, region, "isolated"))
+zones = readRDS(file.path(pct_data, region, "z.Rds"))
+cents = readRDS(file.path(pct_data, region, "c.Rds"))
+l = readRDS(file.path(pct_data, region, "l.Rds"))
+rf = readRDS(file.path(pct_data, region, "rf.Rds"))
+rq = readRDS(file.path(pct_data, region, "rq.Rds"))
+rnet = readRDS(file.path(pct_data, region, "rnet.Rds"))
 ```
 
 This document was produced automatically at `r start_time`.
