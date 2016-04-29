@@ -24,7 +24,64 @@ rq = readRDS(file.path(pct_data, region, "rq.Rds"))
 rnet = readRDS(file.path(pct_data, region, "rnet.Rds"))
 ```
 
-This document was produced automatically at `r start_time`.
+##Attribution
+
+Please include this paragraph in any paper or report produced using these model results.
+
+Data for `r region` were generated at `r date()` by the National Propensity to Cycle Tool (PCT) Version 1, developed by the PCT academic team and released with an GPL Affero [Licence] (https://www.gnu.org/licenses/agpl-3.0). This version examines cycling potential for main-mode commute trips using Census 2011 travel to work data and Middle-Level Super Output areas (MSOASs) as zones. There were <!-- PLS ADD NUMBER COMMUTERS--> commuters in the study area, all of which were included in area-based analysis. Where cycle flows are routed, flows within zones ( <!--PLS add % of all flows that are within-zone--> of flows in `r region`) are excluded as are commuters with no fixed workplace. Of the `r n_flow_region` between-zone regular commute flows, selection criteria were used. For OD pairs with maximum Euclidean distance of `r mdist`, flows with a minimum flow of `r mflow` were selected. For OD pairs with maximum Euclidean distance of `r max_all_dist`, flows with a minimum flow of `r mflow_short` were selected. Adding those (overlapping) selection criteria resulted in `r pmflowa`% of all inter-zone commutes in the study area being selected, accounting for ( <!--PLS add % of all commutes included in area-based data that this represents--> of total commutes in `r region`). A modified version of the 2014 [HEAT tool] (http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update) was used.
+
+##`r region`
+```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
+levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
+levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
+ggplot(dfsp) +
+  geom_freqpoly(aes(dist_fast, weight = slc,
+    color = scenario), binwidth = 1) +
+  ylab("Number of trips per day") +
+  xlab("Route distance (km)") +
+  scale_color_discrete(name = "Mode and\nscenario\n(cycling)") +
+  xlim(c(0,12)) +
+  theme_bw()
+
+dfsp$dist_band <- cut(dfsp$dist_fast, c(0, 2, 5, 10, 40))
+dfsum <- group_by(dfsp, scenario, dist_band) %>% 
+  summarise(percent = sum(slc))
+all_scen <- group_by(dfsp, scenario) %>% summarise(all = sum(slc))
+dfsum <- data.frame(dfsum)
+dfspread <- spread(dfsum, dist_band, percent)
+dfspread[2:ncol(dfspread)] <- t(apply(dfspread[2:ncol(dfspread)], 1, function(x) x / sum(x)  * 100))
+if(ncol(dfspread) == 6) # fix to remove excess column
+  dfspread[6] <- NULL
+dfspread[1,6]
+names(dfspread) <- c("Scenario", "|  0 - 2 km", "|  2 - 5 km", "|  5 - 10 km", "|  10 + km")
+dfspread$`|  N. trips/day` <- round(all_scen$all)
+dfspread$`|  % trips cycled` <- all_scen$all / all_scen$all[1] * 100
+dfspread$`|  % trips cycled`[1] <- NA
+```
+
+The table below illustrates the same information in terms of the % of cyclists in each scenario by each distance band.
+
+```{r, echo=FALSE}
+kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column). The first row of data provides summary statistics (e.g. % trips by each distance band) for all modes. The subsequent rows report data on cycling only.", row.names = F)
+```
+
+```{r, warning=FALSE}
+# Set local authority and ttwa zone names
+region # name of the region
+mflow # Minimum flow between od pairs to show. High means fewer lines
+mflow_short # Minimum flow between od pairs to show. High means fewer lines
+
+# Distances
+mdist # maximum euclidean distance (km) for subsetting lines
+max_all_dist  # maximum distance (km) below which more lines are selected
+buff_dist  # buffer (km) used to select additional zones (often zero = ok)
+buff_geo_dist # buffer (m) for removing line start and end points for network
+
+There are **`r n_flow_region`** OD pairs with origins and destinations in the study
+area. Of these, `r sum(sel_long)` meet the criteria that at least `r mflow` people travelled to work along OD pairs up to `r mdist` km in the 2011 Census. The additional selection criteria that at least `r mflow_short` people travelled to work along OD pairs up to `r max_all_dist` km was met by `r sum(sel_short)` OD pairs.
+Adding those (overlapping) selection criteria resulted in
+**`r nrow(flow)`** or **`r pmflow`%** of all inter-zone OD pairs were selected in the region, accounting for
+**`r pmflowa`%** of inter-zone commutes in the study area.
 
 ## Introduction
 
@@ -164,39 +221,7 @@ of 5.0%.
 ## Scenarios
 
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
-levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
-levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
-ggplot(dfsp) +
-  geom_freqpoly(aes(dist_fast, weight = slc,
-    color = scenario), binwidth = 1) +
-  ylab("Number of trips per day") +
-  xlab("Route distance (km)") +
-  scale_color_discrete(name = "Mode and\nscenario\n(cycling)") +
-  xlim(c(0,12)) +
-  theme_bw()
 
-dfsp$dist_band <- cut(dfsp$dist_fast, c(0, 2, 5, 10, 40))
-dfsum <- group_by(dfsp, scenario, dist_band) %>% 
-  summarise(percent = sum(slc))
-all_scen <- group_by(dfsp, scenario) %>% summarise(all = sum(slc))
-dfsum <- data.frame(dfsum)
-dfspread <- spread(dfsum, dist_band, percent)
-dfspread[2:ncol(dfspread)] <- t(apply(dfspread[2:ncol(dfspread)], 1, function(x) x / sum(x)  * 100))
-if(ncol(dfspread) == 6) # fix to remove excess column
-  dfspread[6] <- NULL
-dfspread[1,6]
-names(dfspread) <- c("Scenario", "|  0 - 2 km", "|  2 - 5 km", "|  5 - 10 km", "|  10 + km")
-dfspread$`|  N. trips/day` <- round(all_scen$all)
-dfspread$`|  % trips cycled` <- all_scen$all / all_scen$all[1] * 100
-dfspread$`|  % trips cycled`[1] <- NA
-```
-
-The table below illustrates the same information in terms of the % of cyclists in each scenario by each distance band.
-
-```{r, echo=FALSE}
-kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column). The first row of data provides summary statistics (e.g. % trips by each distance band) for all modes. The subsequent rows report data on cycling only.", row.names = F)
-```
 
 ```{r, echo=FALSE, results='hide', fig.cap="Illustration of OD pairs on travel network"}
 plot(region_shape)
@@ -225,4 +250,4 @@ The time taken to run the analysis for this area is presented below:
 ```{r}
 end_time - start_time
 ```
-
+This document was produced automatically at `r start_time`.
