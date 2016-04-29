@@ -172,7 +172,7 @@ rnet <- overline(rft, "Bicycle")
 
 
 if(require(foreach) & require(doParallel)){
-  cl <- makeCluster(4)
+  cl <- makeCluster(parallel:::detectCores())
   registerDoParallel(cl)
   # foreach::getDoParWorkers()
     # create list in parallel
