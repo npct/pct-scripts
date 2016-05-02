@@ -10,25 +10,41 @@ output:
 ---
 
 ```{r, include=FALSE}
-start_time <- Sys.time() # for timing the script
+source("set-up.R")
 knitr::opts_chunk$set(message = FALSE)
 
 # Read-in the data
+if(!exists("region")) region <- "west-yorkshire"
 pct_data <- file.path("..", "pct-data")
-file.create(file.path(pct_data, region, "isolated"))
+pct_bigdata <- file.path("..", "pct-bigdata")
 zones = readRDS(file.path(pct_data, region, "z.Rds"))
 cents = readRDS(file.path(pct_data, region, "c.Rds"))
 l = readRDS(file.path(pct_data, region, "l.Rds"))
 rf = readRDS(file.path(pct_data, region, "rf.Rds"))
 rq = readRDS(file.path(pct_data, region, "rq.Rds"))
 rnet = readRDS(file.path(pct_data, region, "rnet.Rds"))
+load(file.path(pct_data, region, "params.RData"))
+if(!exists("regions"))
+  regions <- readOGR(file.path(pct_bigdata, "regions-london.geojson"), layer = "OGRGeoJSON")
+source('shared_build.R')
+dfscen <- dplyr::select(l@data, contains("slc"), -contains("co2"), All, olc = Bicycle, dist_fast)
+dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
+dfsp$scenario <- factor(dfsp$scenario)
+dfsp$scenario <-
+  factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(1, 3, 2, 4, 5, 6)])
+levels(dfsp$scenario)[1] <- c("All modes")
+levels(dfsp$scenario)[6] <- c("Current (2011)")
+
+las_in_region <- gIntersects(las_cents, region_shape, byid = T)
+las_in_region <- las_in_region[1,]
+las_in_region <- las[las_in_region,]
 ```
 
 ##Attribution
 
 Please include this paragraph in any paper or report produced using these model results.
 
-Data for `r region` were generated at `r date()` by the National Propensity to Cycle Tool (PCT) Version 1, developed by the PCT academic team and released with an GPL Affero [Licence] (https://www.gnu.org/licenses/agpl-3.0). This version examines cycling potential for main-mode commute trips using Census 2011 travel to work data and Middle-Level Super Output areas (MSOASs) as zones. There were <!-- PLS ADD NUMBER COMMUTERS--> commuters in the study area, all of which were included in area-based analysis. Where cycle flows are routed, flows within zones ( <!--PLS add % of all flows that are within-zone--> of flows in `r region`) are excluded as are commuters with no fixed workplace. Of the `r n_flow_region` between-zone regular commute flows, selection criteria were used. For OD pairs with maximum Euclidean distance of `r mdist`, flows with a minimum flow of `r mflow` were selected. For OD pairs with maximum Euclidean distance of `r max_all_dist`, flows with a minimum flow of `r mflow_short` were selected. Adding those (overlapping) selection criteria resulted in `r pmflowa`% of all inter-zone commutes in the study area being selected, accounting for ( <!--PLS add % of all commutes included in area-based data that this represents--> of total commutes in `r region`). A modified version of the 2014 [HEAT tool] (http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update) was used.
+Data for `r region` were generated at `r date()` by the National Propensity to Cycle Tool (PCT) Version 1, developed by the PCT academic team and released with an GPL Affero [Licence] (https://www.gnu.org/licenses/agpl-3.0). This version examines cycling potential for main-mode commute trips using Census 2011 travel to work data and Middle-Level Super Output areas (MSOASs) as zones. There were <!-- PLS ADD NUMBER COMMUTERS--> commuters in the study area, all of which were included in area-based analysis. Where cycle flows are routed, flows within zones ( <!--PLS add % of all flows that are within-zone--> of flows in `r region`) are excluded as are commuters with no fixed workplace. Of the `r n_flow_region` between-zone regular commute flows, selection criteria were used. For OD pairs with maximum Euclidean distance of `r params$mdist`, flows with a minimum flow of `r params$mflow` were selected. For OD pairs with maximum Euclidean distance of `r params$max_all_dist`, flows with a minimum flow of `r params$mflow_short` were selected. Adding those (overlapping) selection criteria resulted in `r pmflowa`% of all inter-zone commutes in the study area being selected, accounting for ( <!--PLS add % of all commutes included in area-based data that this represents--> of total commutes in `r region`). A modified version of the 2014 [HEAT tool] (http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update) was used.
 
 ##`r region`
 ```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
@@ -65,22 +81,10 @@ The table below illustrates the same information in terms of the % of cyclists i
 kable(dfspread, format = "html", digits = 1, caption = "Summary statistics of the rate of cycling by distance bands (percentages) and the total number of cycle trips per for each scenario (far right column). The first row of data provides summary statistics (e.g. % trips by each distance band) for all modes. The subsequent rows report data on cycling only.", row.names = F)
 ```
 
-```{r, warning=FALSE}
-# Set local authority and ttwa zone names
-region # name of the region
-mflow # Minimum flow between od pairs to show. High means fewer lines
-mflow_short # Minimum flow between od pairs to show. High means fewer lines
-
-# Distances
-mdist # maximum euclidean distance (km) for subsetting lines
-max_all_dist  # maximum distance (km) below which more lines are selected
-buff_dist  # buffer (km) used to select additional zones (often zero = ok)
-buff_geo_dist # buffer (m) for removing line start and end points for network
-
 There are **`r n_flow_region`** OD pairs with origins and destinations in the study
-area. Of these, `r sum(sel_long)` meet the criteria that at least `r mflow` people travelled to work along OD pairs up to `r mdist` km in the 2011 Census. The additional selection criteria that at least `r mflow_short` people travelled to work along OD pairs up to `r max_all_dist` km was met by `r sum(sel_short)` OD pairs.
+area. Of these, `r sum(sel_long)` meet the criteria that at least `r params$mflow` people travelled to work along OD pairs up to `r params$mdist` km in the 2011 Census. The additional selection criteria that at least `r params$mflow_short` people travelled to work along OD pairs up to `r params$max_all_dist` km was met by `r sum(sel_short)` OD pairs.
 Adding those (overlapping) selection criteria resulted in
-**`r nrow(flow)`** or **`r pmflow`%** of all inter-zone OD pairs were selected in the region, accounting for
+**`r nrow_flow`** or **`r pmflow`%** of all inter-zone OD pairs were selected in the region, accounting for
 **`r pmflowa`%** of inter-zone commutes in the study area.
 
 ## Introduction
@@ -98,16 +102,15 @@ Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/n
 The preset values used to select the study area and filter the origin destination data are described in this section.
 
 ```{r, warning=FALSE}
-# Set local authority and ttwa zone names
 region # name of the region
-mflow # Minimum flow between od pairs to show. High means fewer lines
-mflow_short # Minimum flow between od pairs to show. High means fewer lines
+params$mflow # Minimum flow between od pairs to show. High means fewer lines
+params$mflow_short # Minimum flow between od pairs to show. High means fewer lines
 
 # Distances
-mdist # maximum euclidean distance (km) for subsetting lines
-max_all_dist  # maximum distance (km) below which more lines are selected
-buff_dist  # buffer (km) used to select additional zones (often zero = ok)
-buff_geo_dist # buffer (m) for removing line start and end points for network
+params$mdist # maximum euclidean distance (km) for subsetting lines
+params$max_all_dist  # maximum distance (km) below which more lines are selected
+params$buff_dist  # buffer (km) used to select additional zones (often zero = ok)
+params$buff_geo_dist # buffer (m) for removing line start and end points for network
 ```
 
 ## Input zone data
@@ -118,8 +121,8 @@ The selected region is `r region`.
 
 The characteristics of zones are as follows:
 
-- Number of zones: `r nzones`, compared with 6791 in England
-- Median area of zones: `r mzarea` ha, compared with 300 ha across England
+- Number of zones: `r nrow(zones)`, compared with 6791 in England
+- Median area of zones: `r round(median(gArea(spTransform(zones, CRS("+init=epsg:27700")), byid = T) / 10000), 1)` ha, compared with 300 ha across England
 
 ## Input flow data
 
@@ -133,11 +136,6 @@ plot(region_shape, border = "red", add = T, lwd = 2)
 lines(l[l$All > 100,], col = "green")
 ```
 
-There are **`r n_flow_region`** OD pairs with origins and destinations in the study
-area. Of these, `r sum(sel_long)` meet the criteria that at least `r mflow` people travelled to work along OD pairs up to `r mdist` km in the 2011 Census. The additional selection criteria that at least `r mflow_short` people travelled to work along OD pairs up to `r max_all_dist` km was met by `r sum(sel_short)` OD pairs.
-Adding those (overlapping) selection criteria resulted in
-**`r nrow(flow)`** or **`r pmflow`%** of all inter-zone OD pairs were selected in the region, accounting for
-**`r pmflowa`%** of inter-zone commutes in the study area.
 
 ## Hilliness of OD pairs
 
@@ -176,6 +174,18 @@ lines(rq[nrow(l),], col = "green")
 The distance distribution of trips in the study area is displayed in the figure below, which compares the result with the distribution of trips nationwide.
 
 ```{r, echo=FALSE, fig.cap="Distance distribution of all trips in study lines (blue) compared with national average (dotted bars)"}
+luk <- readRDS(file.path(pct_bigdata, "l_sam8.Rds"))
+
+hdfl <- dplyr::select(l@data, All, dist_fast)
+hdfl$Scope <- "Local"
+hdfl$All <- hdfl$All / sum(hdfl$All)
+
+hdfu <- dplyr::select(luk@data, All, dist_fast)
+hdfu$Scope <- "National"
+hdfu$All <- hdfu$All / sum(hdfu$All)
+
+histdf <- rbind(hdfl, hdfu)
+
 ggplot(histdf) +
   geom_histogram(aes(dist_fast, weight = All, fill = Scope, linetype = Scope),
     position = "identity", colour = "black", binwidth = 0.5) +
@@ -200,8 +210,9 @@ In the case study area
 `r pl5km`% of sampled trips are less than 5km.
 
 Subsetting by distance (set
-to `r mdist` km) and removing inter-zone OD pairs
-further reduces the number of OD pairs from `r sum(sel)`
+to `r params$mdist` km) and removing inter-zone OD pairs
+further reduces the number of OD pairs 
+# from `r sum(sel_long | sel_short)`
 to `r nrow(l)`.
 
 ## The flow model
@@ -214,14 +225,11 @@ These can be seen in the model script which is available
 ## Cycling in the study area
 
 The overall rate of cycling in the OD pairs in the study area
-(after subsetting for distance) is `r rcycle`%, compared a
+(after subsetting for distance) is `r round(100 * sum(l$Bicycle) / sum(l$All), 1)`%, compared a
 rate from the national data (of equally short OD pairs)
 of 5.0%.
 
 ## Scenarios
-
-
-
 
 ```{r, echo=FALSE, results='hide', fig.cap="Illustration of OD pairs on travel network"}
 plot(region_shape)
@@ -248,6 +256,6 @@ plot(rnet, lwd = rnet$Bicycle / mean(rnet$Bicycle))
 The time taken to run the analysis for this area is presented below:
 
 ```{r}
-end_time - start_time
+run_time
 ```
-This document was produced automatically at `r start_time`.
+This document was produced automatically at `r Sys.time()`.
