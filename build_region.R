@@ -94,10 +94,6 @@ l$co2_saving_q <- rq$co2_saving
 l$calories_q <- rq$calories
 l$busyness_q <- rq$busyness
 
-rcycle <- round(100 * sum(l$Bicycle) / sum(l$All), 1)
-# rcarusers <- round (100 * sum(l$Car_driver+l$Car_passenger) / sum(l$All), 1)
-rcarusers <- NA # when we don't have car drivers
-
 rft <- rf
 # Stop rnet lines going to centroid (optional)
 rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist)
