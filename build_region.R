@@ -1,6 +1,7 @@
 source("set-up.R") # load packages needed
 
 # Create default LA name if none exists
+start_time <- Sys.time() # for timing the script
 if(!exists("region")) region <- "west-yorkshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
@@ -16,64 +17,30 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 # Minimum flow between od pairs to show. High means fewer lines
-mflow <-10
-mflow_short <- 10
+params <- NULL
+
+params$mflow <- 30
+params$mflow_short <- 30
 
 # Distances
-mdist <- 20 # maximum euclidean distance (km) for subsetting lines
-max_all_dist <- 7 # maximum distance (km) below which more lines are selected
-buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
-buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
-
-# Save the initial parameters to reproduce results
-save(region, mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist, file = file.path(region_path, "params.RData"))
+params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
+params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
+params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
+params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
 if(!exists("centsa")) # Population-weighted centroids
   centsa <- readOGR(file.path(pct_bigdata, "cents-scenarios.geojson"), "OGRGeoJSON")
 centsa$geo_code <- as.character(centsa$geo_code)
-if(!exists("las"))
-  las <- readOGR(dsn = file.path(pct_bigdata, "las-pcycle.geojson"), layer = "OGRGeoJSON")
-if(!exists("las_cents"))
-  las_cents <- SpatialPoints(coordinates(las))
 
-# Load local authorities and districts
-if(!exists("geo_level")) geo_level <- "regional"
-# if you use a custom geometry, regions should already be saved from buildmaster.R
-
-if(!exists("regions")){
-  if (geo_level == "regional")
-    regions <-
-  readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
-  else {
-    regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
-    regions$Region <- regions$CTYUA12NM
-  }
-}
-region_shape <- region_orig <- # create region shape (and add buffer in m)
-  regions[grep(pattern = region, x = regions$Region, ignore.case = T),]
-
-# Only transform if needed
-if(buff_dist > 0){
-  region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
-  region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
-  region_shape <- spTransform(region_shape, proj4string(centsa))
-}
-
-las_in_region <- gIntersects(las_cents, region_shape, byid = T)
-las_in_region <- las_in_region[1,]
-las_in_region <- las[las_in_region,]
+source('shared_build.R')
 
 # select msoas of interest
 if(proj4string(region_shape) != proj4string(centsa))
   region_shape <- spTransform(region_shape, proj4string(centsa))
 cents <- centsa[region_shape,]
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
-
-nzones <- nrow(zones) # how many zones?
-zones_wgs <- spTransform(zones, CRS("+init=epsg:27700"))
-mzarea <- round(median(gArea(zones_wgs, byid = T) / 10000), 1) # average area of zones, sq km
 
 # load flow dataset, depending on availability
 if(!exists("flow_nat"))
@@ -93,15 +60,14 @@ n_commutes_region <- sum(flow$All)
 
 # Subset lines
 # subset OD pairs by n. people using it
-sel_long <- flow$All > mflow & flow$dist < mdist
-sel_short <- flow$dist < max_all_dist & flow$All > mflow_short
+sel_long <- flow$All > params$mflow & flow$dist < params$mdist
+sel_short <- flow$dist < params$max_all_dist & flow$All > params$mflow_short
 sel <- sel_long | sel_short
 flow <- flow[sel, ]
 # summary(flow$dist)
 # l <- od2line(flow = flow, zones = cents)
 l <- flow
 
-# nrow(flow) # how many OD pairs in the study area?
 # proportion of OD pairs in min-flow based subset
 pmflow <- round(nrow(l) / n_flow_region * 100, 1)
 # % all trips covered
@@ -128,35 +94,9 @@ l$co2_saving_q <- rq$co2_saving
 l$calories_q <- rq$calories
 l$busyness_q <- rq$busyness
 
-luk <- readRDS(file.path(pct_bigdata, "l_sam8.Rds"))
-
-hdfl <- dplyr::select(l@data, All, dist_fast)
-hdfl$Scope <- "Local"
-hdfl$All <- hdfl$All / sum(hdfl$All)
-
-hdfu <- dplyr::select(luk@data, All, dist_fast)
-hdfu$Scope <- "National"
-hdfu$All <- hdfu$All / sum(hdfu$All)
-
-histdf <- rbind(hdfl, hdfu)
-
-rcycle <- round(100 * sum(l$Bicycle) / sum(l$All), 1)
-# rcarusers <- round (100 * sum(l$Car_driver+l$Car_passenger) / sum(l$All), 1)
-rcarusers <- NA # when we don't have car drivers
-natcyc <- sum(luk$Bicycle) / sum(luk$All)
-
-dfscen <- dplyr::select(l@data, contains("slc"), -contains("co2"), All, olc = Bicycle, dist_fast)
-dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
-dfsp$scenario <- factor(dfsp$scenario)
-dfsp$scenario <-
-  factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(1, 3, 2, 4, 5, 6)])
-levels(dfsp$scenario)[1] <- c("All modes")
-levels(dfsp$scenario)[6] <- c("Current (2011)")
-scalenum <- sum(l$All)
-
 rft <- rf
 # Stop rnet lines going to centroid (optional)
-rft <- toptailgs(rf, toptail_dist = buff_geo_dist)
+rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist)
 if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
@@ -170,9 +110,8 @@ rft$Bicycle <- l$Bicycle
 rft <- ms_simplify(rft, keep = 0.06)
 rnet <- overline(rft, "Bicycle")
 
-
 if(require(foreach) & require(doParallel)){
-  cl <- makeCluster(4)
+  cl <- makeCluster(parallel:::detectCores())
   registerDoParallel(cl)
   # foreach::getDoParWorkers()
     # create list in parallel
@@ -254,8 +193,12 @@ saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
 saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
 
+# Save the initial parameters to reproduce results
+run_time <- Sys.time() - start_time
+nrow_flow <- nrow(flow)
+save(params, run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long, file = file.path(region_path, "params.RData"))
 # # Save the script that loaded the lines into the data directory
-file.copy("load.Rmd", file.path(pct_data, region, "load.Rmd"))
+file.copy("build_region.R", file.path(pct_data, region, "build_region.R"))
 
 # Create folder in shiny app folder
 region_dir <- file.path(file.path(pct_shiny_regions, region))
@@ -267,5 +210,3 @@ server_text <- paste0('startingCity <- "', region, '"\n',
 write(ui_text, file = file.path(region_dir, "ui.R"))
 write(server_text, file = file.path(region_dir, "server.R"))
 if(!file.exists( file.path(region_dir, "www"))){ file.symlink(file.path("..", "..","www"), region_dir) }
-
-end_time <- Sys.time()
