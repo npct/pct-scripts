@@ -7,7 +7,7 @@ regions <- readOGR("../pct-bigdata/regions-london.geojson", layer = "OGRGeoJSON"
 la_all <- regions$Region <- as.character(regions$Region)
 la_all = la_all[-which(la_all == "london")]
 # select regions of interest (uncomment/change as appropriate)
-la_all <- c("cambridgeshire") # just one region
+la_all <- c("cambridgeshire", "avon", "kent", "london-central", "west-yorkshire") # just one region
 
 # # For custom regions:
 # regions <- shapefile("/tmp/Study_Areas.shp")
@@ -26,24 +26,19 @@ for(k in 1:length(la_all)){
   # Build the regions (comment out if the data has already been build)
   message(paste0("Building for ", region))
   source("build_region.R")
-  knitr::knit2html(quiet = T,
-    input = "model_output.Rmd",
-    output = file.path(pct-data, region, "model-output.html"),
-    envir = globalenv(), force_v1 = TRUE
-  )
   # Write the model output files (comment out to not report data)
   # message(paste0("Writing the output file for ", region))
-  # knitr::knit2html(quiet = T,
-  #   input = "load.Rmd",
-  #   output = file.path("../pct-data/", region, "/model-output.html"),
-  #   envir = globalenv(), force_v1 = TRUE
-  # )
+  knitr::knit2html(quiet = T,
+    input = "model_output.Rmd",
+    output = file.path(pct_data, region, "model-output.html"),
+    envir = globalenv(), force_v1 = TRUE
+  )
   # Re read the model output file
-  moutput <- readLines(file.path(pct-data, region, "model-output.html"))
+  moutput <- readLines(file.path(pct_data, region, "model-output.html"))
   # Remove all style and javascript tags
   moutput <- moutput[-c(5:200)]
   # Re-write the model output file
-  write(moutput, file.path(pct-data, region, "model-output.html"))
+  write(moutput, file.path(pct_data, region, "model-output.html"))
 
   message(paste0("Just built ", region))
 }
