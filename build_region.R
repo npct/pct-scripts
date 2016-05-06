@@ -196,7 +196,7 @@ saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
 # Save the initial parameters to reproduce results
 run_time <- Sys.time() - start_time
 nrow_flow <- nrow(flow)
-save(params, run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long, file = file.path(region_path, "params.RData"))
+save(params, run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long, n_commutes_region, file = file.path(region_path, "params.RData"))
 # # Save the script that loaded the lines into the data directory
 file.copy("build_region.R", file.path(pct_data, region, "build_region.R"))
 
