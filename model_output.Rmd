@@ -45,9 +45,11 @@ las_in_region <- las[las_in_region,]
 
 Please include this paragraph in any paper or report produced using these model results.
 
-Data for `r region` were generated at `r date()` by the National Propensity to
-Cycle Tool (PCT) Version 1, developed by the PCT academic team and released with
-an GPL Affero [Licence] (https://www.gnu.org/licenses/agpl-3.0). This version
+Data for `r region` were generated at `r build_date` by the National Propensity to
+Cycle Tool (PCT).
+
+This is Version 1, developed by the PCT academic team and released with
+an GPL Affero [Licence](https://www.gnu.org/licenses/agpl-3.0). This version
 examines cycling potential for main-mode commute trips using Census 2011 travel
 to work data and Middle-Level Super Output areas (MSOASs) as zones. There were
 `r sum(zones$All)` commuters in the study area, all of which were
