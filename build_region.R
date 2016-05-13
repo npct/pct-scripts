@@ -19,8 +19,8 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 30
-params$mflow_short <- 30
+params$mflow <- 10
+params$mflow_short <- 10
 
 # Distances
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -67,6 +67,10 @@ flow <- flow[sel, ]
 # summary(flow$dist)
 # l <- od2line(flow = flow, zones = cents)
 l <- flow
+
+# add geo_label of the lines
+l$geo_label_o = left_join(l@data["Area.of.residence"], zones@data[c("geo_code", "geo_label")], by = c("Area.of.residence" = "geo_code"))
+l$geo_label_d = left_join(l@data["Area.of.workplace"], zones@data[c("geo_code", "geo_label")], by = c("Area.of.workplace" = "geo_code"))
 
 # proportion of OD pairs in min-flow based subset
 pmflow <- round(nrow(l) / n_flow_region * 100, 1)
