@@ -20,8 +20,8 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-mflow <- 10
-mflow_short <- 10
+mflow <- 500
+mflow_short <- 500
 
 # Distances
 mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -200,11 +200,11 @@ saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
 
 # gather params
 params = Hmisc::llist(mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist,
-              run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long)
+              run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long,
+              build_date = Sys.Date(), run_time = Sys.time() - start_time)
 saveRDS(params, file.path(pct_data, region, "params.Rds"))
 
 # Save the initial parameters to reproduce results
-run_time <- Sys.time() - start_time
 nrow_flow <- nrow(flow)
 # # Save the script that loaded the lines into the data directory
 file.copy("build_region.R", file.path(pct_data, region, "build_region.R"))
