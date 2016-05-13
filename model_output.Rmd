@@ -49,9 +49,9 @@ Cycle Tool (PCT) Version 1, developed by the PCT academic team and released with
 an GPL Affero [Licence] (https://www.gnu.org/licenses/agpl-3.0). This version
 examines cycling potential for main-mode commute trips using Census 2011 travel
 to work data and Middle-Level Super Output areas (MSOASs) as zones. There were
-<!-- PLS ADD NUMBER COMMUTERS--> commuters in the study area, all of which were
+`r sum(zones$All)` commuters in the study area, all of which were
 included in area-based analysis. Where cycle flows are routed, flows within
-zones ( <!--PLS add % of all flows that are within-zone--> of flows in `r region`
+zones ( `r round(sum(cents$All) / sum(zones$All) * 100, 2)`% of flows in `r region`
 ) are excluded as are commuters with no fixed workplace. Of the `r n_flow_region`
 between-zone regular commute flows, selection criteria were used.
 For OD pairs with maximum Euclidean distance of `r params$mdist`, flows with a
@@ -59,8 +59,7 @@ minimum flow of `r params$mflow` were selected. For OD pairs with maximum
 Euclidean distance of `r params$max_all_dist`, flows with a minimum flow of
 `r params$mflow_short` were selected. Adding those (overlapping) selection criteria
 resulted in `r pmflowa`% of all inter-zone commutes in the study area being
-selected, accounting for ( <!--PLS add % of all commutes included in area-based
-data that this represents--> of total commutes in `r region`). A modified
+selected, accounting for ( `r round(sum(l$All) / sum(zones$All) * 100, 2)`% of total commutes in `r region`). A modified
 version of the 2014 [HEAT tool]
 (http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update)
 was used.
