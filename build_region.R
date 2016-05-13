@@ -2,6 +2,7 @@ source("set-up.R") # load packages needed
 
 # Create default LA name if none exists
 start_time <- Sys.time() # for timing the script
+
 if(!exists("region")) region <- "west-yorkshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
@@ -19,14 +20,14 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 10
-params$mflow_short <- 10
+mflow <- 10
+mflow_short <- 10
 
 # Distances
-params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
-params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
-params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
-params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
+mdist <- 20 # maximum euclidean distance (km) for subsetting lines
+max_all_dist <- 7 # maximum distance (km) below which more lines are selected
+buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
+buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
@@ -60,8 +61,8 @@ n_commutes_region <- sum(flow$All)
 
 # Subset lines
 # subset OD pairs by n. people using it
-sel_long <- flow$All > params$mflow & flow$dist < params$mdist
-sel_short <- flow$dist < params$max_all_dist & flow$All > params$mflow_short
+sel_long <- flow$All > mflow & flow$dist < mdist
+sel_short <- flow$dist < max_all_dist & flow$All > mflow_short
 sel <- sel_long | sel_short
 flow <- flow[sel, ]
 # summary(flow$dist)
@@ -100,7 +101,7 @@ l$busyness_q <- rq$busyness
 
 rft <- rf
 # Stop rnet lines going to centroid (optional)
-rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist)
+rft <- toptailgs(rf, toptail_dist = buff_geo_dist)
 if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
@@ -197,10 +198,14 @@ saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
 saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
 
+# gather params
+p = list(mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist,
+              run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long)
+saveRDS(params, file.path(pct_data, region, "params.Rds"))
+
 # Save the initial parameters to reproduce results
 run_time <- Sys.time() - start_time
 nrow_flow <- nrow(flow)
-save(params, run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long, file = file.path(region_path, "params.RData"))
 # # Save the script that loaded the lines into the data directory
 file.copy("build_region.R", file.path(pct_data, region, "build_region.R"))
 
