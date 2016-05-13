@@ -199,7 +199,7 @@ saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
 
 # gather params
-p = list(mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist,
+params = Hmisc::llist(mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist,
               run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long)
 saveRDS(params, file.path(pct_data, region, "params.Rds"))
 
