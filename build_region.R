@@ -3,7 +3,7 @@ source("set-up.R") # load packages needed
 # Create default LA name if none exists
 start_time <- Sys.time() # for timing the script
 
-if(!exists("region")) region <- "west-yorkshire"
+if(!exists("region")) region <- "cambridgeshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_privatedata <- file.path("..", "pct-privatedata")
@@ -20,14 +20,14 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-mflow <- 500
-mflow_short <- 500
+params$mflow <- 500
+params$mflow_short <- 500
 
 # Distances
-mdist <- 20 # maximum euclidean distance (km) for subsetting lines
-max_all_dist <- 7 # maximum distance (km) below which more lines are selected
-buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
-buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
+params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
+params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
+params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
+params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
@@ -101,7 +101,7 @@ l$busyness_q <- rq$busyness
 
 rft <- rf
 # Stop rnet lines going to centroid (optional)
-rft <- toptailgs(rf, toptail_dist = buff_geo_dist)
+rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist)
 if(length(rft) == length(rf)){
   row.names(rft) <- row.names(rf)
   rft <- SpatialLinesDataFrame(rft, rf@data)
@@ -197,17 +197,16 @@ saveRDS(l, file.path(pct_data, region, "l.Rds"))
 saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
 saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
-write.csv(l@data, file.path(pct_data, region, "line-data.csv"))
+write.csv(x = l@data, file.path(pct_data, region, "line-data.csv"))
 write.csv(z@data, file.path(pct_data, region, "area-data.csv"))
 
 # gather params
-params = Hmisc::llist(mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist,
-              run_time, pmflow, pmflowa, n_flow_region, nrow_flow, sel_short, sel_long,
+params = list(params, nrow_flow = nrow(flow),
               build_date = Sys.Date(), run_time = Sys.time() - start_time)
 saveRDS(params, file.path(pct_data, region, "params.Rds"))
 
 # Save the initial parameters to reproduce results
-nrow_flow <- nrow(flow)
+
 # # Save the script that loaded the lines into the data directory
 file.copy("build_region.R", file.path(pct_data, region, "build_region.R"))
 

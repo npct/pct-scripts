@@ -15,9 +15,9 @@ region_shape <- region_orig <- # create region shape (and add buffer in m)
   regions[grep(pattern = region, x = regions$Region, ignore.case = T),]
 
 # Only transform if needed
-if(buff_dist > 0){
+if(params$buff_dist > 0){
   region_shape <- spTransform(region_shape, CRS("+init=epsg:27700"))
-  region_shape <- gBuffer(region_shape, width = buff_dist * 1000)
+  region_shape <- gBuffer(region_shape, width = params$buff_dist * 1000)
   if(!exists("centsa")) # Population-weighted centroids
     centsa <- readOGR(file.path(pct_bigdata, "cents-scenarios.geojson"), "OGRGeoJSON")
   region_shape <- spTransform(region_shape, proj4string(centsa))
