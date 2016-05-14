@@ -14,7 +14,7 @@ source("set-up.R")
 knitr::opts_chunk$set(message = FALSE)
 
 # Read-in the data
-if(!exists("region")) region <- "west-yorkshire"
+if(!exists("region")) region <- "cambridgeshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 zones = readRDS(file.path(pct_data, region, "z.Rds"))
@@ -63,8 +63,7 @@ Euclidean distance of `r params$max_all_dist`, flows with a minimum flow of
 `r params$mflow_short` were selected. Adding those (overlapping) selection criteria
 resulted in `r pmflowa`% of all inter-zone commutes in the study area being
 selected, accounting for ( `r round(sum(l$All) / sum(zones$All) * 100, 2)`% of total commutes in `r region`). A modified
-version of the 2014 [HEAT tool]
-(http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update)
+version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update)
 was used.
 
 ## `r region`
