@@ -201,8 +201,10 @@ write.csv(x = l@data, file.path(pct_data, region, "line-data.csv"))
 write.csv(zones@data, file.path(pct_data, region, "area-data.csv"))
 
 # gather params
-params = list(params, nrow_flow = nrow(flow),
-              build_date = Sys.Date(), run_time = Sys.time() - start_time)
+params$nrow_flow = nrow(flow)
+params$build_date = Sys.Date()
+params$run_time = Sys.time() - start_time
+
 saveRDS(params, file.path(pct_data, region, "params.Rds"))
 
 # Save the initial parameters to reproduce results
