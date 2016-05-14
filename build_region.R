@@ -56,27 +56,27 @@ if(!exists("rq_nat"))
 o <- flow_nat$Area.of.residence %in% cents$geo_code
 d <- flow_nat$Area.of.workplace %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
-n_flow_region <- nrow(flow)
+params$n_flow_region <- nrow(flow)
 n_commutes_region <- sum(flow$All)
 
 # Subset lines
 # subset OD pairs by n. people using it
-sel_long <- flow$All > mflow & flow$dist < mdist
-sel_short <- flow$dist < max_all_dist & flow$All > mflow_short
-sel <- sel_long | sel_short
+params$sel_long <- flow$All > params$mflow & flow$dist < params$mdist
+params$sel_short <- flow$dist < params$max_all_dist & flow$All > params$mflow_short
+sel <- params$sel_long | params$sel_short
 flow <- flow[sel, ]
 # summary(flow$dist)
 # l <- od2line(flow = flow, zones = cents)
 l <- flow
 
 # add geo_label of the lines
-l$geo_label_o = left_join(l@data["Area.of.residence"], zones@data[c("geo_code", "geo_label")], by = c("Area.of.residence" = "geo_code"))
-l$geo_label_d = left_join(l@data["Area.of.workplace"], zones@data[c("geo_code", "geo_label")], by = c("Area.of.workplace" = "geo_code"))
+l$geo_label_o = left_join(l@data["Area.of.residence"], zones@data[c("geo_code", "geo_label")], by = c("Area.of.residence" = "geo_code"))[[2]]
+l$geo_label_d = left_join(l@data["Area.of.workplace"], zones@data[c("geo_code", "geo_label")], by = c("Area.of.workplace" = "geo_code"))[[2]]
 
 # proportion of OD pairs in min-flow based subset
-pmflow <- round(nrow(l) / n_flow_region * 100, 1)
+params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
-pmflowa <- round(sum(l$All) / n_commutes_region * 100, 1)
+params$pmflowa <- round(sum(l$All) / n_commutes_region * 100, 1)
 
 rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
 rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
