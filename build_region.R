@@ -197,6 +197,8 @@ saveRDS(l, file.path(pct_data, region, "l.Rds"))
 saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
 saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
 saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
+write.csv(l@data, file.path(pct_data, region, "line-data.csv"))
+write.csv(z@data, file.path(pct_data, region, "area-data.csv"))
 
 # gather params
 params = Hmisc::llist(mflow, mflow_short, mdist, max_all_dist, buff_dist, buff_geo_dist,
