@@ -5,9 +5,11 @@ library(knitr)
 pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions-london.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
-la_all = la_all[-which(la_all == "london")]
+la_all = la_all[!grepl(pattern = "london|cambridge", x = la_all)]
+la_all = la_all[10:20]
 # select regions of interest (uncomment/change as appropriate)
-la_all <- c("cambridgeshire", "avon", "kent", "london-central", "west-yorkshire") # just one region
+# la_all <- c("cambridgeshire")
+# la_all = c("avon", "kent", "london-central", "west-yorkshire") # just one region
 
 # # For custom regions:
 # regions <- shapefile("/tmp/Study_Areas.shp")
