@@ -77,6 +77,7 @@ Only OD pairs with less than
 ```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
 levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
 levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
+levels(dfsp$scenario)[2:5] = c("Ebikes", "Go Dutch", "Gender Equality", "Government Target")
 ggplot(dfsp) +
   geom_freqpoly(aes(dist_fast, weight = slc,
     color = scenario), binwidth = 1) +
