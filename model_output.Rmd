@@ -52,14 +52,13 @@ This version uses origin-destination (OD) data on travel to work from the 2011 C
 commuters in the study area, all of whom are represented in the area data produced by the PCT.  
 
 Of the `r n_flow_region`
-between-zone OD pairs in the study area, `r pmflowa`% are represented as
+between-zone OD pairs in the study area, `r round(nrow(l) / n_flow_region * 100)`% are represented as
 lines on the interactive map.
 These `r nrow(l)` desire lines account for `r round(sum(l$All) / sum(zones$All) * 100)`% of all commuters in the study area and
 `r round(sum(l$All) / params$n_commutes_region * 100)`%
 of between-zone commutes taking place within the study area.
 The remainder is accounted for by commuters travelling outside the study region,
-within-zone flows and people with no fixed place of work.
-`r round(sum(cents$All) / sum(zones$All) * 100)`% of commuters in the region travel to work within the same MSOA. 
+within-zone travel (accounting for `r round(sum(cents$All) / sum(zones$All) * 100)`% of commutes) and people with no fixed place of work.
 
 The selection criteria used to select which OD pairs were shown on the map were as follows.
 Only OD pairs with less than
