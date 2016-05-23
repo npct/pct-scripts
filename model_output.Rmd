@@ -47,20 +47,36 @@ This document was created on `r Sys.Date()`.
 
 The data is presented in this document is from Version 1 of the PCT, an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0).
 
-This version uses origin-destination (OD) data on travel to work from the 2011 Census. This dataset reports the number of people travelling by different modes between Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were `r sum(zones$All)` commuters in the study area, all of whom are represented in the area data produced by the PCT.  `r round(sum(l$All) / sum(zones$All) * 100, 2)`% of these are represented as straight and route-allocated OD pairs on the map. `r round(sum(cents$All) / sum(zones$All) * 100, 2)`% of the commuters travel to work within the same MSOA. Of the `r n_flow_region`
-between-zone regular commute flows, selection criteria were used.
-For OD pairs with maximum Euclidean distance of `r params$mdist`, flows with a
-minimum flow of `r params$mflow` were selected. For OD pairs with maximum
-Euclidean distance of `r params$max_all_dist`, flows with a minimum flow of
-`r params$mflow_short` were selected. Adding those (overlapping) selection criteria
-resulted in `r pmflowa`% of all inter-zone commutes in the study area being
-selected, accounting for ( `r round(sum(l$All) / sum(zones$All) * 100, 2)`% of total commutes in `r region`). A modified
-version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update)
-was used.
+This version uses origin-destination (OD) data on travel to work from the 2011 Census. This dataset reports the number of people travelling by different modes between Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were
+`r round(sum(zones$All) / 1000)` thousand
+commuters in the study area, all of whom are represented in the area data produced by the PCT.  
+
+Of the `r n_flow_region`
+between-zone OD pairs in the study area, `r pmflowa`% are represented as
+lines on the interactive map.
+These `r nrow(l)` desire lines account for `r round(sum(l$All) / sum(zones$All) * 100)`% of all commuters in the study area and
+`r round(sum(l$All) / params$n_commutes_region * 100)`%
+of between-zone commutes taking place within the study area.
+The remainder is accounted for by commuters travelling outside the study region,
+within-zone flows and people with no fixed place of work.
+`r round(sum(cents$All) / sum(zones$All) * 100)`% of commuters in the region travel to work within the same MSOA. 
+
+The selection criteria used to select which OD pairs were shown on the map were as follows.
+Only OD pairs with less than
+`r params$mdist`km were and more than 
+`r params$mflow` (by any mode) were selected.
+
+<!-- Commented out because the dual selection criteria is no longer used and can cause confusion. -->
+<!-- For OD pairs with maximum -->
+<!-- Euclidean distance of `r params$max_all_dist`, flows with a minimum flow of -->
+<!-- `r params$mflow_short` were selected. Adding those (overlapping) selection criteria -->
+<!-- resulted in  of all inter-zone commutes in the study area being -->
+<!-- selected, accounting for ( `r round(sum(l$All) / sum(zones$All) * 100, 2)`% of total commutes in `r region`). -->
+
 
  paragraph in any paper or report produced using these model results.
 
-## `r region`
+## Analysis
 
 ```{r, echo=FALSE, warning=FALSE, fig.cap="Rate of cycling in model scenarios. Note the total percentage cycling is equal to the area under each line."}
 levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
@@ -266,6 +282,12 @@ The value of each segment in the network corresponds to the total number of cycl
 plot(rnet, lwd = rnet$Bicycle / mean(rnet$Bicycle))
 ```
 
+## Health impacts
+
+A modified
+version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update)
+was used.
+
 ## Time taken
 
 The time taken to run the analysis for this area is presented below:
@@ -273,4 +295,5 @@ The time taken to run the analysis for this area is presented below:
 ```{r, echo=FALSE}
 round(run_time, 2)
 ```
+
 This document was produced automatically at `r Sys.time()`.
