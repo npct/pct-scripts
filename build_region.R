@@ -57,7 +57,7 @@ o <- flow_nat$Area.of.residence %in% cents$geo_code
 d <- flow_nat$Area.of.workplace %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 params$n_flow_region <- nrow(flow)
-n_commutes_region <- sum(flow$All)
+params$n_commutes_region <- sum(flow$All)
 
 # Subset lines
 # subset OD pairs by n. people using it
@@ -76,7 +76,7 @@ l$geo_label_d = left_join(l@data["Area.of.workplace"], zones@data[c("geo_code", 
 # proportion of OD pairs in min-flow based subset
 params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
-params$pmflowa <- round(sum(l$All) / n_commutes_region * 100, 1)
+params$pmflowa <- round(sum(l$All) / params$n_commutes_region * 100, 1)
 
 rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
 rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
