@@ -41,7 +41,7 @@ las_in_region <- las[las_in_region,]
 
 ## Key information 
 
-This document describes the data underlying the Propensity to Cycle Tool (PCT) for the region `r R.utils::capitalize(region)`.
+This document describes the data underlying the Propensity to Cycle Tool (PCT) for `r R.utils::capitalize(region)`.
 The data was generated on `r build_date`.
 This document was created on `r Sys.Date()`.
 
