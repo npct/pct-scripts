@@ -41,21 +41,15 @@ las_in_region <- las_in_region[1,]
 las_in_region <- las[las_in_region,]
 ```
 
-## Attribution
+## Key information 
 
-Please include this paragraph in any paper or report produced using these model results.
+This document describes the data underlying the Propensity to Cycle Tool (PCT) for the region `r R.utils::capitalize(region)`.
+The data was generated on `r build_date`.
+This document was created on `r Sys.Date()`.
 
-Data for `r region` were generated at `r build_date` by the National Propensity to
-Cycle Tool (PCT).
+The data is presented in this document is from Version 1 of the PCT, an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0).
 
-This is Version 1, developed by the PCT academic team and released with
-an GPL Affero [Licence](https://www.gnu.org/licenses/agpl-3.0). This version
-examines cycling potential for main-mode commute trips using Census 2011 travel
-to work data and Middle-Level Super Output areas (MSOASs) as zones. There were
-`r sum(zones$All)` commuters in the study area, all of which were
-included in area-based analysis. Where cycle flows are routed, flows within
-zones ( `r round(sum(cents$All) / sum(zones$All) * 100, 2)`% of flows in `r region`
-) are excluded as are commuters with no fixed workplace. Of the `r n_flow_region`
+This version uses origin-destination (OD) data on travel to work from the 2011 Census. This dataset reports the number of people travelling by different modes between Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were `r sum(zones$All)` commuters in the study area, all of whom are represented in the area data produced by the PCT.  `r round(sum(l$All) / sum(zones$All) * 100, 2)`% of these are represented as straight and route-allocated OD pairs on the map. `r round(sum(cents$All) / sum(zones$All) * 100, 2)`% of the commuters travel to work within the same MSOA. Of the `r n_flow_region`
 between-zone regular commute flows, selection criteria were used.
 For OD pairs with maximum Euclidean distance of `r params$mdist`, flows with a
 minimum flow of `r params$mflow` were selected. For OD pairs with maximum
@@ -65,6 +59,8 @@ resulted in `r pmflowa`% of all inter-zone commutes in the study area being
 selected, accounting for ( `r round(sum(l$All) / sum(zones$All) * 100, 2)`% of total commutes in `r region`). A modified
 version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update)
 was used.
+
+ paragraph in any paper or report produced using these model results.
 
 ## `r region`
 
