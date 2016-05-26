@@ -216,9 +216,9 @@ file.copy("build_region.R", file.path(pct_data, region, "build_region.R"))
 region_dir <- file.path(file.path(pct_shiny_regions, region))
 dir.create(region_dir)
 ui_text <- 'source("../../ui-base.R", local = T, chdir = T)'
-server_text <- paste0('startingCity <- "', region, '"\n',
-                      'shinyRoot <- file.path("..", "..")\n',
-                      'source(file.path(shinyRoot, "server-base.R"), local = T)')
+server_text <- paste0('starting_city <- "', region, '"\n',
+                      'shiny_root <- file.path("..", "..")\n',
+                      'source(file.path(shiny_root, "server-base.R"), local = T)')
 write(ui_text, file = file.path(region_dir, "ui.R"))
 write(server_text, file = file.path(region_dir, "server.R"))
 if(!file.exists( file.path(region_dir, "www"))){ file.symlink(file.path("..", "..","www"), region_dir) }
