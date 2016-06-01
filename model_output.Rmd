@@ -44,7 +44,8 @@ This document provides more information about the data underlying the Propensity
 
 This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were
 `r prettyNum(sum(zones$All), big.mark = ",", scientific = F)` thousand
-commuters in the study area, all of whom are represented in the area data produced by the PCT.  
+commuters in the study area from this data source.
+All of these are represented in the area data produced by the PCT.  
 
 Lines on the interactive map  represent flows between zones in `r R.utils::capitalize(region)`. This excludes
 within-zone travel (`r round(sum(cents$All) / sum(zones$All) * 100)`% of commutes in `r R.utils::capitalize(region)`), commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work. 
