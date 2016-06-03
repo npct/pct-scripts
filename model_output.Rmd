@@ -14,7 +14,7 @@ source("set-up.R")
 knitr::opts_chunk$set(message = FALSE)
 
 # Read-in the data
-if(!exists("region")) region <- "cambridgeshire"
+if(!exists("region")) region <- "isle-of-scily"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 zones = readRDS(file.path(pct_data, region, "z.Rds"))

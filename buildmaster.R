@@ -3,18 +3,25 @@ library(knitr)
 
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
-regions <- readOGR("../pct-bigdata/regions-london.geojson", layer = "OGRGeoJSON")
+regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
 la_all = la_all[!grepl(pattern = "london|cambridge", x = la_all)]
 la_all = la_all[17:20]
 # select regions of interest (uncomment/change as appropriate)
 # la_all <- c("cambridgeshire")
-# la_all = c("avon", "kent", "london-central", "west-yorkshire") # just one region
+la_all = c("isle-of-wight") # just one region
+
 
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
 # regions$Region <- tolower(regions$Name) # add region names
 # la_all <- regions$Region
+
+# # # For Local Authorities
+# regions <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
+# regions$Region <- regions$CTYUA12NM
+# regions$Region <- tolower(as.character(regions$Region))
+# la_all = "leicester"
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
@@ -48,8 +55,3 @@ for(k in 1:length(la_all)){
 
 # # Update the data sha
 # source("update_sha.R")
-
-# las <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
-# las_names <- las$CTYUA12NM
-# las$Region <- tolower(as.character(las_names))
-# regions <- las[las$Region == region,]
