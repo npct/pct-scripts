@@ -1,5 +1,9 @@
 source("set-up.R") # load packages needed
 
+# ms_simplify gives Error: RangeError: Maximum call stack size exceeded
+# for large objects.  Turning the repair off fixed it...
+too_large <- function(to_save, max_size = 5.6){ format(object.size(to_save), units = 'Mb') > max_size }
+
 # Create default LA name if none exists
 start_time <- Sys.time() # for timing the script
 
@@ -112,7 +116,12 @@ rft$Bicycle <- l$Bicycle
 # this greatly speeds up the build (due to calls to overline)
 # needs mapshaper installed and available to system():
 # see https://github.com/mbloch/mapshaper/wiki/
-rft <- ms_simplify(rft, keep = 0.06)
+rft_too_large <-  too_large(rft)
+rft <- ms_simplify(rft, keep = 0.06, no_repair = rft_too_large)
+if (rft_too_large){
+  file.create(file.path(pct_data, region, "rft_too_large"))
+}
+
 rnet <- overline(rft, "Bicycle")
 
 if(require(foreach) & require(doParallel)){
@@ -137,6 +146,7 @@ if(require(foreach) & require(doParallel)){
     rft@data[i] <- NULL
   }
 }
+rm(rft)
 
 # # Add maximum amount of interzone flow to rnet
 # create line midpoints (sp::over does not work with lines it seems)
@@ -151,10 +161,10 @@ for(i in c("Bicycle", scens)){
   rnet@data = cbind(rnet@data, over(rnet_cents, zones[nm]))
   zones@data[nm] = NULL
 }
+rm(rnet_osgb, rnet_cents)
 
 # Are the lines contained by a single zone?
-gtest = gContains(zones, rnet, byid = TRUE)
-rnet$Singlezone = rowSums(gtest)
+rnet$Singlezone = rowSums(gContains(zones, rnet, byid = TRUE))
 rnet@data[rnet$Singlezone == 0, grep(pattern = "upto", names(rnet))] = NA
 
 if(!"gendereq_slc" %in% scens)
@@ -190,15 +200,41 @@ for(ii in na_cols){
 
 # # Save objects
 # Save objects # uncomment these lines to save model output
-saveRDS(zones, file.path(pct_data, region, "z.Rds"))
-geojson_write( ms_simplify(zones, keep = 0.1), file = file.path(pct_data, region, "z"))
+save_formats <- function(to_save, name = F){
+  if (name == F){
+    name <- substitute(to_save)
+  }
+  saveRDS(to_save, file.path(pct_data, region, paste0(name, ".Rds")))
+
+  # Simplify data checked with before and after using:
+  # plot(l$gendereq_sideath_webtag)
+  to_save@data <- round_df(to_save@data, 5)
+
+  # Simplify geom
+  geojson_write( ms_simplify(to_save, keep = 0.1, no_repair = too_large(to_save)), file = file.path(pct_data, region, name))
+  write.csv(to_save@data, file.path(pct_data, region, paste0(name, ".csv")))
+}
+
+round_df <- function(df, digits) {
+  nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+
+  df[,nums] <- round(df[,nums], digits = digits)
+
+  (df)
+}
+
+save_formats(zones, 'z')
+rm(zones)
+save_formats(l)
+rm(l)
+save_formats(rf)
+rm(rf)
+save_formats(rq)
+rm(rq)
+save_formats(rnet)
+rm(rnet)
+
 saveRDS(cents, file.path(pct_data, region, "c.Rds"))
-saveRDS(l, file.path(pct_data, region, "l.Rds"))
-saveRDS(rf, file.path(pct_data, region, "rf.Rds"))
-saveRDS(rq, file.path(pct_data, region, "rq.Rds"))
-saveRDS(rnet, file.path(pct_data, region, "rnet.Rds"))
-write.csv(x = l@data, file.path(pct_data, region, "line-data.csv"))
-write.csv(zones@data, file.path(pct_data, region, "area-data.csv"))
 
 # gather params
 params$nrow_flow = nrow(flow)
