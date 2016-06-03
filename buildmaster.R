@@ -16,7 +16,11 @@ la_all = la_all[17:20]
 # regions$Region <- tolower(regions$Name) # add region names
 # la_all <- regions$Region
 
-for(k in 1:length(la_all)){
+require(foreach) & require(doParallel)
+cl <- makeCluster(parallel:::detectCores())
+registerDoParallel(cl)
+
+foreach(k = 1:length(la_all)) %dopar%{
   # What geographic level are we working at (cua or regional)
   geo_level <- "regional"
   region <- la_all[k]
@@ -43,7 +47,7 @@ for(k in 1:length(la_all)){
   write(moutput, file.path(pct_data, region, "model-output.html"))
 
   message(paste0("Just built ", region))
-  
+
 }
 
 # # Update the data sha

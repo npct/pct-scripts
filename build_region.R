@@ -124,27 +124,11 @@ if (rft_too_large){
 
 rnet <- overline(rft, "Bicycle")
 
-if(require(foreach) & require(doParallel)){
-  cl <- makeCluster(parallel:::detectCores())
-  registerDoParallel(cl)
-  # foreach::getDoParWorkers()
-    # create list in parallel
-    rft_data_list <- foreach(i = scens) %dopar% {
-      rft@data[i] <- l@data[i]
-      rnet_tmp <- stplanr::overline(rft, i)
-      rnet_tmp@data[i]
-    }
-    # save the results back into rnet with normal for loop
-    for(j in seq_along(scens)){
-      rnet@data <- cbind(rnet@data, rft_data_list[[j]])
-    }
-} else {
-  for(i in scens){
-    rft@data[i] <- l@data[i]
-    rnet_tmp <- overline(rft, i)
-    rnet@data[i] <- rnet_tmp@data[i]
-    rft@data[i] <- NULL
-  }
+for(i in scens){
+  rft@data[i] <- l@data[i]
+  rnet_tmp <- overline(rft, i)
+  rnet@data[i] <- rnet_tmp@data[i]
+  rft@data[i] <- NULL
 }
 rm(rft)
 
