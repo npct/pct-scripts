@@ -51,7 +51,7 @@ commuters in the study area from this data source. All of these are represented 
 <!-- as discussed can we please insert actual not rounded number-->
 
 Lines on the interactive map  represent flows between zones in `r R.utils::capitalize(region)`. This excludes
-within-zone travel (`r round(sum(cents$All) / sum(zones$All) * 100)`% of commutes in `r R.utils::capitalize(region)`), commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work. Within `r R.utils::capitalize(region)` there are `r n_flow_region / 1000` between-zone OD pairs. Of these, `r round(nrow(l) / n_flow_region * 100)`% are represented as lines on the interactive map. The selection criteria used for this were (i) distance of less than 
+within-zone travel (`r round(sum(cents$All) / sum(zones$All) * 100)`% of commutes in `r R.utils::capitalize(region)`), commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work. Within `r R.utils::capitalize(region)` there are `r n_flow_region` between-zone OD pairs. Of these, `r round(nrow(l) / n_flow_region * 100)`% are represented as lines on the interactive map. The selection criteria used for this were (i) distance of less than 
 `r params$mdist`km and (ii) more than `r params$mflow` (by any mode). The resultant `r nrow(l)` desire lines account for `r round(sum(l$All) / sum(zones$All) * 100)`% of all commuters in `r R.utils::capitalize(region)` and
 `r round(sum(l$All) / params$n_commutes_region * 100)`%
 of between-zone commutes taking place within `r R.utils::capitalize(region)`.
