@@ -16,7 +16,7 @@ source("set-up.R")
 knitr::opts_chunk$set(message = FALSE)
 
 # Read-in the data
-if(!exists("region")) region <- "isle-of-scily"
+if(!exists("region")) region <- "cambridgeshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 zones = readRDS(file.path(pct_data, region, "z.Rds"))
@@ -45,7 +45,7 @@ las_in_region <- las[las_in_region,]
 This document provides more information about the data underlying the Propensity to Cycle Tool (PCT) for `r R.utils::capitalize(region)`. The data was generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0).Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others given attribution to the original.
 
 This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were
-`r prettyNum(sum(zones$All), big.mark = ",", scientific = F)` thousand
+`r prettyNum(sum(zones$All), big.mark = ",", scientific = F)`
 commuters in the study area from this data source. All of these are represented in the area data produced by the PCT.  
 
 <!-- as discussed can we please insert actual not rounded number-->
