@@ -34,7 +34,7 @@ for(k in 1:length(la_all)){
 
   # Build the regions (comment out if the data has already been build)
   message(paste0("Building for ", region))
-  source("build_region.R")
+  # source("build_region.R") # comment out to skip build
   # Write the model output files (comment out to not report data)
   # message(paste0("Writing the output file for ", region))
   knitr::knit2html(quiet = T,
@@ -43,11 +43,11 @@ for(k in 1:length(la_all)){
     envir = globalenv(), force_v1 = TRUE
   )
   # Re read the model output file
-  moutput <- readLines(file.path(pct_data, region, "model-output.html"))
+  # moutput <- readLines(file.path(pct_data, region, "model-output.html"))
   # Remove all style and javascript tags
-  moutput <- moutput[-c(5:200)]
+  # moutput <- moutput[-c(5:200)]
   # Re-write the model output file
-  write(moutput, file.path(pct_data, region, "model-output.html"))
+  # write(moutput, file.path(pct_data, region, "model-output.html"))
 
   message(paste0("Just built ", region))
   
