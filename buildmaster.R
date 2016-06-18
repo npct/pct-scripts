@@ -5,7 +5,7 @@ library(knitr)
 pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
-la_all = la_all[grepl(pattern = "cambridge", x = la_all)]
+la_all = la_all[!grepl(pattern = "london", x = la_all)]
 # la_all = la_all[17:20]
 # select regions of interest (uncomment/change as appropriate)
 # la_all <- c("cambridgeshire")
