@@ -38,3 +38,11 @@ if(sum(!reqs) > 0) install.packages(pkgs[!reqs])
 # Option 3: download data manually from https://github.com/Robinlovelace/pct-data/archive/master.zip
 
 cckey <- Sys.getenv('CS_API_KEY')
+
+# function to remove style from html page
+remove_style = function(x){
+  style_starts = grep("<style", x)
+  style_ends = grep("</style", x)
+  res = x[-(style_starts:style_ends)]
+  res
+}

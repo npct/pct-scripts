@@ -5,7 +5,7 @@ library(knitr)
 pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
-la_all = la_all[!grepl(pattern = "london|cambridge", x = la_all)]
+la_all = la_all[grepl(pattern = "cambridge", x = la_all)]
 # la_all = la_all[17:20]
 # select regions of interest (uncomment/change as appropriate)
 # la_all <- c("cambridgeshire")
@@ -22,7 +22,7 @@ la_all = la_all[!grepl(pattern = "london|cambridge", x = la_all)]
 # regions$Region <- regions$CTYUA12NM
 # regions$Region <- tolower(as.character(regions$Region))
 # la_all = "leicester"
-
+k = 1
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
   geo_level <- "regional"
@@ -43,11 +43,12 @@ for(k in 1:length(la_all)){
     envir = globalenv(), force_v1 = TRUE
   )
   # Re read the model output file
-  # moutput <- readLines(file.path(pct_data, region, "model-output.html"))
-  # Remove all style and javascript tags
-  # moutput <- moutput[-c(5:200)]
+  model_output =
+    readLines(file.path(pct_data, region, "model-output.html"))
+  # remove style section
+  model_output <- remove_style(model_output)
   # Re-write the model output file
-  # write(moutput, file.path(pct_data, region, "model-output.html"))
+  write(model_output, file.path(pct_data, region, "model-output.html"))
 
   message(paste0("Just built ", region))
   
