@@ -16,6 +16,8 @@ save_formats <- function(to_save, name = F){
   if (name == F){
     name <- substitute(to_save)
   }
+  to_save <- to_save[,!grepl("(webtag|siw$|base_)", names(to_save@data))]
+  saveRDS(to_save, file.path(pct_data, region, paste0(name, ".Rds")))
   to_save@data <- round_df(to_save@data, 5)
   geojson_write(ms_simplify(to_save, keep = 0.1, no_repair = too_large(to_save)) , file = file.path(pct_data, region, name))
   write.csv(to_save@data, file.path(pct_data, region, paste0(name, ".csv")))

@@ -60,6 +60,11 @@ if(!exists("rq_nat"))
 o <- flow_nat$Area.of.residence %in% cents$geo_code
 d <- flow_nat$Area.of.workplace %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
+
+# Remove Webtag, increase in walkers and base_
+zones <- zones[,!grepl("(webtag|siw$|base_)", names(zones@data))]
+flow <- flow[,!grepl("(webtag|siw$|base_)", names(zones@data))]
+
 params$n_flow_region <- nrow(flow)
 params$n_commutes_region <- sum(flow$All)
 
