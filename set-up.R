@@ -43,6 +43,9 @@ cckey <- Sys.getenv('CS_API_KEY')
 remove_style = function(x){
   style_starts = grep("<style", x)
   style_ends = grep("</style", x)
-  res = x[-(style_starts:style_ends)]
-  res
+  # Remove lines ONLY when the 'style' tag exists
+  if ((length(style_starts) != 0 && length(style_ends) != 0))
+    x[-(style_starts:style_ends)]
+  else
+    x
 }
