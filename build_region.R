@@ -90,7 +90,7 @@ params$pmflowa <- round(sum(l$All) / params$n_commutes_region * 100, 1)
 rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
 rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
 rf <- rf_nat[rf_nat$id %in% l$id,]
-rq <- rq_nat[rf_nat$id %in% l$id,]
+rq <- rq_nat[rq_nat$id %in% l$id,]
 
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length
