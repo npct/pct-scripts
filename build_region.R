@@ -130,7 +130,7 @@ if (rft_too_large){
 rnet <- overline(rft, "Bicycle")
 
 if(require(foreach) & require(doParallel)){
-  cl <- makeCluster(parallel:::detectCores())
+  cl <- makeCluster(4)
   registerDoParallel(cl)
   # foreach::getDoParWorkers()
     # create list in parallel
