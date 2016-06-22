@@ -143,6 +143,7 @@ if(require(foreach) & require(doParallel)){
     for(j in seq_along(scens)){
       rnet@data <- cbind(rnet@data, rft_data_list[[j]])
     }
+    stopCluster(cl = cl)
 } else {
   for(i in scens){
     rft@data[i] <- l@data[i]
