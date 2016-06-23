@@ -68,13 +68,13 @@ Two selection criteria were used to select which were visualised: only flows tha
 
 Between-zone flows exclude **within-zone travel**, when the zone of origin is the same as the zone of destination. Within-zone travel is represented by red points on the map when the lines are shown, and accounts for `r round(sum(cents$All) / sum(zones$All) * 100)`% of commuters in `r R.utils::capitalize(region)`. The between-zone flows visualised lines and routes on the map also exclude commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work.
 
-See ([Lovelace et al.](http://arxiv.org/abs/1509.04425)) for details of the methods we used to estimate the cycling, health and carbon impacts of each scenario, and to visualise results at the area, line, route and route network level.
+See [Lovelace et al. (2016)](http://arxiv.org/abs/1509.04425) for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and to visualise results at the area, line, route and route network level.
 
 ## The `r R.utils::capitalize(region)` region
 
 <!-- Can we show hilliness by comparison to other areas?  -->
 
-```{r distance-dist, echo=FALSE, fig.cap="**Figure 1:** Map of the study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The straight green lines represents the 100 flows with the greatest number of commuters by any mode.", echo=FALSE, message=FALSE, warning=FALSE}
+```{r distance-dist, echo=FALSE, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
 plot(zones, col = "lightgrey")
 plot(regions, add = T)
 plot(las_in_region, border = "blue", add = T, lwd = 2)
@@ -82,6 +82,8 @@ plot(region_orig, lwd = 5, add = T)
 plot(region_shape, border = "red", add = T, lwd = 2)
 lines(l[l$All > 100,], col = "green")
 ```
+
+**Figure 1:** Map of the study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The straight green lines represents the 100 flows with the greatest number of commuters by any mode.
 
 The map below shows the average hilliness of the between-zone routes used by commuters living in each MSOA.
 The average hilliness of the fastest routes in
@@ -91,11 +93,13 @@ compared with a national average of
 `r round(100 * mean(rf_nat$av_incline, na.rm = T), 2)`%.
 
 
-```{r, echo = FALSE, fig.cap="**Figure 2:** Map showing the average hilliness of routes in zones across the study area."}
+```{r, echo = FALSE, fig.cap=""}
 tm_shape(zones) +
   tm_fill("avslope", n = 3, palette = "Oranges", title = "Average gradient\nof fast routes (%)") +
   tm_legend()
 ```
+
+**Figure 2:** Map showing the average hilliness of routes in zones across the study area.
 
 ## Cycling levels in each scenario for `r R.utils::capitalize(region)`
 
@@ -122,7 +126,7 @@ dfdb =
 dfdb$Other = dfdb$All - rowSums(dfdb[3:ncol(dfdb)])
 dfdb$`Route distance (km)` = as.character(dfdb$`Route distance (km)`)
 dfdb = rbind(dfdb, c("All", colSums(dfdb[2:ncol(dfdb)])))
-knitr::kable(dfdb, caption = "**Table 1:** The proportion of people travelling by distance band and mode in the region in the 2011 Census. Note that '(0,2]' means 'from more than zero, up to and including 2', as defined by [ISO 31-11](https://en.wikipedia.org/wiki/ISO_31-11).")
+htmlTable::htmlTable(dfdb, caption = '<strong>Table 1:</strong> The proportion of people travelling by distance band and mode in the region in the 2011 Census. Note that ‘(0,2]’ means ‘from more than zero, up to and including 2’, as defined by <a href="https://en.wikipedia.org/wiki/ISO_31-11">ISO 31-11</a>.')
 ```
 
 The overall proportion cycling under each scenario is illustrated in Figure 3 below.
@@ -138,7 +142,7 @@ The overall proportion cycling under each scenario is illustrated in Figure 3 be
 
 <!--I think we either need to remove this graph or make clearer source of data - what is included? Are we including within zone-based trips?
 -->
-```{r, echo=FALSE, warning=FALSE, fig.cap="**Figure 3:** Percent of commuters cycling in model scenarios for between-zone trips within the region, stratified by trip distance. Note the total percentage cycling is equal to the area under each line."}
+```{r, echo=FALSE, warning=FALSE, fig.cap=""}
 levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
 levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
 levels(dfsp$scenario)[2:5] = c("Ebikes", "Go Dutch", "Gender Equality", "Government Target")
@@ -151,6 +155,14 @@ ggplot(dfsp) +
   xlim(c(0,12)) +
   theme_bw()
 ```
+
+**Figure 3:** Number of between-zone commuters cycling by scenario and distance.
+
+<!-- For further information on -->
+
+## References
+
+Lovelace, Robin, Anna Goodman, Rachel Aldred, Nikolai Berkoff, Ali Abbas, and James Woodcock. 2016. "The Propensity to Cycle Tool: An Open Source Online System for Sustainable Transport Planning."" ArXiv:1509.04425 [Cs]. http://arxiv.org/abs/1509.04425.
 
 <!-- Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in the table below. -->
 

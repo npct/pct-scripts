@@ -8,7 +8,7 @@ la_all <- regions$Region <- as.character(regions$Region)
 la_all = la_all[!grepl(pattern = "london", x = la_all)]
 # la_all = la_all[17:20]
 # select regions of interest (uncomment/change as appropriate)
-# la_all = c("isle-of-wight") # just one region
+la_all = c("cambridgeshire") # just one region
 
 
 # # # For custom regions:
@@ -33,13 +33,13 @@ for(k in 1:length(la_all)){
 
   # Build the regions (comment out if the data has already been build)
   message(paste0("Building for ", region))
-  source("build_region.R") # comment out to skip build
+  # source("build_region.R") # comment out to skip build
   # Write the model output files (comment out to not report data)
   # message(paste0("Writing the output file for ", region))
   knitr::knit2html(quiet = T,
     input = "model_output.Rmd",
     output = file.path(pct_data, region, "model-output.html"),
-    envir = globalenv(), force_v1 = TRUE
+    envir = globalenv(), force_v1 = T
   )
   # Re read the model output file
   model_output =
