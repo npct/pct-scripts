@@ -4,7 +4,6 @@ source("set-up.R")
 # after downloading latest data from github, e.g. with download-data.R
 fname = "../pct-bigdata/rf.Rds"
 fname = "../pct-bigdata/rq.Rds"
-fname = "../pct-bigdata/l_all_cc.Rds"
 r = readRDS(fname)
 
 # Which lengths are crazy long?
@@ -18,6 +17,15 @@ r$length[sel] = r$length[sel] / 1000
 
 # save the result
 # saveRDS(r, fname)
+
+# Check distance data for straight lines
+fname = "../pct-bigdata/pct_lines_oneway_shapes.Rds"
+r = readRDS(fname)
+# Which lengths are crazy long?
+sel = r$dist > 100 | is.na(r$dist)
+summary(sel)
+plot(r[sel,])
+summary(r$length[sel])
 
 # checks per region
 pct_data <- file.path("..", "pct-data")
