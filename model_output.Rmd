@@ -9,8 +9,6 @@ output:
     toc: yes
 ---
 
-<!--Anna suggested two places where we should change commutes to commuters - I wasn't 100% sure which these were so have left it. Slightly confusing as we are using 'commutes' to refer to OD pairs, whereas numbers of actual commutes by commuters will be higher...-->
-
 ```{r, include=FALSE}
 source("set-up.R")
 knitr::opts_chunk$set(message = FALSE)
@@ -20,6 +18,7 @@ if(!exists("region")) region <- "cambridgeshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 zones = readRDS(file.path(pct_data, region, "z.Rds"))
+zones$avslope = zones$avslope * 100
 cents = readRDS(file.path(pct_data, region, "c.Rds"))
 l = readRDS(file.path(pct_data, region, "l.Rds"))
 if(!exists("rf_nat"))
@@ -45,7 +44,7 @@ las_in_region <- las[las_in_region,]
 
 ## Key information 
 
-This document provides more information about the data underlying the Propensity to Cycle Tool (PCT) for `r R.utils::capitalize(region)`. The data was generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0).Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others given attribution to the original.
+This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r R.utils::capitalize(region)`. The data was generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0). Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others given attribution to the original.
 
 This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were
 `r prettyNum(sum(zones$All), big.mark = ",", scientific = F)`
@@ -58,21 +57,16 @@ Within `r R.utils::capitalize(region)` there are `r n_flow_region` between-zone 
 
 <!-- Lines on the interactive map represent flows between zones within `r R.utils::capitalize(region)` that meet the selection criteria for visualisation: only lines less than `r mdist` km in straight line (Euclidean) distance and with at least `r mflow` commuters (by any mode) using it -->
 
-Of these, `r nrow(l)` (`r round(nrow(l) / n_flow_region * 100)`%) are represented as **Straight Lines**, **Routes** (fastest and quietest) and the **Route Network** on the interactive map, capturing
+Of these, `r nrow(l)` (`r round(nrow(l) / n_flow_region * 100)`%) are represented as **Straight Lines**, **Routes** (fast and quiet) and the **Route Network** on the interactive map, capturing
 `r round(sum(l$All) / params$n_commutes_region * 100)`%
 of the between-zone commutes < 30 km within
 `r R.utils::capitalize(region)`.
-The following selection criteria was used to select which flows were visualised:
-
-- Straight line (Euclidean) distance of less than 
-`r mdist` km.
-- More than `r mflow` commuters (by any mode).
-
-These `r nrow(l)` desire lines account for
+Two selection criteria were used to select which were visualised: only flows that had a) a Euclidean (crow-flies) distance of less than 
+`r mdist` km; and b) more than `r mflow` commuters travelling on it (by any mode in both directions). These `r nrow(l)` flows account for
 `r round(sum(l$All) / sum(zones$All) * 100)`% of all commutes in
 `r R.utils::capitalize(region)`.
 
-Between-zone flows exclude **within-zone travel** (represented as red points on the map when the lines are shown), which accounts for `r round(sum(cents$All) / sum(zones$All) * 100)`% of commutes in `r R.utils::capitalize(region)`, commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work.
+Between-zone flows exclude **within-zone travel**, when the zone of origin is the same as the zone of destination. Within-zone travel is represented by red points on the map when the lines are shown, and accounts for `r round(sum(cents$All) / sum(zones$All) * 100)`% of commuters in `r R.utils::capitalize(region)`. The between-zone flows visualised lines and routes on the map also exclude commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work.
 
 See ([Lovelace et al.](http://arxiv.org/abs/1509.04425)) for details of the methods we used to estimate the cycling, health and carbon impacts of each scenario, and to visualise results at the area, line, route and route network level.
 
@@ -80,8 +74,7 @@ See ([Lovelace et al.](http://arxiv.org/abs/1509.04425)) for details of the meth
 
 <!-- Can we show hilliness by comparison to other areas?  -->
 
-```{r distance-dist, echo=FALSE, fig.cap="The above graph shows the study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The black straight green represents the most intensive commuting OD pairs.", echo=FALSE, message=FALSE, warning=FALSE}
-
+```{r distance-dist, echo=FALSE, fig.cap="**Figure 1:** Map of the study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The straight green lines represents the 100 flows with the greatest number of commuters by any mode.", echo=FALSE, message=FALSE, warning=FALSE}
 plot(zones, col = "lightgrey")
 plot(regions, add = T)
 plot(las_in_region, border = "blue", add = T, lwd = 2)
@@ -90,6 +83,7 @@ plot(region_shape, border = "red", add = T, lwd = 2)
 lines(l[l$All > 100,], col = "green")
 ```
 
+The map below shows the average hilliness of the between-zone routes used by commuters living in each MSOA.
 The average hilliness of the fastest routes in
 `r R.utils::capitalize(region)`
 `r round(100 * mean(rf$av_incline, na.rm = T), 2)`%,
@@ -97,24 +91,41 @@ compared with a national average of
 `r round(100 * mean(rf_nat$av_incline, na.rm = T), 2)`%.
 
 
-```{r, echo = FALSE}
-# # It used to say - see below. What to replace this with?
-# compared with the national average of
-# `r round(mean(ukmsoas$avslope, na.rm = T), 1)`. This data is displayed in the
-# figure below.
+```{r, echo = FALSE, fig.cap="**Figure 2:** Map showing the average hilliness of routes in zones across the study area."}
 tm_shape(zones) +
-  tm_fill("avslope", n = 3, palette = "Oranges")
+  tm_fill("avslope", n = 3, palette = "Oranges", title = "Average gradient\nof fast routes (%)") +
+  tm_legend()
 ```
 
 ## Cycling levels in each scenario for `r R.utils::capitalize(region)`
 
-The proportion of cyclists in the baseline (2011 Census) data in `r R.utils::capitalize(region)` is 
-`r round(100 * sum(zones$Bicycle) / sum(zones$All) , 1)`%, compared to national average of 3.2%.
+The proportion of people who cycled as their main mode of travel to work baseline (2011 Census) data in `r R.utils::capitalize(region)` was 
+`r round(100 * sum(zones$Bicycle) / sum(zones$All) , 1)`%, compared to the national average of 3.2%.
 The percentage of cycling expected, based on the distance and hilliness of commutes in the region using the baseline model for England, was
 `r round(100 * (sum(zones$govtarget_slc) - sum(zones$Bicycle)) / sum(zones$All) , 1)`%.
 
-The proportion of cyclists is shown in the table below, alongside the proportion of people walking, driving and using other modes.
+The proportion of people cycling, walking and driving to work, by distance band, is illustrated in Table 1 below.
 
+```{r, echo=FALSE}
+dbands = c(0, 2, 5, 10, 15, 20, 50)
+l$`Route distance (km)` = cut(l$dist_fast, dbands)
+library(dplyr)
+dfdb =
+  group_by(l@data, `Route distance (km)`) %>% 
+  summarise(All = sum(All),
+            Cycle = sum(`Bicycle`),
+            Drive = sum(`Car_driver`),
+            Walk = sum(`Foot`)
+            # ,            Other = All - Cycle - Drive - Walk
+              )
+# dfdb = dfdb[1:5,] # cut out some rows
+dfdb$Other = dfdb$All - rowSums(dfdb[3:ncol(dfdb)])
+dfdb$`Route distance (km)` = as.character(dfdb$`Route distance (km)`)
+dfdb = rbind(dfdb, c("All", colSums(dfdb[2:ncol(dfdb)])))
+knitr::kable(dfdb, caption = "**Table 1:** The proportion of people travelling by distance band and mode in the region in the 2011 Census. Note that '(0,2]' means 'from more than zero, up to and including 2', as defined by [ISO 31-11](https://en.wikipedia.org/wiki/ISO_31-11).")
+```
+
+The overall proportion cycling under each scenario is illustrated in Figure 3 below.
 
 <!--As discussed with Anna - can we please have here a table for the whole region per scenario, using area-based data? This would look like the following
                               % cyclists  % walking % car drivers % all other modes
@@ -127,7 +138,7 @@ The proportion of cyclists is shown in the table below, alongside the proportion
 
 <!--I think we either need to remove this graph or make clearer source of data - what is included? Are we including within zone-based trips?
 -->
-```{r, echo=FALSE, warning=FALSE, fig.cap="Percent of commuters cycling in model scenarios for between-zone trips within the region, stratified by trip distance. Note the total percentage cycling is equal to the area under each line."}
+```{r, echo=FALSE, warning=FALSE, fig.cap="**Figure 3:** Percent of commuters cycling in model scenarios for between-zone trips within the region, stratified by trip distance. Note the total percentage cycling is equal to the area under each line."}
 levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
 levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
 levels(dfsp$scenario)[2:5] = c("Ebikes", "Go Dutch", "Gender Equality", "Government Target")
@@ -139,16 +150,19 @@ ggplot(dfsp) +
   scale_color_discrete(name = "Mode and\nscenario\n(cycling)") +
   xlim(c(0,12)) +
   theme_bw()
-
 ```
 
-## Health and carbon impacts
+<!-- Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in the table below. -->
 
-A modified
-version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update)
-was used to calculate health impacts, based on the extra physical activity gained through new cycling trips in each scenario, minus the physical activity displaced in any former walking trips that have now been switched to cycling. CO2 impacts are derived from changes in distance driven per scenario.
 
-The table below illustrates the health and carbon impacts of the different scenarios.
+
+<!-- ## Health and carbon impacts -->
+
+<!-- A modified -->
+<!-- version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update) -->
+<!-- was used to calculate health impacts, based on the extra physical activity gained through new cycling trips in each scenario, minus the physical activity displaced in any former walking trips that have now been switched to cycling. CO2 impacts are derived from changes in distance driven per scenario. -->
+
+<!-- The table below illustrates the health and carbon impacts of the different scenarios. -->
 
 <!-- please create table below.
 
