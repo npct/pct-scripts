@@ -63,7 +63,7 @@ of the between-zone commutes < 30 km within
 `r R.utils::capitalize(region)`.
 Two selection criteria were used to select which were visualised: only flows that had a) a Euclidean (crow-flies) distance of less than 
 `r mdist` km; and b) more than `r mflow` commuters travelling on it (by any mode in both directions). These `r nrow(l)` flows account for
-`r round(sum(l$All) / sum(zones$All) * 100)`% of all commutes in
+`r round(sum(l$All) / sum(zones$All) * 100)`% of all commuters in
 `r R.utils::capitalize(region)`.
 
 Between-zone flows exclude **within-zone travel**, when the zone of origin is the same as the zone of destination. Within-zone travel is represented by red points on the map when the lines are shown, and accounts for `r round(sum(cents$All) / sum(zones$All) * 100)`% of commuters in `r R.utils::capitalize(region)`. The between-zone flows visualised lines and routes on the map also exclude commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work.
