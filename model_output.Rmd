@@ -67,7 +67,7 @@ plot(region_shape, border = "red", add = T, lwd = 2)
 lines(l[l$All > 100,], col = "green")
 ```
 
-**Figure 1:** Map of the study region (thick black border), selected zones (grey), the administrative zone region (red line) and local authorities (blue line). The straight green lines represents the 100 flows with the greatest number of commuters by any mode.
+**Figure 1:** Map of the PCT region (thick black border), the administrative zone region (red line), local authority boundaries (blue line) and zones in the region (grey with a black border). The straight green lines represents the 100 flows with the greatest number of commuters by any mode.
 
 The map below shows the average hilliness of the between-zone routes used by commuters living in each MSOA.
 The average hilliness of the fastest routes in
