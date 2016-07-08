@@ -71,7 +71,7 @@ lines(l[l$All > 100,], col = "green")
 
 The map below shows the average hilliness of the between-zone routes used by commuters living in each MSOA.
 The average hilliness of the fastest routes in
-`r R.utils::capitalize(region)`
+`r R.utils::capitalize(region)` is
 `r round(100 * mean(rf$av_incline, na.rm = T), 2)`%,
 compared with a national average of
 `r round(100 * mean(rf_nat$av_incline, na.rm = T), 2)`%.
