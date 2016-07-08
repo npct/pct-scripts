@@ -37,7 +37,7 @@ plot(l_redo)
 plot(rq[sel,])
 plot(rf[sel,], add = T, col = "red")
 names(l_redo)
-destnames = c(l_redo$Area.of.residence, l_redo$Area.of.workplace)
+destnames = c(l_redo$msoa1, l_redo$msoa2)
 
 sum(sel)
 s = which(sel)
