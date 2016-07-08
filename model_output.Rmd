@@ -91,47 +91,22 @@ The proportion of people who cycled as their main mode of travel to work baselin
 The percentage of cycling expected, based on the distance and hilliness of commutes in the region using the baseline model for England, was
 `r round(100 * (sum(zones$govtarget_slc) - sum(zones$Bicycle)) / sum(zones$All) , 1)`%.
 
-<!-- Note from Anna: I strongly think we should not include this table commented out here. I think we should just leave a blank until we can give the table that we want, as described below. This table seems quite unclear to me, e.g. I'm not sure who is included in it – I assume it is only between-zone travel, but if the distances go up to 50 km then this is clearly not just the subset of lines that we describe using in the first paragraph. I also wonder if 50 km is correct – do you instead mean 30 km?  In any case, I think better to have a blank for now than this table
+<!-- Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in Table 1 below. -->
 
-
-The number of people cycling, walking and driving to work in the 2011 Census, by distance band, is illustrated in Table 1 below.  This table only shows between-zone travel.
-
-```{r, echo=FALSE}
-dbands = c(0, 2, 5, 10, 15, 20, 50)
-l$`Route distance (km)` = cut(l$dist_fast, dbands)
-library(dplyr)
-dfdb =
-  group_by(l@data, `Route distance (km)`) %>% 
-  summarise(All = sum(All),
-            Cycle = sum(`Bicycle`),
-            Drive = sum(`Car_driver`),
-            Walk = sum(`Foot`)
-            # ,            Other = All - Cycle - Drive - Walk
-              )
-# dfdb = dfdb[1:5,] # cut out some rows
-dfdb$Other = dfdb$All - rowSums(dfdb[3:ncol(dfdb)])
-dfdb$`Route distance (km)` = as.character(dfdb$`Route distance (km)`)
-dfdb = rbind(dfdb, c("All commuters <50km", colSums(dfdb[2:ncol(dfdb)])))
-htmlTable::htmlTable(dfdb, caption = '<strong>Table 1:</strong> The number of people travelling by distance band and mode in the region in the 2011 Census. Note that ‘(0,2]’ means ‘from more than zero, up to and including 2’, as defined by <a href="https://en.wikipedia.org/wiki/ISO_31-11">ISO 31-11</a>.')
-```
--->
-
-
-<!-- Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in the table below. -->
-
-<!--As discussed with Anna - can we please have here a table for the whole region per scenario, using area-based data? This would look like the following
-                              % cyclists  % walking % car drivers % all other modes
+<!--Can we please have here a table for the whole region per scenario, using area-based data? This would look like the following.  Cycling/walking/car drivers cells the percent is equal to the scenario level of cycling across all the zones, divided by 'all'.  In the "all other modes" cell, the percent is equal to 100% minus the first 3 rows. I suggest one decimal place.
+                              % cyclists    % walking   % car drivers   % all other modes
   Census 2011
   Government Target
   Gender Equity
   Go Dutch
   Ebikes
 -->
+<!-- **Table 1:** Mode split among commuters living in `r R.utils::capitalize(region)` across scenarios
+-->
 
 Figure 3 illustrates the overall number of people in between-zone flows cycling to work under each scenario (note that this does not include within-zone travel).
 
-<!--I think we Ideally should revisit this figure at some point and include within-zone flows, I think it would make the figure much more helpful
--->
+<!--Anna note I think we Ideally should revisit this figure at some point and include within-zone flows, I think it would make the figure much more helpful-->
 ```{r, echo=FALSE, warning=FALSE, fig.cap=""}
 levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
 levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
@@ -155,20 +130,18 @@ ggplot(dfsp) +
 Lovelace, Robin, Anna Goodman, Rachel Aldred, Nikolai Berkoff, Ali Abbas, and James Woodcock. 2016. "The Propensity to Cycle Tool: An Open Source Online System for Sustainable Transport Planning."" ArXiv:1509.04425 [Cs]. http://arxiv.org/abs/1509.04425.
 
 
-
-
 <!-- ## Health and carbon impacts -->
 
 <!-- A modified -->
 <!-- version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update) -->
 <!-- was used to calculate health impacts, based on the extra physical activity gained through new cycling trips in each scenario, minus the physical activity displaced in any former walking trips that have now been switched to cycling. CO2 impacts are derived from changes in distance driven per scenario. -->
 
-<!-- The table below illustrates the health and carbon impacts of the different scenarios. -->
+<!-- Table 2 below illustrates the health and carbon impacts of the different scenarios.  For each scenario, comparisons are made with a counterfactual in which nobody in the region cycled (‘No cyclists’), and with the observed level of cycling in the 2011 Census.  -->
 
 <!-- please create table below.
 
-Scenario      Comparison                  Mortality Impacts                        Change in MTCO2e/year
-                              Change in deaths/yr Value of change (£, millions)
+Scenario      Comparison                  Mortality Impacts                           Change in MTCO2e/year
+                              Change in deaths/yr    Value of change (£, millions)
 Census 2011  'No Cyclists'
 Govt Target 'No Cyclists'
             Census 2011
@@ -179,3 +152,6 @@ Go Dutch 'No Cyclists'
 Ebikes 'No Cyclists'
             Census 2011-->
 
+<!--
+**Table 2:** Mortality and carbon impacts of scenarios in `r R.utils::capitalize(region)`, relative to baseline and to a ‘no cyclists’ counterfactual.  Note that 'MTCO2e' stands for meg-tonnes of CO2-equivalent emissions
+-->
