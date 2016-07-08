@@ -63,11 +63,10 @@ plot(zones, col = "lightgrey")
 plot(regions, add = T)
 plot(las_in_region, border = "blue", add = T, lwd = 2)
 plot(region_orig, lwd = 5, add = T)
-plot(region_shape, border = "red", add = T, lwd = 2)
 lines(l[l$All > 100,], col = "green")
 ```
 
-**Figure 1:** Map of the PCT region (thick black border), the administrative zone region (red line), local authority boundaries (blue line) and zones in the region (grey with a black border). The straight green lines represents the 100 flows with the greatest number of commuters by any mode.
+**Figure 1:** Map of the PCT region (thick black border), local authority boundaries (blue line) and zones in the region (grey with a black border). The straight green lines represent the 100 flows with the greatest number of commuters by any mode.
 
 The map below shows the average hilliness of the between-zone routes used by commuters living in each MSOA.
 The average hilliness of the fastest routes in
