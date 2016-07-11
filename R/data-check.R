@@ -12,6 +12,9 @@ summary(sel)
 plot(r[sel,])
 summary(r$length[sel])
 
+# What about the units for hilliness?
+summary(r$av_incline)
+
 # Fix the lengths (out be 3 orders of magnitude)
 r$length[sel] = r$length[sel] / 1000
 
