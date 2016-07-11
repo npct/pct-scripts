@@ -18,7 +18,6 @@ if(!exists("region")) region <- "cambridgeshire"
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 zones = readRDS(file.path(pct_data, region, "z.Rds"))
-zones$avslope = zones$avslope * 100
 cents = readRDS(file.path(pct_data, region, "c.Rds"))
 l = readRDS(file.path(pct_data, region, "l.Rds"))
 if(!exists("rf_nat"))
