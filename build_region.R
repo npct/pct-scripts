@@ -87,8 +87,8 @@ flow <- flow[sel, ]
 l <- flow
 
 # add geo_label of the lines
-l$geo_label_o = left_join(l@data["msoa1"], zones@data[c("geo_code", "geo_label")], by = c("msoa1" = "geo_code"))[[2]]
-l$geo_label_d = left_join(l@data["msoa2"], zones@data[c("geo_code", "geo_label")], by = c("msoa2" = "geo_code"))[[2]]
+l$geo_label1 = left_join(l@data["msoa1"], zones@data[c("geo_code", "geo_label")], by = c("msoa1" = "geo_code"))[[2]]
+l$geo_label2 = left_join(l@data["msoa2"], zones@data[c("geo_code", "geo_label")], by = c("msoa2" = "geo_code"))[[2]]
 
 # proportion of OD pairs in min-flow based subset
 params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
