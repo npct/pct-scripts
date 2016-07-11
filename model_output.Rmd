@@ -29,7 +29,7 @@ rnet = readRDS(file.path(pct_data, region, "rnet.Rds"))
 params = readRDS(file.path(pct_data, region, "params.Rds"))
 list2env(x = params, envir = globalenv())
 source('shared_build.R')
-dfscen <- dplyr::select(l@data, contains("slc"), -contains("co2"), All, olc = Bicycle, dist_fast)
+dfscen <- dplyr::select(l@data, contains("slc"), -contains("co2"), all, olc = bicycle, dist_fast)
 dfsp <- gather(dfscen, key = scenario, value = slc, -dist_fast)
 dfsp$scenario <- factor(dfsp$scenario)
 dfsp$scenario <-
@@ -46,11 +46,11 @@ las_in_region <- las[las_in_region,]
 
 This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r R.utils::capitalize(region)`. The data were generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0). Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others as long as attribution is made to the original.
 
-This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were `r prettyNum(sum(zones$All), big.mark = ",", scientific = F)` commuters living in `r R.utils::capitalize(region)` recorded in the 2011 Census. All of these are represented in the zones data produced by the PCT.
+This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were `r prettyNum(sum(zones$all), big.mark = ",", scientific = F)` commuters living in `r R.utils::capitalize(region)` recorded in the 2011 Census. All of these are represented in the zones data produced by the PCT.
 
-In `r R.utils::capitalize(region)` there are `r nrow(l)` between-zone flows that a) start and end in `r R.utils::capitalize(region)`, b) have a straight-line (Euclidean) distance of less than `r mdist`km, and c) contain more than `r mflow` commuters (by any mode, counting commuters in both directions).   These `r nrow(l)` between-zone flows are visualised as **Straight Lines**, **Routes** (fast and quiet) and the **Route Network** on the interactive map, and account for `r round(sum(l$All) / sum(zones$All) * 100)`% of all commuters living in `r R.utils::capitalize(region)`.
+In `r R.utils::capitalize(region)` there are `r nrow(l)` between-zone flows that a) start and end in `r R.utils::capitalize(region)`, b) have a straight-line (Euclidean) distance of less than `r mdist`km, and c) contain more than `r mflow` commuters (by any mode, counting commuters in both directions).   These `r nrow(l)` between-zone flows are visualised as **Straight Lines**, **Routes** (fast and quiet) and the **Route Network** on the interactive map, and account for `r round(sum(l$all) / sum(zones$all) * 100)`% of all commuters living in `r R.utils::capitalize(region)`.
 
-Between-zone flows exclude **within-zone travel**, when the zone of origin is the same as the zone of destination. Within-zone travel is represented by red points on the map when the lines are shown, and accounts for `r round(sum(cents$All) / sum(zones$All) * 100)`% of commuters in `r R.utils::capitalize(region)`. The between-zone flows visualised as lines and routes on the map also exclude commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work.
+Between-zone flows exclude **within-zone travel**, when the zone of origin is the same as the zone of destination. Within-zone travel is represented by red points on the map when the lines are shown, and accounts for `r round(sum(cents$all) / sum(zones$all) * 100)`% of commuters in `r R.utils::capitalize(region)`. The between-zone flows visualised as lines and routes on the map also exclude commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work.
 
 See [Lovelace et al. (2016)](http://arxiv.org/abs/1509.04425) for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and to visualise results at the area, line, route and route network level.
 
@@ -63,7 +63,7 @@ plot(zones, col = "lightgrey")
 plot(regions, add = T)
 plot(las_in_region, border = "blue", add = T, lwd = 2)
 plot(region_orig, lwd = 5, add = T)
-lines(l[l$All > 100,], col = "green")
+lines(l[l$all > 100,], col = "green")
 ```
 
 **Figure 1:** Map of the PCT region (thick black border), local authority boundaries (blue line) and zones in the region (grey with a black border). The straight green lines represent the 100 flows with the greatest number of commuters by any mode.
@@ -87,9 +87,9 @@ tm_shape(zones) +
 ## Cycling levels in each scenario for `r R.utils::capitalize(region)`
 
 The proportion of people who cycled as their main mode of travel to work baseline (2011 Census) data in `r R.utils::capitalize(region)` was 
-`r round(100 * sum(zones$Bicycle) / sum(zones$All) , 1)`%, compared to the national average of 3.2%.
+`r round(100 * sum(zones$bicycle) / sum(zones$all) , 1)`%, compared to the national average of 3.2%.
 The percentage of cycling expected, based on the distance and hilliness of commutes in the region using the baseline model for England, was
-`r round(100 * (sum(zones$govtarget_slc) - sum(zones$Bicycle)) / sum(zones$All) , 1)`%.
+`r round(100 * (sum(zones$govtarget_slc) - sum(zones$bicycle)) / sum(zones$all) , 1)`%.
 
 <!-- Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in Table 1 below. -->
 
