@@ -58,11 +58,11 @@ summary(flow_nat$dutch_slc / flow_nat$all)
 
 if(!exists("rf_nat")){
   rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
-  rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish)")
+  rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 }
 if(!exists("rq_nat")){
   rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
-  rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish)")
+  rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 }
 # Subset by zones in the study area
 o <- flow_nat$msoa1 %in% cents$geo_code
