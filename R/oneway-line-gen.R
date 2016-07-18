@@ -30,8 +30,6 @@ flow_cam <- flow_cens[o & d, ] # subset OD pairs with o and d in study area
 flow_cam_sp = od2line(flow = flow_cam, zones = cents)
 flow_cam_sp$dist = gprojected(flow_cam_sp, byid = T) / 1000
 plot(flow_cam_sp)
-flow_cam_sp_osgb = spTransform(flow_cam_sp, CRSobj = CRS("+init=epsg:27700"))
-flow_cam_sp$dist3 = gLength(flow_cam_sp_osgb, byid = T) / 1000
 summary(flow_cam_sp$dist)
 # cor(flow_cam_sp$dist, flow_cam_sp$dist3) # testing the method works
 flow_cam_sp = flow_cam_sp[flow_cam_sp$dist < 20 & flow_cam_sp$dist > 0.5,]
@@ -54,21 +52,18 @@ sum(flow_cam_oneway$`All categories: Method of travel to work`) ==
   sum(flow_cam_sp$`All categories: Method of travel to work`)
 # Finding: fixed, they have the same total flow now
 flow_cam_oneway = flow_cam_oneway[flow_cam_oneway$`All categories: Method of travel to work` > 10,]
-summary(flow_cam_oneway$dist)
-flow_cam_oneway$dist = flow_cam_oneway$dist / 2
+# summary(flow_cam_oneway$dist)
+# flow_cam_oneway$dist = flow_cam_oneway$dist / 2
 
 flow_cam_oneway_sp = od2line(flow_cam_oneway, cents)
 flow_cam_sp_osgb = spTransform(flow_cam_oneway_sp, CRSobj = CRS("+init=epsg:27700"))
-flow_cam_oneway_sp$dist2 = gLength(flow_cam_sp_osgb, byid = T) / 1000
-plot(flow_cam_oneway_sp$dist2, flow_cam_oneway_sp$dist)
-
-summary(flow_cam_oneway_sp$dist2)
+flow_cam_oneway_sp$dist = gprojected(flow_cam_oneway_sp, byid = T) / 1000
+summary(flow_cam_oneway_sp$dist)
 plot(flow_cam_oneway_sp, lwd = flow_cam_oneway_sp$`All categories: Method of travel to work` /
        mean(flow_cam_oneway_sp$`All categories: Method of travel to work`))
 
 df = flow_cam_oneway_sp@data
 write_csv(df, "/tmp/cam-oneway-updated-rl.csv")
-
 
 # side note: testing od2line
 df_test = flow_cam_sp@data
