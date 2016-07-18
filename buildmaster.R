@@ -10,7 +10,6 @@ la_all = la_all[!grepl(pattern = "london", x = la_all)]
 # select regions of interest (uncomment/change as appropriate)
 la_all = c("isle-of-wight") # just one region
 
-
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
 # regions$Region <- tolower(regions$Name) # add region names
