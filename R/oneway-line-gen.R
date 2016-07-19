@@ -32,7 +32,7 @@ flow_cam_sp$dist = gprojected(flow_cam_sp, byid = T) / 1000
 plot(flow_cam_sp)
 summary(flow_cam_sp$dist)
 # cor(flow_cam_sp$dist, flow_cam_sp$dist3) # testing the method works
-flow_cam_sp = flow_cam_sp[flow_cam_sp$dist < 20 & flow_cam_sp$dist > 0.5,]
+flow_cam_sp = flow_cam_sp[flow_cam_sp$dist < 20 ]
 plot(flow_cam_sp, lwd = flow_cam_sp$`All categories: Method of travel to work` /
        mean(flow_cam_sp$`All categories: Method of travel to work`))# Finding: 2304 lines
 sum(flow_cam_sp$`All categories: Method of travel to work`)
@@ -47,7 +47,7 @@ sum(l$all)
 # Solution: update stplanr::onewayid() function
 flow_cam_oneway = onewayid(flow_cam_sp@data, attrib = 3:14)
 # flow_cam_oneway = onewayid(flow_cam_sp@data, attrib = 3:ncol(flow_cam_sp))
-
+flow_cam_oneway = arrange(flow_cam_oneway, `Area of residence`, ids1)
 sum(flow_cam_oneway$`All categories: Method of travel to work`) ==
   sum(flow_cam_sp$`All categories: Method of travel to work`)
 # Finding: fixed, they have the same total flow now
