@@ -6,13 +6,13 @@ region = "cambridgeshire"
 # source("build_region.R") # comment out to skip build
 
 # load excel file containing them
-download.file("https://github.com/npct/pct-shiny/files/333471/160624_MissingCambLines.xlsx", "160624_MissingCambLines.xlsx")
-flow_ag = readxl::read_excel("160624_MissingCambLines.xlsx")
+# download.file("https://github.com/npct/pct-shiny/files/333471/160624_MissingCambLines.xlsx", "160624_MissingCambLines.xlsx")
+# flow_ag = readxl::read_excel("160624_MissingCambLines.xlsx")
 l = readRDS("../pct-data/cambridgeshire/l.Rds")
 zones = readRDS("../pct-data/cambridgeshire/z.Rds")
 cents = readRDS("../pct-data/cambridgeshire/c.Rds")
 
-sum(flow_ag$visualised_anna)
+# sum(flow_ag$visualised_anna)
 nrow(l)
 # Finding: there are more lines in 'visualised anna' (1347) than the pct (1110)
 # Which ones are missing?
@@ -47,16 +47,22 @@ sum(l$all)
 # Solution: update stplanr::onewayid() function
 flow_cam_oneway = onewayid(flow_cam_sp@data, attrib = 3:14)
 # flow_cam_oneway = onewayid(flow_cam_sp@data, attrib = 3:ncol(flow_cam_sp))
-flow_cam_oneway = arrange(flow_cam_oneway, `Area of residence`, ids1)
 sum(flow_cam_oneway$`All categories: Method of travel to work`) ==
   sum(flow_cam_sp$`All categories: Method of travel to work`)
 # Finding: fixed, they have the same total flow now
 flow_cam_oneway = flow_cam_oneway[flow_cam_oneway$`All categories: Method of travel to work` > 10,]
+# swap ids of lines where msoa1 > msoa2
+sel_msoa1_big = flow_cam_oneway$`Area of residence` > flow_cam_oneway$`Area of workplace`
+summary(sel_msoa1_big)
+o = flow_cam_oneway$`Area of residence`[sel_msoa1_big]
+d = flow_cam_oneway$`Area of workplace`[sel_msoa1_big]
+flow_cam_oneway$`Area of residence`[sel_msoa1_big] = d
+flow_cam_oneway$`Area of workplace`[sel_msoa1_big] = o
+flow_cam_oneway = arrange(flow_cam_oneway, `Area of residence`, `Area of workplace`)
 # summary(flow_cam_oneway$dist)
 # flow_cam_oneway$dist = flow_cam_oneway$dist / 2
 
 flow_cam_oneway_sp = od2line(flow_cam_oneway, cents)
-flow_cam_sp_osgb = spTransform(flow_cam_oneway_sp, CRSobj = CRS("+init=epsg:27700"))
 flow_cam_oneway_sp$dist = gprojected(flow_cam_oneway_sp, byid = T) / 1000
 summary(flow_cam_oneway_sp$dist)
 plot(flow_cam_oneway_sp, lwd = flow_cam_oneway_sp$`All categories: Method of travel to work` /
