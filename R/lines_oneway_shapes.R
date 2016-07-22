@@ -3,16 +3,18 @@ source("set-up.R")
 source("../stplanr/R/overline.R")
 cents = geojsonio::geojson_read("../pct-bigdata/cents-scenarios.geojson", what = "sp")
 
-flow_cens = readr::read_csv("../pct-bigdata/wu03ew_v2.csv")
+unzip('../pct-bigdata/wu03ew_msoa.zip', exdir = './wuo3ew/')
+flow_cens = readr::read_csv("./wuo3ew/wu03ew_msoa.csv")
+unlink('./wuo3ew/', recursive = T, force = T)
 nrow(flow_cens) # 2.4 m
 
 omatch = match(flow_cens$`Area of residence`, cents$geo_code)
 dmatch = match(flow_cens$`Area of workplace`, cents$geo_code)
 
-cents_o = cents@coords[omatch,] 
-cents_d = cents@coords[dmatch,] 
+cents_o = cents@coords[omatch,]
+cents_d = cents@coords[dmatch,]
 summary(is.na(cents_o)) # check how many origins don't match
-summary(is.na(cents_d)) 
+summary(is.na(cents_d))
 geodist = geosphere::distHaversine(p1 = cents_o, p2 = cents_d) / 1000 # superfast - NB: soon to be function in stplanr
 summary(is.na(geodist))
 
@@ -22,21 +24,21 @@ flow_cens = flow_cens[!is.na(flow_cens$dist),] # there are 36k destinations with
 flow = flow_cens[flow_cens$dist < 20,]
 names(flow) = gsub(pattern = " ", "_", names(flow))
 flow = onewayid(flow, attrib = 3:14)
+flow = flow[flow$`All_categories:_Method_of_travel_to_work` > 10,]
 nrow(flow) # down to 0.9m, removed majority of lines
 lines = od2line2(flow = flow, zones = cents)
 
 class(lines)
-length(lines) 
+length(lines)
 lines = SpatialLinesDataFrame(sl = lines, data = flow)
 names(lines)
 proj4string(lines) = CRS("+init=epsg:4326") # set crs
-lines = lines[lines$`All_categories:_Method_of_travel_to_work` > 10,]
+
 sum(lines$`All_categories:_Method_of_travel_to_work`)
-sum(l$all, na.rm = T)
 summary(lines$`All_categories:_Method_of_travel_to_work`)
 
 # to be removed when this is in stplanr
-od_dist <- function(flow, zones){ 
+od_dist <- function(flow, zones){
   omatch = match(flow[[1]], cents@data[[1]])
   dmatch = match(flow[[2]], cents@data[[1]])
   cents_o = cents@coords[omatch,]
@@ -70,15 +72,13 @@ lines$Work_mainly_at_or_from_home <- NULL
 
 names(l_new)
 names(lines)
-
-head(l_new$id)
-
+l_new$id <- paste(pmin(l_new$msoa1, l_new$msoa2), pmax(l_new$msoa1, l_new$msoa2))
 # names in old data but not new
 names(lines)[!names(lines) %in% names(l_new)]
 duplicated_idx = names(l_new) %in% names(lines)
 
-lines$id <- paste(pmin(lines$Area_of_residence, lines$Area_of_workplace), pmax(lines$Area_of_residence, lines$Area_of_workplace))
-l_new$id <- paste(pmin(l_new$msoa1, l_new$msoa2), pmax(l_new$msoa1, l_new$msoa2))
+lines$id <- paste(pmin(lines$msoa1, lines$msoa2), pmax(lines$msoa1, lines$msoa2))
+
 
 # which flows are included?
 nrow(lines)
