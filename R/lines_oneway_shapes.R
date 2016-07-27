@@ -2,10 +2,8 @@
 source("set-up.R")
 source("../stplanr/R/overline.R")
 cents = geojsonio::geojson_read("../pct-bigdata/cents-scenarios.geojson", what = "sp")
-
-unzip('../pct-bigdata/wu03ew_msoa.zip', exdir = './wuo3ew/')
-flow_cens = readr::read_csv("./wuo3ew/wu03ew_msoa.csv")
-unlink('./wuo3ew/', recursive = T, force = T)
+# load OD data - source http://wicid.ukdataservice.ac.uk/
+flow_cens = readr::read_csv("../pct-bigdata/wu03ew_v2.csv")
 nrow(flow_cens) # 2.4 m
 
 omatch = match(flow_cens$`Area of residence`, cents$geo_code)
