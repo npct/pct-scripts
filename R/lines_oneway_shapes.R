@@ -110,5 +110,19 @@ proj4string(lines)
 
 saveRDS(lines, "../pct-bigdata/lines_oneway_shapes_updated.Rds")
 lines = readRDS("../pct-bigdata/lines_oneway_shapes_updated.Rds") # load the pre-saved lines
-
+# switch msoa1 and 2
+lines$msoa3 = lines$msoa1
+lines$msoa1 = lines$msoa2
+lines$msoa2 = lines$msoa3
+lines$msoa3 = NULL
+summary(lines$msoa1 <= lines$msoa2)
+# switch msoas which are the wrong way around
+sel = lines$msoa2 < lines$msoa1
+summary(sel)
+lines@data[sel, 1:2] = lines@data[sel, 2:1]
+summary(lines$msoa1 <= lines$msoa2)
+head(lines@data[1:5])
+ord = order(lines$msoa1, lines$msoa2)
+plot(ord)
+summary(lines$msoa1 <= lines$msoa2)
 # Create rf and rq datasets with matching indices
