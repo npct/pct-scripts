@@ -125,4 +125,14 @@ head(lines@data[1:5])
 ord = order(lines$msoa1, lines$msoa2)
 plot(ord)
 summary(lines$msoa1 <= lines$msoa2)
+
 # Create rf and rq datasets with matching indices
+rf = readRDS("../pct-bigdata/rf.Rds")
+rq = readRDS("../pct-bigdata/rf.Rds")
+
+head(rf)
+sel_rf_match = rf$id %in% lines$id
+summary(sel_rf_match)
+head(rf$id[sel_rf_match]) # ids in rf but not lines
+
+
