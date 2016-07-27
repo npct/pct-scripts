@@ -109,6 +109,6 @@ names(newdat)
 proj4string(lines)
 
 saveRDS(lines, "../pct-bigdata/lines_oneway_shapes_updated.Rds")
+lines = readRDS("../pct-bigdata/lines_oneway_shapes_updated.Rds") # load the pre-saved lines
 
-
-Sys.time() - start
+# Create rf and rq datasets with matching indices
