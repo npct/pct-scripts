@@ -27,7 +27,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 10
+params$mflow <- 100
 params$mflow_short <- 10
 
 # Distances
@@ -53,15 +53,15 @@ zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 
 # load flow dataset, depending on availability
 if(!exists("flow_nat"))
-  flow_nat <- readRDS(file.path(pct_bigdata, "pct_lines_oneway_shapes.Rds"))
+  flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated.Rds"))
 summary(flow_nat$dutch_slc / flow_nat$all)
 
 if(!exists("rf_nat")){
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf_new.Rds"))
   rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 }
 if(!exists("rq_nat")){
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
+  rq_nat <- readRDS(file.path(pct_bigdata, "rq_new.Rds"))
   rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 }
 # Subset by zones in the study area
@@ -112,11 +112,11 @@ l$avslope_q <- rq$av_incline * 100
 
 rft <- rf
 # Stop rnet lines going to centroid (optional)
-rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist)
-if(length(rft) == length(rf)){
-  row.names(rft) <- row.names(rf)
-  rft <- SpatialLinesDataFrame(rft, rf@data)
-} else print("Error: toptailed lines do not match lines")
+# rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
+# if(length(rft) == length(rf)){
+#   row.names(rft) <- row.names(rf)
+#   rft <- SpatialLinesDataFrame(rft, rf@data)
+# } else print("Error: toptailed lines do not match lines")
 rft$bicycle <- l$bicycle
 
 # Simplify line geometries (if mapshaper is available)
@@ -231,9 +231,13 @@ round_df <- function(df, digits) {
   (df)
 }
 
+l@data = round_df(l@data, 5)
+
 save_formats(zones, 'z', csv = T)
 rm(zones)
-save_formats(l, csv = T)
+
+# save_formats(l, csv = T) # errors
+saveRDS(l, file.path(pct_data, region, "l.Rds"))
 rm(l)
 save_formats(rf)
 rm(rf)

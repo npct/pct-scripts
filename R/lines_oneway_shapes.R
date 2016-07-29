@@ -1,6 +1,5 @@
 # Aim: find and re-add 'missing lines'
 source("set-up.R")
-source("../stplanr/R/overline.R")
 cents = geojsonio::geojson_read("../pct-bigdata/cents-scenarios.geojson", what = "sp")
 # load OD data - source http://wicid.ukdataservice.ac.uk/
 flow_cens = readr::read_csv("../pct-bigdata/wu03ew_v2.csv")
@@ -22,7 +21,11 @@ flow_cens$dist = geodist
 flow_cens = flow_cens[!is.na(flow_cens$dist),] # there are 36k destinations with no matching cents - remove
 flow = flow_cens[flow_cens$dist < 20,]
 names(flow) = gsub(pattern = " ", "_", names(flow))
+flow_twoway = flow
 flow = onewayid(flow, attrib = 3:14)
+new_ids = cbind(pmin(flow[[1]], flow[[2]]), pmax(flow[[1]], flow[[2]]))
+head(new_ids)
+flow[1:2] = new_ids
 flow = flow[flow$`All_categories:_Method_of_travel_to_work` > 10,]
 nrow(flow) # down to 0.9m, removed majority of lines
 lines = od2line2(flow = flow, zones = cents)
@@ -45,7 +48,7 @@ od_dist <- function(flow, zones){
   geosphere::distHaversine(p1 = cents_o, p2 = cents_d)
 }
 
-lines$dist = od_dist(flow = lines@data, zones = cents)
+lines$dist = od_dist(flow = lines@data, zones = cents) / 1000
 
 summary(lines$dist)
 
@@ -88,7 +91,7 @@ summary(lines$all) # much higher average
 
 # check they are the same - nope!
 # plot(l$All, l_new$All)
-head(l$id)
+head(lines$id)
 head(l_new$id)
 
 # creat placeholder variable names
@@ -105,36 +108,22 @@ names(newdat)
 # save the new data:
 proj4string(lines)
 
-saveRDS(lines, "../pct-bigdata/lines_oneway_shapes_updated.Rds")
-lines = readRDS("../pct-bigdata/lines_oneway_shapes_updated.Rds") # load the pre-saved lines
-# switch msoa1 and 2
-lines$msoa3 = lines$msoa1
-lines$msoa1 = lines$msoa2
-lines$msoa2 = lines$msoa3
-lines$msoa3 = NULL
-summary(lines$msoa1 <= lines$msoa2)
-# switch msoas which are the wrong way around
-sel = lines$msoa2 < lines$msoa1
-summary(sel)
-lines@data[sel, 1:2] = lines@data[sel, 2:1]
+# saveRDS(lines, "../pct-bigdata/lines_oneway_shapes_updated.Rds") # 
+# lines = readRDS("../pct-bigdata/lines_oneway_shapes_updated.Rds") # load the pre-saved lines
 summary(lines$msoa1 <= lines$msoa2)
 head(lines@data[1:5])
-ord = order(lines$msoa1, lines$msoa2)
-plot(ord)
-summary(lines$msoa1 <= lines$msoa2)
+# ord = order(lines$msoa1, lines$msoa2)
+# plot(ord)
 
 # Create rf and rq datasets with matching indices
-rf = readRDS("../pct-bigdata/rf.Rds")
-rq = readRDS("../pct-bigdata/rf.Rds")
-
-head(rf)
-
-# rename vars to merge in - first remove duplicate names from lines
-lines$dist_fast	<- lines$dist_quiet <- lines$time_fast	<- lines$time_quiet <-
-  lines$distq_f <- lines$avslope_q <- lines$avslope <- NULL
-
-rfdata = dplyr::select(rf@data, id, dist_fast = length, avslope = av_incline, time_fast = time, busyness_fast = busyness)
-rqdata = dplyr::select(rq@data, id, dist_quiet = length, avslope_q = av_incline, time_quiet = time, busyness_quiet = busyness)
+# rf = readRDS("../pct-bigdata/rf.Rds")
+# rq = readRDS("../pct-bigdata/rf.Rds")
+# 
+# head(rf)
+# 
+# # rename vars to merge in 
+# rfdata = dplyr::select(rf@data, id, dist_fast = length, avslope = av_incline, time_fast = time, busyness_fast = busyness)
+# rqdata = dplyr::select(rq@data, id, dist_quiet = length, avslope_q = av_incline, time_quiet = time, busyness_quiet = busyness)
 
 # prepare for merge - analysis commented out
 # sel_rf_match = rf$id %in% lines$id
@@ -154,54 +143,72 @@ rqdata = dplyr::select(rq@data, id, dist_quiet = length, avslope_q = av_incline,
 # summary(flow_cens[sel_flow_nomatch,]) 
 
 # merge the distances that *do* match
-newdat_rf = left_join(lines@data, rfdata, by = "id")
-sum(newdat_rf$all[!is.na(newdat_rf$dist_fast)], na.rm = T) # 98% flows captured ++
-cor(newdat_rf$dist_fast, newdat_rf$dist, use = "complete.obs") # very good correlation (0.98)
-newdat_rf_rq = left_join(newdat_rf, rq@data, by = "id")
-lines@data = newdat_rf_rq
+# newdat_rf = left_join(lines@data, rfdata, by = "id")
+# sum(newdat_rf$all[!is.na(newdat_rf$dist_fast)], na.rm = T) # 98% flows captured ++
+# cor(newdat_rf$dist_fast, newdat_rf$dist, use = "complete.obs") # very good correlation (0.98)
+# newdat_rf_rq = left_join(newdat_rf, rq@data, by = "id")
+# lines@data = newdat_rf_rq
 
 # add the missing routes - for subset of the data (cambridge) to test first
-cents = readRDS("../pct-data/cambridgeshire/c.Rds")
-o <- lines$msoa1 %in% cents$geo_code
-d <- lines$msoa2 %in% cents$geo_code
-lines_orig = lines
-lines <- lines[o & d, ] # subset OD pairs with o and d in study area
-rf <- rf[rf$id %in% lines$id,]
-rq <- rq[rq$id %in% lines$id,]
-sel_no_rf = is.na(lines$dist_fast)
-summary(sel_no_rf)
-rf_new = line2route(l = lines[sel_no_rf,], plan = "fastest")
-rf_new$id = lines$id[sel_no_rf]
-rf_new$nv = stplanr::n_vertices(rf_new)
-summary(rf_new$nv == 2) # check for failed lines
-rf_new@data = rf_new@data[match(names(rf), names(rf_new))]
+# cents = readRDS("../pct-data/cambridgeshire/c.Rds")
+# o <- lines$msoa1 %in% cents$geo_code
+# d <- lines$msoa2 %in% cents$geo_code
+# lines_orig = lines
+# lines <- lines[o & d, ] # subset OD pairs with o and d in study area
+# rf <- rf[rf$id %in% lines$id,]
+# rq <- rq[rq$id %in% lines$id,]
+# sel_no_rf = is.na(lines$dist_fast)
+# summary(sel_no_rf)
 
-rf_updated = sbind(rf, rf_new)
-nrow(rf_updated) == nrow(lines) # now: 1 to 1 match with lines
-plot(order(rf_updated$id)) # shows ids are out
-plot(order(lines$id)) # correct ids
-rf_updated = rf_updated[order(rf_updated$id),]
+# regenerate lines - commented out, 100,000 lines per day
+# rf_new = line2route(l = lines[sel_no_rf,], plan = "fastest")
+# rf_new$id = lines$id[sel_no_rf]
+# rf_new$nv = stplanr::n_vertices(rf_new)
+# summary(rf_new$nv == 2) # check for failed lines
+# rf_new@data = rf_new@data[match(names(rf), names(rf_new))]
 
-plot(lines[99,]) # check they match
-plot(rf_updated[99,], add = T) # yes
+# rf_updated = sbind(rf, rf_new)
+# nrow(rf_updated) == nrow(lines) # now: 1 to 1 match with lines
+# plot(order(rf_updated$id)) # shows ids are out
+# plot(order(lines$id)) # correct ids
+# rf_updated = rf_updated[order(rf_updated$id),]
+# 
+# plot(lines[99,]) # check they match
+# plot(rf_updated[99,], add = T) # yes
+# 
+# # the same for the quietest routes
+# sel_no_rq = is.na(lines$dist_fast)
+# summary(sel_no_rq)
+# rq_new = line2route(l = lines[sel_no_rq,], plan = "quietest")
+# rq_new$id = lines$id[sel_no_rq]
+# rq_new$nv = stplanr::n_vertices(rq_new)
+# summary(rq_new$nv == 2) # check for failed lines
+# rq_new@data = rq_new@data[match(names(rq), names(rq_new))]
+# 
+# rq_updated = sbind(rq, rq_new)
+# nrow(rq_updated) == nrow(lines) # now: 1 to 1 match with lines
+# plot(order(rq_updated$id)) # shows ids are out
+# plot(order(lines$id)) # correct ids
+# rq_updated = rq_updated[order(rq_updated$id),]
+# 
+# plot(lines[99,]) # check they match
+# plot(rq_updated[99,], add = T) # yes
+# 
+# # save for the local area
+# saveRDS(rf_updated, "../pct-bigdata/rf_updated.Rds")
+# saveRDS(rq_updated, "../pct-bigdata/rq_updated.Rds")
+rf_updated = readRDS("../pct-bigdata/rf_updated.Rds")
+rq_updated = readRDS("../pct-bigdata/rq_updated.Rds")
 
-# the same for the quietest routes
-sel_no_rq = is.na(lines$dist_fast)
-summary(sel_no_rq)
-rq_new = line2route(l = lines[sel_no_rq,], plan = "quietest")
-rq_new$id = lines$id[sel_no_rq]
-rq_new$nv = stplanr::n_vertices(rq_new)
-summary(rq_new$nv == 2) # check for failed lines
-rq_new@data = rq_new@data[match(names(rq), names(rq_new))]
+sel_rf_in_lines = match(lines$id, rf_updated$id) # rq is the same
+summary(sel_rf_in_lines)
+rf_new = rf_updated[sel_rf_in_lines,]
+rq_new = rq_updated[sel_rf_in_lines,]
+test_index = 100000
+plot(rf_new[test_index,])
+lines(lines[test_index,])
+lines(rq_new[test_index,])
 
-rq_updated = sbind(rq, rq_new)
-nrow(rq_updated) == nrow(lines) # now: 1 to 1 match with lines
-plot(order(rq_updated$id)) # shows ids are out
-plot(order(lines$id)) # correct ids
-rq_updated = rq_updated[order(rq_updated$id),]
-
-plot(lines[99,]) # check they match
-plot(rf_updated[99,], add = T) # yes
-
-# save for the local area
-
+saveRDS(lines, "../pct-bigdata/lines_oneway_shapes_updated.Rds")
+saveRDS(rf_new, "../pct-bigdata/rf_new.Rds")
+saveRDS(rq_new, "../pct-bigdata/rq_new.Rds")
