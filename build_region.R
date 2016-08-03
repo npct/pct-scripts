@@ -27,7 +27,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 100
+params$mflow <- 10
 params$mflow_short <- 10
 
 # Distances
@@ -70,8 +70,8 @@ d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 
 # Remove Webtag, increase in walkers and base_
-zones <- remove_cols(zones, "(webtag|siw$|sid$|siw$|base_)")
-flow <- remove_cols(flow, "(webtag|siw$|sid$|siw$|base_)")
+zones <- remove_cols(zones, "(webtag|siw$|siw$|base_)")
+flow <- remove_cols(flow, "(webtag|siw$|siw$|base_)")
 
 params$n_flow_region <- nrow(flow)
 params$n_commutes_region <- sum(flow$all)
