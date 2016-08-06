@@ -2,8 +2,9 @@
 source("set-up.R")
 cents = geojsonio::geojson_read("../pct-bigdata/cents-scenarios.geojson", what = "sp")
 # load OD data - source http://wicid.ukdataservice.ac.uk/
-flow_cens = readr::read_csv("../pct-bigdata/wu03ew_v2.csv")
-flow_cens$id = paste(flow_cens$`Area of residence`, flow_cens$`Area of workplace`)
+unzip("../pct-bigdata/wu03ew_msoa.zip")
+flow_cens = readr::read_csv("wu03ew_msoa.csv")
+file.remove("wu03ew_msoa.csv")
 nrow(flow_cens) # 2.4 m
 
 omatch = match(flow_cens$`Area of residence`, cents$geo_code)
@@ -23,10 +24,7 @@ flow = flow_cens[flow_cens$dist < 20,]
 names(flow) = gsub(pattern = " ", "_", names(flow))
 flow_twoway = flow
 flow = onewayid(flow, attrib = 3:14)
-new_ids = cbind(pmin(flow[[1]], flow[[2]]), pmax(flow[[1]], flow[[2]]))
-head(new_ids)
-flow[1:2] = new_ids
-flow = flow[flow$`All_categories:_Method_of_travel_to_work` > 10,]
+flow[1:2] = cbind(pmin(flow[[1]], flow[[2]]), pmax(flow[[1]], flow[[2]]))
 nrow(flow) # down to 0.9m, removed majority of lines
 lines = od2line2(flow = flow, zones = cents)
 
@@ -150,21 +148,26 @@ head(lines@data[1:5])
 # lines@data = newdat_rf_rq
 
 # add the missing routes - for subset of the data (cambridge) to test first
-# cents = readRDS("../pct-data/cambridgeshire/c.Rds")
-# o <- lines$msoa1 %in% cents$geo_code
-# d <- lines$msoa2 %in% cents$geo_code
+cents = readRDS("../pct-data/cambridgeshire/c.Rds")
+lines <- lines[lines$msoa1 != lines$msoa2,] # Remove inter msoa commuters
+o <- lines$msoa1 %in% cents$geo_code
+d <- lines$msoa2 %in% cents$geo_code
 # lines_orig = lines
-# lines <- lines[o & d, ] # subset OD pairs with o and d in study area
+lines_cam <- lines[o & d, ] # subset OD pairs with o and d in study area
+
+# Looks line some scenario data is missing
+missing_scenario_data <- lines_cam[is.na(lines_cam$dutch_slco2),]@data[,c("msoa1", "msoa2")]
+
 # rf <- rf[rf$id %in% lines$id,]
 # rq <- rq[rq$id %in% lines$id,]
 # sel_no_rf = is.na(lines$dist_fast)
 # summary(sel_no_rf)
 
 # regenerate lines - commented out, 100,000 lines per day
-# rf_new = line2route(l = lines[sel_no_rf,], plan = "fastest")
-# rf_new$id = lines$id[sel_no_rf]
-# rf_new$nv = stplanr::n_vertices(rf_new)
-# summary(rf_new$nv == 2) # check for failed lines
+rf_cam = line2route(l = lines_cam, plan = "fastest")
+rf_cam$id = lines_cam$id
+rf_cam$nv = stplanr::n_vertices(rf_cam)
+summary(rf_cam$nv == 2) # check for failed lines
 # rf_new@data = rf_new@data[match(names(rf), names(rf_new))]
 
 # rf_updated = sbind(rf, rf_new)
@@ -172,17 +175,19 @@ head(lines@data[1:5])
 # plot(order(rf_updated$id)) # shows ids are out
 # plot(order(lines$id)) # correct ids
 # rf_updated = rf_updated[order(rf_updated$id),]
-# 
-# plot(lines[99,]) # check they match
-# plot(rf_updated[99,], add = T) # yes
-# 
+#
+
+plot(rf_cam[70:73,], col="green") # yes
+plot(lines_cam[70:73,], add = T) # check they match
+
+#
 # # the same for the quietest routes
 # sel_no_rq = is.na(lines$dist_fast)
 # summary(sel_no_rq)
-# rq_new = line2route(l = lines[sel_no_rq,], plan = "quietest")
-# rq_new$id = lines$id[sel_no_rq]
-# rq_new$nv = stplanr::n_vertices(rq_new)
-# summary(rq_new$nv == 2) # check for failed lines
+rq_cam = line2route(l = lines_cam, plan = "quietest")
+rq_cam$id = lines_cam$id
+rq_cam$nv = stplanr::n_vertices(rq_cam)
+summary(rq_cam$nv == 2) # check for failed lines
 # rq_new@data = rq_new@data[match(names(rq), names(rq_new))]
 # 
 # rq_updated = sbind(rq, rq_new)
@@ -190,13 +195,23 @@ head(lines@data[1:5])
 # plot(order(rq_updated$id)) # shows ids are out
 # plot(order(lines$id)) # correct ids
 # rq_updated = rq_updated[order(rq_updated$id),]
-# 
-# plot(lines[99,]) # check they match
-# plot(rq_updated[99,], add = T) # yes
-# 
+#
+plot(rq_cam[110:112,], col="green") # yes
+plot(lines_cam[110:112,], add = T) # check they match
+#
+#
 # # save for the local area
-# saveRDS(rf_updated, "../pct-bigdata/rf_updated.Rds")
-# saveRDS(rq_updated, "../pct-bigdata/rq_updated.Rds")
+
+# Remove long routes
+too_long_ids <- rf_cam[rf_cam$length > 30000, ]$id
+rf_cam <- rf_cam[!rf_cam$id %in% too_long_ids,]
+rq_cam <- rq_cam[!rq_cam$id %in% too_long_ids,]
+lines  <- lines[!lines$id %in% too_long_ids,]
+lines_cam  <- lines_cam[!lines_cam$id %in% too_long_ids,]
+
+
+saveRDS(rf_cam, "../pct-bigdata/rf_cam.Rds")
+saveRDS(rq_cam, "../pct-bigdata/rq_cam.Rds")
 rf_updated = readRDS("../pct-bigdata/rf_updated.Rds")
 rq_updated = readRDS("../pct-bigdata/rq_updated.Rds")
 
