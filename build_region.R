@@ -199,13 +199,6 @@ l$clc <- l$bicycle / l$all * 100
 cents@data$avslope <- NULL
 cents@data <- left_join(cents@data, zones@data)
 
-# Remove NAN numbers (cause issues with geojson_write)
-na_cols  <- which(names(zones) %in%
-  c("av_distance", "cirquity", "distq_f", "base_olcarusers", "gendereq_slc", "gendereq_sic"))
-for(ii in na_cols){
-  zones@data[[ii]][is.nan(zones@data[[ii]])] <- NA
-}
-
 # # Save objects
 # Save objects # uncomment these lines to save model output
 save_formats <- function(to_save, name = F, csv = F){
