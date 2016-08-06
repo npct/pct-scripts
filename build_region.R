@@ -229,8 +229,9 @@ l@data = round_df(l@data, 5)
 save_formats(zones, 'z', csv = T)
 rm(zones)
 
-# save_formats(l, csv = T) # errors
-saveRDS(l, file.path(pct_data, region, "l.Rds"))
+l@data <- as.data.frame(l@data) # The data is in tibble format, can we please use standard data frames in future!
+
+save_formats(l, csv = T)
 rm(l)
 save_formats(rf)
 rm(rf)
