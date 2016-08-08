@@ -35,7 +35,7 @@ params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
-# params$min_rnet_length <- 20 # minimum segment length for the Route Network to display
+params$min_rnet_length <- 20 # minimum segment length for the Route Network to display
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
 ukmsoas$avslope = ukmsoas$avslope * 100 # Put in units of percentages
@@ -172,7 +172,7 @@ rnet_cents <- SpatialLinesMidPoints(rnet_osgb)
 rnet_cents <- spTransform(rnet_cents, CRS("+init=epsg:4326"))
 rnet_lengths = gLength(rnet_osgb, byid = T)
 summary(rnet_lengths)
-# rnet = rnet[rnet_lengths > params$min_rnet_length,]
+rnet = rnet[rnet_lengths > params$min_rnet_length,]
 
 proj4string(rnet) = proj4string(zones)
 for(i in c("bicycle", scens)){
