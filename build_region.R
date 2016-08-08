@@ -35,7 +35,7 @@ params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
-params$min_rnet_length <- 20 # minimum segment length for the Route Network to display
+params$min_rnet_length <- 2 # minimum segment length for the Route Network to display - low currently due to holes in routes
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
 ukmsoas$avslope = ukmsoas$avslope * 100 # Put in units of percentages
@@ -58,11 +58,11 @@ if(!exists("flow_nat"))
 summary(flow_nat$dutch_slc / flow_nat$all)
 
 if(!exists("rf_nat")){
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf_new.Rds"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf_cam.Rds"))
   rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 }
 if(!exists("rq_nat")){
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq_new.Rds"))
+  rq_nat <- readRDS(file.path(pct_bigdata, "rq_cam.Rds"))
   rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 }
 # Subset by zones in the study area
@@ -102,8 +102,8 @@ rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rq_nat$id %in% l$id,]
 
 # Allocate route characteristics to OD pairs
-l$dist_fast <- rf$length
-l$dist_quiet <- rq$length
+l$dist_fast <- rf$length / 1000 # convert m to km
+l$dist_quiet <- rq$length / 1000 # convert m to km
 l$time_fast <- rf$time
 l$time_quiet <- rq$time
 l$cirquity <- rf$length / l$dist
