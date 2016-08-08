@@ -175,12 +175,6 @@ summary(rnet_lengths)
 rnet = rnet[rnet_lengths > params$min_rnet_length,]
 
 proj4string(rnet) = proj4string(zones)
-for(i in c("bicycle", scens)){
-  nm = paste0(i, "_upto") # new variable name
-  zones@data[nm] = left_join(zones@data[c("geo_code")], cents@data[c("geo_code", i)])[2]
-  rnet@data = cbind(rnet@data, over(rnet_cents, zones[nm]))
-  zones@data[nm] = NULL
-}
 rm(rnet_osgb, rnet_cents)
 
 # Are the lines contained by a single zone?
