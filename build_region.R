@@ -35,7 +35,7 @@ params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
-
+# params$min_rnet_length <- 20 # minimum segment length for the Route Network to display
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
 ukmsoas$avslope = ukmsoas$avslope * 100 # Put in units of percentages
@@ -113,8 +113,8 @@ l$avslope_q <- rq$av_incline * 100
 
 rft_too_large <-  too_large(rf)
 rft <- rf
-rft@data <- cbind(rft@data, l@data[scens])
-rft <- ms_simplify(input = rf, keep = 0.05, keep_shapes = T, no_repair = rft_too_large)
+rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
+rft <- ms_simplify(input = rft, keep = 0.05, keep_shapes = T, no_repair = rft_too_large)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
@@ -160,14 +160,19 @@ if(require(foreach) & require(doParallel)){
 }
 
 # debug rnet so it is smaller and contains only useful results
-summary(rnet)
-
-
+# summary(rnet) # diagnostic check of what it contains
+sel_rnet_zero = rnet$govtarget_slc > 0
+# plot(rnet[!sel_rnet_zero,]) # diagnostic check of the segments with no cyclists
+# links to: https://github.com/npct/pct-shiny/issues/336
+rnet = rnet[rnet$govtarget_slc > 0,] # remove segments with zero cycling flows
 # # Add maximum amount of interzone flow to rnet
 # create line midpoints (sp::over does not work with lines it seems)
 rnet_osgb <- spTransform(rnet, CRS("+init=epsg:27700"))
 rnet_cents <- SpatialLinesMidPoints(rnet_osgb)
 rnet_cents <- spTransform(rnet_cents, CRS("+init=epsg:4326"))
+rnet_lengths = gLength(rnet_osgb, byid = T)
+summary(rnet_lengths)
+# rnet = rnet[rnet_lengths > params$min_rnet_length,]
 
 proj4string(rnet) = proj4string(zones)
 for(i in c("bicycle", scens)){
