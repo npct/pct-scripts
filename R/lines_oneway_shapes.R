@@ -237,3 +237,5 @@ saveRDS(rq_new, "../pct-bigdata/rq_new.Rds")
 # rq_nat = rq_nat[!is.na(rq_nat$length),]
 # rq_nat$length[rq_nat$length > 100] = rq_nat$length / 1000
 # summary(rq_nat)
+# saveRDS(rf_nat, "../pct-bigdata/rf_new.Rds")
+# saveRDS(rq_nat, "../pct-bigdata/rq_new.Rds")
