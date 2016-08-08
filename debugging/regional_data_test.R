@@ -39,6 +39,9 @@ df <- l@data
 df2 <- rFast@data
 summary(l@data[which(sel)] - rFast@data)
 
+# testing rnet data
+summary(rnet$dutch_slc) # some zero values in there for Go Dutch
+
 # render it
 
 leaflet() %>%
