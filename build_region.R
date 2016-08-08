@@ -24,9 +24,9 @@ region # name of the region
 region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
-# Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
+# Minimum flow between od pairs to show. High means fewer lines
 params$mflow <- 10
 params$mflow_short <- 10
 
@@ -52,10 +52,8 @@ cents <- centsa[region_shape,]
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 
 # load flow dataset, depending on availability
-if(!exists("flow_nat"))
-  flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated.Rds"))
-  flow_nat <- flow_nat[flow_nat$dist > 0,]
-summary(flow_nat$dutch_slc / flow_nat$all)
+if(!exists("l_nat"))
+  l_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated.Rds"))
 
 if(!exists("rf_nat")){
   rf_nat <- readRDS(file.path(pct_bigdata, "rf_cam.Rds"))
@@ -66,27 +64,26 @@ if(!exists("rq_nat")){
   rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 }
 # Subset by zones in the study area
-o <- flow_nat$msoa1 %in% cents$geo_code
-d <- flow_nat$msoa2 %in% cents$geo_code
-flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
-flow <- flow[!is.na(flow$dutch_slc),] # remove flows with no scenario data
+o <- l_nat$msoa1 %in% cents$geo_code
+d <- l_nat$msoa2 %in% cents$geo_code
+l <- l_nat[o & d, ] # subset OD pairs with o and d in study area
+
+params$nrow_flow = nrow(l)
+l <- l[!is.na(l$dutch_slc),] # remove flows with no scenario data
 
 # Remove Webtag, increase in walkers and base_
 zones <- remove_cols(zones, "(webtag|siw$|siw$|base_)")
-flow <- remove_cols(flow, "(webtag|siw$|siw$|base_)")
+l <- remove_cols(l, "(webtag|siw$|siw$|base_)")
 
-params$n_flow_region <- nrow(flow)
-params$n_commutes_region <- sum(flow$all)
+params$n_flow_region <- nrow(l)
+params$n_commutes_region <- sum(l$all)
 
 # Subset lines
 # subset OD pairs by n. people using it
-params$sel_long <- flow$all > params$mflow & flow$dist < params$mdist
-params$sel_short <- flow$dist < params$max_all_dist & flow$all > params$mflow_short
+params$sel_long <- l$all > params$mflow & l$dist < params$mdist
+params$sel_short <- l$dist < params$max_all_dist & l$all > params$mflow_short
 sel <- params$sel_long | params$sel_short
-flow <- flow[sel, ]
-# summary(flow$dist)
-# l <- od2line(flow = flow, zones = cents)
-l <- flow
+l <- l[sel, ]
 
 # add geo_label of the lines
 l$geo_label1 = left_join(l@data["msoa1"], zones@data[c("geo_code", "geo_label")], by = c("msoa1" = "geo_code"))[[2]]
@@ -97,8 +94,6 @@ params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
 params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
-rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
-rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rq_nat$id %in% l$id,]
 
@@ -115,7 +110,7 @@ l$avslope_q <- rq$av_incline * 100
 rft_too_large <-  too_large(rf)
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
-rft <- ms_simplify(input = rft, keep = 0.05, keep_shapes = T, no_repair = rft_too_large)
+rft <- ms_simplify(input = rft, keep = 0.1, keep_shapes = T, no_repair = rft_too_large)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
@@ -153,27 +148,19 @@ if(require(foreach) & require(doParallel)){
     stopCluster(cl = cl)
 } else {
   for(i in scens){
-    rft@data[i] <- l@data[i]
     rnet_tmp <- overline(rft, i)
     rnet@data[i] <- rnet_tmp@data[i]
     rft@data[i] <- NULL
   }
 }
 
-# debug rnet so it is smaller and contains only useful results
-# summary(rnet) # diagnostic check of what it contains
-sel_rnet_zero = rnet$govtarget_slc > 0
-# plot(rnet[!sel_rnet_zero,]) # diagnostic check of the segments with no cyclists
+sel_rnet_zero <- rnet$govtarget_slc > 0
 # links to: https://github.com/npct/pct-shiny/issues/336
-rnet = rnet[rnet$govtarget_slc > 0,] # remove segments with zero cycling flows
-# # Add maximum amount of interzone flow to rnet
-# create line midpoints (sp::over does not work with lines it seems)
+rnet <- rnet[sel_rnet_zero,] # remove segments with zero cycling flows
 rnet_osgb <- spTransform(rnet, CRS("+init=epsg:27700"))
-rnet_cents <- SpatialLinesMidPoints(rnet_osgb)
-rnet_cents <- spTransform(rnet_cents, CRS("+init=epsg:4326"))
-rnet_lengths = gLength(rnet_osgb, byid = T)
+rnet_lengths <- gLength(rnet_osgb, byid = T)
 summary(rnet_lengths)
-rnet = rnet[rnet_lengths > params$min_rnet_length,]
+rnet <- rnet[rnet_lengths > params$min_rnet_length,]
 
 proj4string(rnet) = proj4string(zones)
 rm(rnet_osgb, rnet_cents)
@@ -241,7 +228,6 @@ save_formats(rnet)
 saveRDS(cents, file.path(pct_data, region, "c.Rds"))
 
 # gather params
-params$nrow_flow = nrow(flow)
 params$build_date = Sys.Date()
 params$run_time = Sys.time() - start_time
 
