@@ -27,7 +27,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 10
+params$mflow <- 100
 params$mflow_short <- 10
 
 # Distances
@@ -54,6 +54,7 @@ zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 # load flow dataset, depending on availability
 if(!exists("flow_nat"))
   flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated.Rds"))
+  flow_nat <- flow_nat[flow_nat$dist > 0,]
 summary(flow_nat$dutch_slc / flow_nat$all)
 
 if(!exists("rf_nat")){
@@ -110,7 +111,7 @@ l$distq_f <- rq$length / rf$length
 l$avslope <- rf$av_incline * 100
 l$avslope_q <- rq$av_incline * 100
 
-rft <- rf
+rft <- ms_simplify(input = rf, keep = 0.5, keep_shapes = T)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
@@ -124,7 +125,7 @@ rft$bicycle <- l$bicycle
 # needs mapshaper installed and available to system():
 # see https://github.com/mbloch/mapshaper/wiki/
 rft_too_large <-  too_large(rft)
-rft <- ms_simplify(rft, keep = 0.06, no_repair = rft_too_large)
+rft <- ms_simplify(rft, keep = 0.1, no_repair = rft_too_large)
 if (rft_too_large){
   file.create(file.path(pct_data, region, "rft_too_large"))
 }
