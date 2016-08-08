@@ -27,7 +27,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 10
+params$mflow <- 1000
 params$mflow_short <- 10
 
 # Distances
@@ -158,9 +158,10 @@ if(require(foreach) & require(doParallel)){
     rft@data[i] <- NULL
   }
 }
-rm(rft)
 
-# debug rnet so it is smaller and has more consistent results
+# debug rnet so it is smaller and contains only useful results
+summary(rnet)
+
 
 # # Add maximum amount of interzone flow to rnet
 # create line midpoints (sp::over does not work with lines it seems)
@@ -229,18 +230,13 @@ round_df <- function(df, digits) {
 l@data = round_df(l@data, 5)
 
 save_formats(zones, 'z', csv = T)
-rm(zones)
 
 l@data <- as.data.frame(l@data) # The data is in tibble format, can we please use standard data frames in future!
 
 save_formats(l, csv = T)
-rm(l)
 save_formats(rf)
-rm(rf)
 save_formats(rq)
-rm(rq)
 save_formats(rnet)
-rm(rnet)
 
 saveRDS(cents, file.path(pct_data, region, "c.Rds"))
 
