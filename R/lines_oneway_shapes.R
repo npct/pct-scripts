@@ -227,3 +227,13 @@ lines(rq_new[test_index,])
 saveRDS(lines, "../pct-bigdata/lines_oneway_shapes_updated.Rds")
 saveRDS(rf_new, "../pct-bigdata/rf_new.Rds")
 saveRDS(rq_new, "../pct-bigdata/rq_new.Rds")
+
+# # fix inconsistencies in rf/rq data - run build_region.R first
+# rf_nat <- readRDS(file.path(pct_bigdata, "rf_new.Rds"))
+# rf_nat = rf_nat[!is.na(rf_nat$length),]
+# rf_nat$length[rf_nat$length > 100] = rf_nat$length / 1000
+# summary(rf_nat)
+# rq_nat <- readRDS(file.path(pct_bigdata, "rq_new.Rds"))
+# rq_nat = rq_nat[!is.na(rq_nat$length),]
+# rq_nat$length[rq_nat$length > 100] = rq_nat$length / 1000
+# summary(rq_nat)
