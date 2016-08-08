@@ -27,7 +27,7 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 100
+params$mflow <- 10
 params$mflow_short <- 10
 
 # Distances
@@ -111,21 +111,21 @@ l$distq_f <- rq$length / rf$length
 l$avslope <- rf$av_incline * 100
 l$avslope_q <- rq$av_incline * 100
 
-rft <- ms_simplify(input = rf, keep = 0.5, keep_shapes = T)
+rft_too_large <-  too_large(rf)
+rft <- rf
+rft@data <- cbind(rft@data, l@data[scens])
+rft <- ms_simplify(input = rf, keep = 0.05, keep_shapes = T, no_repair = rft_too_large)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
 #   row.names(rft) <- row.names(rf)
 #   rft <- SpatialLinesDataFrame(rft, rf@data)
 # } else print("Error: toptailed lines do not match lines")
-rft$bicycle <- l$bicycle
 
 # Simplify line geometries (if mapshaper is available)
 # this greatly speeds up the build (due to calls to overline)
 # needs mapshaper installed and available to system():
 # see https://github.com/mbloch/mapshaper/wiki/
-rft_too_large <-  too_large(rft)
-rft <- ms_simplify(rft, keep = 0.1, no_repair = rft_too_large)
 if (rft_too_large){
   file.create(file.path(pct_data, region, "rft_too_large"))
 }
@@ -142,7 +142,6 @@ if(require(foreach) & require(doParallel)){
   # foreach::getDoParWorkers()
     # create list in parallel
     rft_data_list <- foreach(i = scens) %dopar% {
-      rft@data[i] <- l@data[i]
       rnet_tmp <- stplanr::overline(rft, i)
       rnet_tmp@data[i]
     }
@@ -160,6 +159,8 @@ if(require(foreach) & require(doParallel)){
   }
 }
 rm(rft)
+
+# debug rnet so it is smaller and has more consistent results
 
 # # Add maximum amount of interzone flow to rnet
 # create line midpoints (sp::over does not work with lines it seems)
