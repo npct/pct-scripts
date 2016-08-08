@@ -69,6 +69,7 @@ if(!exists("rq_nat")){
 o <- flow_nat$msoa1 %in% cents$geo_code
 d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
+flow <- flow[!is.na(flow$dutch_slc),] # remove flows with no scenario data
 
 # Remove Webtag, increase in walkers and base_
 zones <- remove_cols(zones, "(webtag|siw$|siw$|base_)")
