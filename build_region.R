@@ -46,6 +46,7 @@ source('shared_build.R')
 
 # load in codebook data
 codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
+codebook_z = readr::read_csv("../pct-shiny/static/codebook_zones.csv")
 
 # select msoas of interest
 if(proj4string(region_shape) != proj4string(centsa))
