@@ -45,6 +45,9 @@ centsa$geo_code <- as.character(centsa$geo_code)
 
 source('shared_build.R')
 
+# load in codebook data
+codebook_l = read.csv("../pct-shiny/static/codebook_lines.csv")
+
 # select msoas of interest
 if(proj4string(region_shape) != proj4string(centsa))
   region_shape <- spTransform(region_shape, proj4string(centsa))
