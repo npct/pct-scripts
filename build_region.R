@@ -239,7 +239,7 @@ l@data = round_df(l@data, 5)
 
 save_formats(zones, 'z', csv = T)
 
-l@data <- as.data.frame(l@data) # The data is in tibble format, can we please use standard data frames in future!
+l@data <- as.data.frame(l@data) # convert from tibble to data.frame
 
 save_formats(l, csv = T)
 save_formats(rf)
