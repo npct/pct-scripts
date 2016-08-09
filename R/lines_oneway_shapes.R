@@ -93,7 +93,7 @@ head(lines$id)
 head(l_new$id)
 
 # creat placeholder variable names
-lines$geo_label_o	<- lines$geo_label_d	<- lines$cirquity <- NA
+lines$geo_label1	<- lines$geo_label2	<- lines$cirquity <- NA
 # lines$co2_saving <- lines$busyness <- # commented - additional variables will be added during merge
 
 newdat <- left_join(lines@data, l_new[!duplicated_idx], by="id")

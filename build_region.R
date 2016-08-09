@@ -159,7 +159,6 @@ if(require(foreach) & require(doParallel)){
     stopCluster(cl = cl)
 } else {
   for(i in scens){
-    rft@data[i] <- l@data[i]
     rnet_tmp <- overline(rft, i)
     rnet@data[i] <- rnet_tmp@data[i]
     rft@data[i] <- NULL
