@@ -83,23 +83,27 @@ params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
 params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
-# # Create/load routes: comment out 10 lines to generate routes on-the-fly
-# if(!exists("rf_nat")){
+# Load rf and rq data pre-saved for region, comment to get routes from elsewhere
+rf = readRDS(file.path(pct_data, region, "rf.Rds"))
+rq = readRDS(file.path(pct_data, region, "rq.Rds"))
+
+# # Create/load routes: uncomment 10 lines to load lines from pct-bigdata
+# if(!exists("rf_nat"))
 #   rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
-#   rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-# }
-# if(!exists("rq_nat")){
+# if(!exists("rq_nat"))
 #   rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
-#   rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-# }
 # rf <- rf_nat[rf_nat$id %in% l$id,]
 # rq <- rq_nat[rq_nat$id %in% l$id,]
 
-# To create routes on-the-fly, uncomment the next 4 lines:
-rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
-rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
-rf$id = l$id
-rq$id = l$id
+# # To create routes on-the-fly, uncomment the next 4 lines:
+# rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+# rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+# rf$id = l$id
+# rq$id = l$id
+
+# Remove unwanted columns from routes
+rf <- remove_cols(rf, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
+rq <- remove_cols(rq, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length / 1000 # convert m to km
