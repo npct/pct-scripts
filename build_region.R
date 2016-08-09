@@ -67,10 +67,6 @@ d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 flow <- flow[!is.na(flow$dutch_slc),] # remove flows with no scenario data
 
-# Remove Webtag, increase in walkers and base_
-zones <- remove_cols(zones, "(webtag|siw$|siw$|base_)")
-flow <- remove_cols(flow, "(webtag|siw$|siw$|base_)")
-
 params$n_flow_region <- nrow(flow)
 params$n_commutes_region <- sum(flow$all)
 
@@ -200,13 +196,12 @@ cents@data <- left_join(cents@data, zones@data)
 # # Save objects
 
 l@data = round_df(l@data, 5)
-save_formats(zones, 'z', csv = T)
-
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
 # the next line diagnoses missing variables or incorrectly names variables
 # codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)] 
 l@data <- l@data[codebook_l$`Variable name`] # fix order and vars kept in l
-
+zones@data <- zones@data[codebook_z$`Variable name`]
+save_formats(zones, 'z', csv = T)
 save_formats(l, csv = T)
 save_formats(rf)
 save_formats(rq)
