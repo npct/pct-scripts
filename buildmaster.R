@@ -1,3 +1,4 @@
+rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
 library(knitr)
 
