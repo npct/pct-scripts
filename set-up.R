@@ -49,3 +49,32 @@ remove_style = function(x){
   else
     x
 }
+
+save_formats <- function(to_save, name = F, csv = F){
+  if (name == F){
+    name <- substitute(to_save)
+  }
+  saveRDS(to_save, file.path(pct_data, region, paste0(name, ".Rds")))
+  
+  # Simplify data checked with before and after using:
+  # plot(l$gendereq_sideath_webtag)
+  to_save@data <- round_df(to_save@data, 5)
+  
+  # Simplify geom
+  geojson_write( ms_simplify(to_save, keep = 0.1, no_repair = too_large(to_save)), file = file.path(pct_data, region, name))
+  if(csv) write.csv(to_save@data, file.path(pct_data, region, paste0(name, ".csv")))
+}
+
+round_df <- function(df, digits) {
+  nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+  
+  df[,nums] <- round(df[,nums], digits = digits)
+  
+  (df)
+}
+# ms_simplify gives Error: RangeError: Maximum call stack size exceeded
+# for large objects.  Turning the repair off fixed it...
+too_large <- function(to_save, max_size = 5.6){ format(object.size(to_save), units = 'Mb') > max_size }
+remove_cols <- function(df, col_regex){
+  df[,!grepl(col_regex, names(df))]
+}
