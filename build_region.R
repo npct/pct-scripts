@@ -1,12 +1,5 @@
 source("set-up.R") # load packages needed
 
-# ms_simplify gives Error: RangeError: Maximum call stack size exceeded
-# for large objects.  Turning the repair off fixed it...
-too_large <- function(to_save, max_size = 5.6){ format(object.size(to_save), units = 'Mb') > max_size }
-remove_cols <- function(df, col_regex){
-  df[,!grepl(col_regex, names(df))]
-}
-
 # Create default LA name if none exists
 start_time <- Sys.time() # for timing the script
 
@@ -36,14 +29,19 @@ params$max_all_dist <- 7 # maximum distance (km) below which more lines are sele
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 params$min_rnet_length <- 2 # minimum segment length for the Route Network to display - low currently due to holes in routes
-if(!exists("ukmsoas")) # MSOA zones
+if(!exists("ukmsoas")){ # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
-ukmsoas$avslope = ukmsoas$avslope * 100 # Put in units of percentages
+  ukmsoas$avslope = ukmsoas$avslope * 100
+}
 if(!exists("centsa")) # Population-weighted centroids
   centsa <- readOGR(file.path(pct_bigdata, "cents-scenarios.geojson"), "OGRGeoJSON")
 centsa$geo_code <- as.character(centsa$geo_code)
 
 source('shared_build.R')
+
+# load in codebook data
+codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
+codebook_z = readr::read_csv("../pct-shiny/static/codebook_zones.csv")
 
 # select msoas of interest
 if(proj4string(region_shape) != proj4string(centsa))
@@ -57,23 +55,11 @@ if(!exists("flow_nat"))
   flow_nat <- flow_nat[flow_nat$dist > 0,]
 summary(flow_nat$dutch_slc / flow_nat$all)
 
-if(!exists("rf_nat")){
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf_cam.Rds"))
-  rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-}
-if(!exists("rq_nat")){
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq_cam.Rds"))
-  rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-}
 # Subset by zones in the study area
 o <- flow_nat$msoa1 %in% cents$geo_code
 d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 flow <- flow[!is.na(flow$dutch_slc),] # remove flows with no scenario data
-
-# Remove Webtag, increase in walkers and base_
-zones <- remove_cols(zones, "(webtag|siw$|siw$|base_)")
-flow <- remove_cols(flow, "(webtag|siw$|siw$|base_)")
 
 params$n_flow_region <- nrow(flow)
 params$n_commutes_region <- sum(flow$all)
@@ -97,10 +83,17 @@ params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
 params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
-rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
-rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
-rf <- rf_nat[rf_nat$id %in% l$id,]
-rq <- rq_nat[rq_nat$id %in% l$id,]
+# Load rf and rq data pre-saved for region, comment to get routes from elsewhere
+rf = readRDS(file.path(pct_data, region, "rf.Rds"))
+rq = readRDS(file.path(pct_data, region, "rq.Rds"))
+
+# # Create/load routes: uncomment 10 lines to load lines from pct-bigdata
+# if(!exists("rf_nat"))
+#   rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
+# if(!exists("rq_nat"))
+#   rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
+# rf <- rf_nat[rf_nat$id %in% l$id,]
+# rq <- rq_nat[rq_nat$id %in% l$id,]
 
 # # To create routes on-the-fly, uncomment the next 4 lines:
 # rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
@@ -108,12 +101,16 @@ rq <- rq_nat[rq_nat$id %in% l$id,]
 # rf$id = l$id
 # rq$id = l$id
 
+# Remove unwanted columns from routes
+rf <- remove_cols(rf, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
+rq <- remove_cols(rq, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
+
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length / 1000 # convert m to km
 l$dist_quiet <- rq$length / 1000 # convert m to km
 l$time_fast <- rf$time
 l$time_quiet <- rq$time
-l$cirquity <- rf$length / l$dist
+l$cirquity <- l$dist_fast / l$dist
 l$distq_f <- rq$length / rf$length
 l$avslope <- rf$av_incline * 100
 l$avslope_q <- rq$av_incline * 100
@@ -137,33 +134,8 @@ if (rft_too_large){
   file.create(file.path(pct_data, region, "rft_too_large"))
 }
 
-rnet <- overline(rft, "bicycle")
-
-if(require(foreach) & require(doParallel)){
-  n_cores <- 4 # set max number of cores to 4
-  # reduce n_cores for 2 core machines
-  if(parallel:::detectCores() < 4)
-    n_cores <- parallel:::detectCores()
-  cl <- makeCluster(n_cores)
-  registerDoParallel(cl)
-  # foreach::getDoParWorkers()
-    # create list in parallel
-    rft_data_list <- foreach(i = scens) %dopar% {
-      rnet_tmp <- stplanr::overline(rft, i)
-      rnet_tmp@data[i]
-    }
-    # save the results back into rnet with normal for loop
-    for(j in seq_along(scens)){
-      rnet@data <- cbind(rnet@data, rft_data_list[[j]])
-    }
-    stopCluster(cl = cl)
-} else {
-  for(i in scens){
-    rnet_tmp <- overline(rft, i)
-    rnet@data[i] <- rnet_tmp@data[i]
-    rft@data[i] <- NULL
-  }
-}
+# source("R/generate_rnet.R") # comment out to avoid slow rnet build
+rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # debug rnet so it is smaller and contains only useful results
 # summary(rnet) # diagnostic check of what it contains
@@ -194,12 +166,6 @@ if(!"gendereq_slc" %in% scens)
 # Save the data #
 # # # # # # # # #
 
-# Remove/change private/superfluous variables
-l$Male <- l$Female <- l$From_home <-
-  # data used in the model - superflous for pct-shiny
-  l$dist_fastsq <- l$dist_fastsqrt <- l$ned_avslope <-
-  l$interact <- l$interactsq <- l$interactsqrt <- NULL
-
 # Creation of clc current cycling variable (temp)
 l$clc <- l$bicycle / l$all * 100
 
@@ -208,36 +174,13 @@ cents@data$avslope <- NULL
 cents@data <- left_join(cents@data, zones@data)
 
 # # Save objects
-# Save objects # uncomment these lines to save model output
-save_formats <- function(to_save, name = F, csv = F){
-  if (name == F){
-    name <- substitute(to_save)
-  }
-  saveRDS(to_save, file.path(pct_data, region, paste0(name, ".Rds")))
-
-  # Simplify data checked with before and after using:
-  # plot(l$gendereq_sideath_webtag)
-  to_save@data <- round_df(to_save@data, 5)
-
-  # Simplify geom
-  geojson_write( ms_simplify(to_save, keep = 0.1, no_repair = too_large(to_save)), file = file.path(pct_data, region, name))
-  if(csv) write.csv(to_save@data, file.path(pct_data, region, paste0(name, ".csv")))
-}
-
-round_df <- function(df, digits) {
-  nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
-
-  df[,nums] <- round(df[,nums], digits = digits)
-
-  (df)
-}
-
 l@data = round_df(l@data, 5)
-
+l@data <- as.data.frame(l@data) # convert from tibble to data.frame
+# the next line diagnoses missing variables or incorrectly names variables
+# codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)] 
+l@data <- l@data[codebook_l$`Variable name`] # fix order and vars kept in l
+zones@data <- zones@data[codebook_z$`Variable name`]
 save_formats(zones, 'z', csv = T)
-
-l@data <- as.data.frame(l@data) # The data is in tibble format, can we please use standard data frames in future!
-
 save_formats(l, csv = T)
 save_formats(rf)
 save_formats(rq)

@@ -1,6 +1,5 @@
+rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
-library(knitr)
-
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
@@ -49,6 +48,9 @@ for(k in 1:length(la_all)){
   write(model_output, file.path(pct_data, region, "model-output.html"))
 
   message(paste0("Just built ", region))
+  
+  # # Update the data sha - uncomment to automate this (from unix machines)
+  # source("update_sha.R")
 
 }
 
