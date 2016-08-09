@@ -102,6 +102,12 @@ rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rq_nat$id %in% l$id,]
 
+# # To create routes on-the-fly, uncomment the next 4 lines:
+# rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+# rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+# rf$id = l$id
+# rq$id = l$id
+
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length / 1000 # convert m to km
 l$dist_quiet <- rq$length / 1000 # convert m to km
