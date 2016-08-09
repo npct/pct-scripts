@@ -197,12 +197,6 @@ if(!"gendereq_slc" %in% scens)
 # Save the data #
 # # # # # # # # #
 
-# Remove/change private/superfluous variables
-l$Male <- l$Female <- l$From_home <-
-  # data used in the model - superflous for pct-shiny
-  l$dist_fastsq <- l$dist_fastsqrt <- l$ned_avslope <-
-  l$interact <- l$interactsq <- l$interactsqrt <- NULL
-
 # Creation of clc current cycling variable (temp)
 l$clc <- l$bicycle / l$all * 100
 
