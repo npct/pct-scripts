@@ -240,6 +240,7 @@ l@data = round_df(l@data, 5)
 save_formats(zones, 'z', csv = T)
 
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
+l@data <- l@data[codebook_l$Variable.name] # fix order and vars kept in l
 
 save_formats(l, csv = T)
 save_formats(rf)
