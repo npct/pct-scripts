@@ -46,7 +46,7 @@ centsa$geo_code <- as.character(centsa$geo_code)
 source('shared_build.R')
 
 # load in codebook data
-codebook_l = read.csv("../pct-shiny/static/codebook_lines.csv")
+codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
 
 # select msoas of interest
 if(proj4string(region_shape) != proj4string(centsa))
@@ -234,7 +234,9 @@ l@data = round_df(l@data, 5)
 save_formats(zones, 'z', csv = T)
 
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
-l@data <- l@data[codebook_l$Variable.name] # fix order and vars kept in l
+# the next line diagnoses missing variables or incorrectly names variables
+# codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)] 
+l@data <- l@data[codebook_l$`Variable name`] # fix order and vars kept in l
 
 save_formats(l, csv = T)
 save_formats(rf)
