@@ -83,25 +83,23 @@ params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
 params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
-# Create/load the routes
-if(!exists("rf_nat")){
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
-  rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-}
-if(!exists("rq_nat")){
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
-  rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-}
-rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
-rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
-rf <- rf_nat[rf_nat$id %in% l$id,]
-rq <- rq_nat[rq_nat$id %in% l$id,]
+# # Create/load routes: comment out 10 lines to generate routes on-the-fly
+# if(!exists("rf_nat")){
+#   rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
+#   rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
+# }
+# if(!exists("rq_nat")){
+#   rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
+#   rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
+# }
+# rf <- rf_nat[rf_nat$id %in% l$id,]
+# rq <- rq_nat[rq_nat$id %in% l$id,]
 
-# # To create routes on-the-fly, uncomment the next 4 lines:
-# rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
-# rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
-# rf$id = l$id
-# rq$id = l$id
+# To create routes on-the-fly, uncomment the next 4 lines:
+rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+rf$id = l$id
+rq$id = l$id
 
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length / 1000 # convert m to km
