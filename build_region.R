@@ -55,14 +55,6 @@ if(!exists("flow_nat"))
   flow_nat <- flow_nat[flow_nat$dist > 0,]
 summary(flow_nat$dutch_slc / flow_nat$all)
 
-if(!exists("rf_nat")){
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf_cam.Rds"))
-  rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-}
-if(!exists("rq_nat")){
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq_cam.Rds"))
-  rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
-}
 # Subset by zones in the study area
 o <- flow_nat$msoa1 %in% cents$geo_code
 d <- flow_nat$msoa2 %in% cents$geo_code
@@ -91,6 +83,15 @@ params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
 params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
+# Create/load the routes
+if(!exists("rf_nat")){
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
+  rf_nat <- remove_cols(rf_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
+}
+if(!exists("rq_nat")){
+  rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
+  rq_nat <- remove_cols(rq_nat, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
+}
 rf_nat$id <- gsub('(?<=[0-9])E', ' E', rf_nat$id, perl=TRUE) # temp fix to ids
 rq_nat$id <- gsub('(?<=[0-9])E', ' E', rq_nat$id, perl=TRUE)
 rf <- rf_nat[rf_nat$id %in% l$id,]
