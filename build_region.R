@@ -115,7 +115,7 @@ l$dist_fast <- rf$length / 1000 # convert m to km
 l$dist_quiet <- rq$length / 1000 # convert m to km
 l$time_fast <- rf$time
 l$time_quiet <- rq$time
-l$cirquity <- rf$length / l$dist
+l$cirquity <- l$dist_fast / l$dist
 l$distq_f <- rq$length / rf$length
 l$avslope <- rf$av_incline * 100
 l$avslope_q <- rq$av_incline * 100
