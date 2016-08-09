@@ -38,7 +38,6 @@ params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points 
 params$min_rnet_length <- 2 # minimum segment length for the Route Network to display - low currently due to holes in routes
 if(!exists("ukmsoas")) # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
-ukmsoas$avslope = ukmsoas$avslope * 100 # Put in units of percentages
 if(!exists("centsa")) # Population-weighted centroids
   centsa <- readOGR(file.path(pct_bigdata, "cents-scenarios.geojson"), "OGRGeoJSON")
 centsa$geo_code <- as.character(centsa$geo_code)
