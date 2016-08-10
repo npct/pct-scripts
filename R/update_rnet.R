@@ -19,5 +19,4 @@ rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
 rft <- ms_simplify(input = rft, keep = 0.05, keep_shapes = T, no_repair = rft_too_large)
 
-source("R/generate_rnet.R
-       ")
+source("R/generate_rnet.R")
