@@ -92,13 +92,14 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # rf = readRDS(file.path(pct_data, region, "rf.Rds"))
 # rq = readRDS(file.path(pct_data, region, "rq.Rds"))
 
-# 2: Create/load routes: uncomment 10 lines to load lines from pct-bigdata
+# 2: Load routes pre-generated and stored in pct-bigdata
 if(!exists("rf_nat"))
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf_new.Rds"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf_1_to_37_of_50.Rds"))
 if(!exists("rq_nat"))
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq_new.Rds"))
+  rq_nat <- readRDS(file.path(pct_bigdata, "rq_nat.Rds"))
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rq_nat$id %in% l$id,]
+if(nrow(rf) != nrow(rq)) next()
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
 # rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
