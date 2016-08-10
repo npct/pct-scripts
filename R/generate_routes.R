@@ -35,7 +35,7 @@ num_names = formatC(1:n, flag = "0", width = 2)
 sel_names = paste0("rf_39_", num_names, ".Rds")
 for(i in 1:n){
   rf_n[[i]] = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet", plan = "fastest")
-  saveRDS(rf_n[[i]], paste0("../pct-bigdata/", sel_names[i]))
+  saveRDS(rf_n[[i]], paste0("../pct-bigdata/", sel_names[i])) # failes in 8th set
 }
 
 # bind the routes together
