@@ -94,7 +94,7 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
 # 2: Load routes pre-generated and stored in pct-bigdata
 if(!exists("rf_nat"))
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf_1_to_37_of_50.Rds"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf_nat.Rds"))
 if(!exists("rq_nat"))
   rq_nat <- readRDS(file.path(pct_bigdata, "rq_nat.Rds"))
 rf <- rf_nat[rf_nat$id %in% l$id,]
