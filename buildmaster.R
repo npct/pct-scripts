@@ -1,13 +1,16 @@
 rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
+to_build = read_csv("to_rebuild_updated.csv")
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
 la_all = la_all[!grepl(pattern = "london", x = la_all)]
+la_all = la_all[to_build$to_rebuild]
+(la_all = la_all[1:10]) # the first n. not yet done
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
-la_all = la_all[grep(pattern = "bedf|berks", regions$Region)] # just one region
+la_all = la_all[grep(pattern = "isle-of", regions$Region)] # just one region
 
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
@@ -46,10 +49,7 @@ for(k in 1:length(la_all)){
   model_output <- remove_style(model_output)
   # Re-write the model output file
   write(model_output, file.path(pct_data, region, "model-output.html"))
-
   message(paste0("Just built ", region))
-  
   # # Update the data sha - uncomment to automate this (from unix machines)
-  # source("update_sha.R")
-
+  source("update_sha.R")
 }
