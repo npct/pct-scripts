@@ -2,15 +2,18 @@
 source("set-up.R")
 # check national lines data
 # after downloading latest data from github, e.g. with download-data.R
-fname = "../pct-bigdata/rf.Rds"
-fname = "../pct-bigdata/rq.Rds"
+fname = "../pct-bigdata/rf_nat.Rds"
+fname = "../pct-bigdata/rq_nat.Rds"
 r = readRDS(fname)
 
-# Which lengths are crazy long?
-sel = r$length > 100 | is.na(r$length)
+# Check lengths
+sel = r$length < 50 | is.na(r$length)
 summary(sel)
 plot(r[sel,])
-summary(r$length[sel])
+summary(r$length[sel]) # seem to be ones where routes failed
+
+# spatial distribution of fails
+
 
 # What about the units for hilliness?
 summary(r$av_incline)
