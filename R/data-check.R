@@ -1,9 +1,13 @@
 # Aim: check the data produced by pct-load
 source("set-up.R")
+
+# load data
+regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
+
 # check national lines data
 # after downloading latest data from github, e.g. with download-data.R
 fname = "../pct-bigdata/rf_nat.Rds"
-fname = "../pct-bigdata/rq_nat.Rds"
+# fname = "../pct-bigdata/rq_nat.Rds"
 r = readRDS(fname)
 
 # Check lengths
@@ -13,6 +17,11 @@ plot(r[sel,])
 summary(r$length[sel]) # seem to be ones where routes failed
 
 # spatial distribution of fails
+proj4string(regions) = proj4string(r)
+sp_fail = aggregate(r[sel,]["length"], regions, FUN = length)
+sp_fail$name = regions$Region
+df = sp_fail@data[order(sp_fail$length, decreasing = T),]
+write_csv(df, "debugging/fails-rf-by-region.csv")
 
 
 # What about the units for hilliness?
