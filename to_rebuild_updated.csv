@@ -1,7 +1,7 @@
 name,date,to_rebuild,Who,checkedby
 avon,2016-08-10,FALSE,AA,-
-bedfordshire,2016-08-10,TRUE,RL1,-
-berkshire,2016-08-10,TRUE,RL1,-
+bedfordshire,2016-08-10,FALSE,RL1,-
+berkshire,2016-08-10,FALSE,RL1,-
 buckinghamshire,2016-06-22,TRUE,RL1,-
 cambridgeshire,2016-08-09,FALSE,-,AG
 cheshire,2016-06-22,TRUE,RL1,-
