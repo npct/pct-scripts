@@ -35,19 +35,26 @@ for(i in 1:length(f)){
     rn = readRDS(f[i])
     rf = sbind(rf, rn)
   }
+  print(i)
 }
 rf$id = l$id[1:nrow(rf)]
+
+saveRDS(rf, "../pct-bigdata/rf_1_to_37_of_50.Rds")
 
 # testing
 rq = readRDS("../pct-bigdata/rq_nat.Rds")
 summary(l$id == rq$id) # all match
 summary(rf$id == l$id[1:nrow(rf)])
 
-n = 999
+n = 100000
 plot(l[n,])
 plot(rq[n,], add = T, col = "green")
 plot(rf[n,], add = T, col = "red")
 
+summary(rf@data)
 
+
+
+test_route_complete
 
 
