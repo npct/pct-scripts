@@ -31,15 +31,17 @@ f = list.files(path = "../pct-bigdata/", pattern = "rf[0-9]", full.names = T)
 for(i in 1:length(f)){
   if(i == 1){
     rf = readRDS(f[i])
+    rf$id = l$id[sel[[i]]]
   }else{
     rn = readRDS(f[i])
+    rn$id = l$id[sel[[i]]]
     rf = sbind(rf, rn)
+    print(i)
   }
-  print(i)
 }
 rf$id = l$id[1:nrow(rf)]
 
-saveRDS(rf, "../pct-bigdata/rf_1_to_37_of_50.Rds")
+saveRDS(rf, "../pct-bigdata/rf_1_to_35_missing_39.Rds")
 
 # testing
 rq = readRDS("../pct-bigdata/rq_nat.Rds")
