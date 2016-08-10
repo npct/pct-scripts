@@ -7,12 +7,12 @@ l = l[l$dist > 0,]
 # l = l[z,]
 # plot(l)
 
-rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
-rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
-# summary(rf$length)
-
-rf$id = l$id
-rq$id = l$id
+# rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+# rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+# # summary(rf$length)
+# 
+# rf$id = l$id
+# rq$id = l$id
 
 # breaking lines into n pieces
 n = 50
@@ -22,6 +22,18 @@ rf_n = as.list(1:n)
 num_names = formatC(1:n, flag = "0", width = 2)
 sel_names = paste0("rf", num_names, ".Rds")
 for(i in 34:39){
+  rf_n[[i]] = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet", plan = "fastest")
+  saveRDS(rf_n[[i]], paste0("../pct-bigdata/", sel_names[i]))
+}
+
+l = l[sel[[39]],]
+n = 10
+x = 1:nrow(l)
+sel = split(x, cut(x, n, labels = FALSE))
+rf_n = as.list(1:n)
+num_names = formatC(1:n, flag = "0", width = 2)
+sel_names = paste0("rf_39_", num_names, ".Rds")
+for(i in 1:n){
   rf_n[[i]] = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet", plan = "fastest")
   saveRDS(rf_n[[i]], paste0("../pct-bigdata/", sel_names[i]))
 }
