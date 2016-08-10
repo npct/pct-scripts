@@ -5,9 +5,9 @@ pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
 la_all = la_all[!grepl(pattern = "london", x = la_all)]
-# la_all = la_all[17:20]
+la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
-la_all = c("london") # just one region
+# la_all = c("london") # just one region
 
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
@@ -50,9 +50,6 @@ for(k in 1:length(la_all)){
   message(paste0("Just built ", region))
   
   # # Update the data sha - uncomment to automate this (from unix machines)
-  # source("update_sha.R")
+  source("update_sha.R")
 
 }
-
-# # Update the data sha
-# source("update_sha.R")

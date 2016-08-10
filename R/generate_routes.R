@@ -21,7 +21,7 @@ sel = split(x, cut(x, n, labels = FALSE))
 rf_n = as.list(1:n)
 num_names = formatC(1:n, flag = "0", width = 2)
 sel_names = paste0("rf", num_names, ".Rds")
-for(i in 32:n){
+for(i in 34:39){
   rf_n[[i]] = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet", plan = "fastest")
   saveRDS(rf_n[[i]], paste0("../pct-bigdata/", sel_names[i]))
 }

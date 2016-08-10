@@ -20,8 +20,8 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 50
-params$mflow_short <- 50
+params$mflow <- 10
+params$mflow_short <- 10
 
 # Distances
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
@@ -83,19 +83,24 @@ params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
 # % all trips covered
 params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
-# Load rf and rq data pre-saved for region, comment to get routes from elsewhere
-rf = readRDS(file.path(pct_data, region, "rf.Rds"))
-rq = readRDS(file.path(pct_data, region, "rq.Rds"))
+# # # # # # # # # # # # # # # # # # #
+# Get route allocated data          #
+# Use 1 of the following 3 options  #
+# # # # # # # # # # # # # # # # # # #
 
-# # Create/load routes: uncomment 10 lines to load lines from pct-bigdata
-# if(!exists("rf_nat"))
-#   rf_nat <- readRDS(file.path(pct_bigdata, "rf.Rds"))
-# if(!exists("rq_nat"))
-#   rq_nat <- readRDS(file.path(pct_bigdata, "rq.Rds"))
-# rf <- rf_nat[rf_nat$id %in% l$id,]
-# rq <- rq_nat[rq_nat$id %in% l$id,]
+# # 1: Load rf and rq data pre-saved for region, comment for 2 or 3
+# rf = readRDS(file.path(pct_data, region, "rf.Rds"))
+# rq = readRDS(file.path(pct_data, region, "rq.Rds"))
 
-# # To create routes on-the-fly, uncomment the next 4 lines:
+# 2: Create/load routes: uncomment 10 lines to load lines from pct-bigdata
+if(!exists("rf_nat"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf_new.Rds"))
+if(!exists("rq_nat"))
+  rq_nat <- readRDS(file.path(pct_bigdata, "rq_new.Rds"))
+rf <- rf_nat[rf_nat$id %in% l$id,]
+rq <- rq_nat[rq_nat$id %in% l$id,]
+
+# # 3: Create routes on-the-fly, uncomment the next 4 lines:
 # rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
 # rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
 # rf$id = l$id
@@ -134,8 +139,8 @@ if (rft_too_large){
   file.create(file.path(pct_data, region, "rft_too_large"))
 }
 
-# source("R/generate_rnet.R") # comment out to avoid slow rnet build
-rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
+source("R/generate_rnet.R") # comment out to avoid slow rnet build
+# rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # debug rnet so it is smaller and contains only useful results
 # summary(rnet) # diagnostic check of what it contains
