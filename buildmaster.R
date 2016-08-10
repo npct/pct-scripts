@@ -10,7 +10,7 @@ la_all = la_all[to_build$to_rebuild]
 (la_all = la_all[1:10]) # the first n. not yet done
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
-la_all = la_all[grep(pattern = "isle-of", regions$Region)] # just one region
+# la_all = la_all[grep(pattern = "isle-of", regions$Region)] # from exist regions
 
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
