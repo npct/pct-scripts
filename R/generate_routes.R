@@ -38,6 +38,18 @@ for(i in 1:n){
   saveRDS(rf_n[[i]], paste0("../pct-bigdata/", sel_names[i])) # failes in 8th set
 }
 
+l = l[sel[[8]],]
+n = 10
+x = 1:nrow(l)
+sel = split(x, cut(x, n, labels = FALSE))
+rf_n = as.list(1:n)
+num_names = formatC(1:n, flag = "0", width = 2)
+sel_names = paste0("rf_39_8", num_names, ".Rds")
+for(i in 1:n){
+  rf_n[[i]] = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet", plan = "fastest")
+  saveRDS(rf_n[[i]], paste0("../pct-bigdata/", sel_names[i])) # failes in 8th set
+}
+
 # bind the routes together
 f = list.files(path = "../pct-bigdata/", pattern = "rf[0-9]", full.names = T)
 for(i in 1:length(f)){
