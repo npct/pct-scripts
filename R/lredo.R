@@ -4,32 +4,18 @@ library(leaflet)
 
 # load data
 centsa = geojson_read("../pct-bigdata/cents-scenarios.geojson", what = "sp")
-rf = readRDS("../pct-bigdata/rf.Rds")
-rq = readRDS("../pct-bigdata/rq.Rds")
+rf = readRDS("../pct-bigdata/rf_nat.Rds")
+rq = readRDS("../pct-bigdata/rq_nat.Rds")
+# rf = rq # to fix rq, but calling it rf
+# rq = rf # vice versa
 rf$nv = n_vertices(rf)
-l = readRDS("../pct-bigdata/pct_lines_oneway_shapes.Rds")
+l = readRDS("../pct-bigdata/lines_oneway_shapes_updated.Rds")
+l = l[l$dist > 0,]
 nrow(l)
 nrow(rf)
-
-# make l and rf identical
-head(l$id)
-head(rf$id)
-# update rf id
-nchar(rf$id[1:2])
-id1 = stringr::str_sub(rf$id, 1, 9)
-head(id1)
-id2 = stringr::str_sub(rf$id, 10, 18)
-rf$id = paste(id1, id2)
-
-rf = rf[rf$id %in% l$id,] # subset
-nrow(rf) # the right length
-summary(rf$id == l$id) # they're the same ids
-plot(rf[nrow(rf),])
-plot(l[nrow(l),], add = T) # yes they're the same!
+nrow(rq)
 
 rq$nv = n_vertices(rq)
-
-
 sel = rq$nv < 3
 summary(sel)
 l_redo = l[sel,]
@@ -72,6 +58,11 @@ for(i in s){
   # mapview(rf[i,])
   message(i)
 }
+
+summary(is.na(rf$length))
+rf$nv = n_vertices(rf)
+saveRDS(rf, "../pct-bigdata/rq_nat.Rds")
+
 mapview::mapview(rf[s,])
 centsa_old = geojson_read("../pct-bigdata/cents-scenarios.geojson", what = "sp")
 leaflet() %>% addTiles() %>% addCircles(data = centsa_old[mc,]) %>%
