@@ -2,9 +2,9 @@ rnet <- overline(rft, "bicycle")
 
 if(require(foreach) & require(doParallel)){
   n_cores <- 4 # set max number of cores to 4
-  # reduce n_cores for 2 core machines
-  if(parallel:::detectCores() < 4)
-    n_cores <- parallel:::detectCores()
+  # reduce n_cores - uncomment for 2 core machines 
+  # if(parallel:::detectCores() < 4)
+  #   n_cores <- parallel:::detectCores()
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
   # foreach::getDoParWorkers()
