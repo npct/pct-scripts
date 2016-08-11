@@ -11,6 +11,7 @@ la_all <- as.character(regions$Region)
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
 # la_all = la_all[grep(pattern = "isle-of", regions$Region)] # from exist regions
+la_all = "dorset" # a single region
 
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
