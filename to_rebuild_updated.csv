@@ -1,5 +1,5 @@
-name,date,to_rebuild,who,checked_by
-avon,2016-08-10,0,AA,-
+name,date,to_rebuild,who,checked_by,issues
+avon,2016-08-10,maybe,AA,AG,rnet
 bedfordshire,2016-08-10,0,RL1,-
 berkshire,2016-08-10,0,RL1,-
 buckinghamshire,2016-08-10,0,RL1,AG
