@@ -8,7 +8,7 @@ la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 0 # don't rebuild 'maybes'
 (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
-(la_all = la_all[!grepl(pattern = "london|manch|west", x = la_all)])
+(la_all = la_all[!grepl(pattern = "london|manch|west|av", x = la_all)])
 # (la_all = la_all[2:length(la_all)]) # the first n. not yet done
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
@@ -54,5 +54,5 @@ for(k in 1:length(la_all)){
   write(model_output, file.path(pct_data, region, "model-output.html"))
   message(paste0("Just built ", region))
   # # Update the data sha - uncomment to automate this (from unix machines)
-  # source("update_sha.R")
+  source("update_sha.R")
 }
