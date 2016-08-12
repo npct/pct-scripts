@@ -11,8 +11,8 @@ cumbria,2016-08-10,0,RL1,AG,
 derbyshire,2016-08-10,maybe,RL1,AG,37 lines failed to route and one missing line
 devon,2016-08-10,0,RL1,AG,
 dorset,2016-08-10,0,RL1,AG,
-east-sussex,2016-08-10,0,RL1,-,
-essex,2016-08-10,0,RL1,-,
+east-sussex,2016-08-10,1,RL1,AG,rnet sparse less good than pct.bike
+essex,2016-08-10,0,RL1,AG,
 gloucestershire,2016-08-11,0,RL1,-,
 greater-manchester,2016-05-20,1,AU,-,
 hampshire,2016-08-11,0,RL1,-,
