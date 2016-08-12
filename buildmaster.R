@@ -22,7 +22,7 @@ la_all <- as.character(regions$Region)
 # regions <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
 # regions$Region <- regions$CTYUA12NM
 # regions$Region <- tolower(as.character(regions$Region))
-# la_all = "leicester"
+la_all = "london"
 k = 1
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
@@ -52,5 +52,5 @@ for(k in 1:length(la_all)){
   write(model_output, file.path(pct_data, region, "model-output.html"))
   message(paste0("Just built ", region))
   # # Update the data sha - uncomment to automate this (from unix machines)
-  source("update_sha.R")
+  # source("update_sha.R")
 }
