@@ -1,7 +1,7 @@
 name,date,to_rebuild,who,checked_by,outstanding_issues
 avon,2016-08-10,1,AA,AG,rnet looks funny+mflow 50
-bedfordshire,2016-08-10,0,RL1,-,
-berkshire,2016-08-10,0,RL1,-,
+bedfordshire,2016-08-10,0,RL1,AG,
+berkshire,2016-08-10,0,RL1,AG,
 buckinghamshire,2016-08-10,0,RL1,AG,
 cambridgeshire,2016-08-09,0,RL1,AG,
 cheshire,2016-08-10,0,RL1,AG,
