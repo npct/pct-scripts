@@ -20,8 +20,8 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 50
-params$mflow_short <- 50
+params$mflow <- 10
+params$mflow_short <- 10
 
 # Distances
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines

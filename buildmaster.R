@@ -5,9 +5,11 @@ to_build = read_csv("to_rebuild_updated.csv")
 pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- as.character(regions$Region)
-(la_all = la_all[as.logical(to_build$to_rebuild)])
-(la_all = la_all[!grepl(pattern = "london|manch|west-y", x = la_all)])
-(la_all = la_all[2:length(la_all)]) # the first n. not yet done
+sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
+to_build$to_rebuild[sel_text] = 0 # don't rebuild 'maybes'
+(la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
+(la_all = la_all[!grepl(pattern = "london|manch|west", x = la_all)])
+# (la_all = la_all[2:length(la_all)]) # the first n. not yet done
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
 # la_all = la_all[grep(pattern = "isle-of", regions$Region)] # from exist regions
@@ -22,7 +24,7 @@ la_all <- as.character(regions$Region)
 # regions <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
 # regions$Region <- regions$CTYUA12NM
 # regions$Region <- tolower(as.character(regions$Region))
-la_all = "london"
+# la_all = "london"
 k = 1
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
