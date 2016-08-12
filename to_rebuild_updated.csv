@@ -1,5 +1,5 @@
 name,date,to_rebuild,who,checked_by,issues
-avon,2016-08-10,maybe,AA,AG,rnet
+avon,2016-08-10,1,AA,AG,rnet looks funny+mflow 50
 bedfordshire,2016-08-10,0,RL1,-,
 berkshire,2016-08-10,0,RL1,-,
 buckinghamshire,2016-08-10,0,RL1,AG,
