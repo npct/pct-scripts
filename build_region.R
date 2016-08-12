@@ -152,14 +152,11 @@ rnet = rnet[rnet$govtarget_slc > 0,] # remove segments with zero cycling flows
 # # Add maximum amount of interzone flow to rnet
 # create line midpoints (sp::over does not work with lines it seems)
 rnet_osgb <- spTransform(rnet, CRS("+init=epsg:27700"))
-rnet_cents <- SpatialLinesMidPoints(rnet_osgb)
-rnet_cents <- spTransform(rnet_cents, CRS("+init=epsg:4326"))
 rnet_lengths = gLength(rnet_osgb, byid = T)
 summary(rnet_lengths)
 rnet = rnet[rnet_lengths > params$min_rnet_length,]
 
 proj4string(rnet) = proj4string(zones)
-rm(rnet_osgb, rnet_cents)
 
 # Are the lines contained by a single zone?
 rnet$Singlezone = rowSums(gContains(zones, rnet, byid = TRUE))
@@ -183,7 +180,7 @@ cents@data <- left_join(cents@data, zones@data)
 l@data = round_df(l@data, 5)
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
 # the next line diagnoses missing variables or incorrectly names variables
-# codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)] 
+# codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)]
 l@data <- l@data[codebook_l$`Variable name`] # fix order and vars kept in l
 zones@data <- zones@data[codebook_z$`Variable name`]
 save_formats(zones, 'z', csv = T)
@@ -204,7 +201,7 @@ saveRDS(params, file.path(pct_data, region, "params.Rds"))
 # Save the initial parameters to reproduce results
 
 # # Save the script that loaded the lines into the data directory
-file.copy("build_region.R", file.path(pct_data, region, "build_region.R"))
+file.copy("build_region.R", file.path(pct_data, region, "build_region.R"), overwrite = T)
 
 # Create folder in shiny app folder
 region_dir <- file.path(file.path(pct_shiny_regions, region))
