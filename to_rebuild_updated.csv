@@ -27,7 +27,7 @@ lincolnshire,2016-08-11,0,RL2,AG,-
 liverpool-city-region,2016-08-11,1,RL2,-,rnet patchy
 london,2016-08-11,1,RL3,-,NA
 norfolk,2016-08-11,0,RL2,AG,-
-northamptonshire,2016-08-11,0,RL2,-,NA
+northamptonshire,2016-08-11,1,RL2,-,java crashing and rnet not covering whole area
 north-east,2016-05-20,0,RL2,-,NA
 northumberland,2016-05-20,0,RL2,-,NA
 north-yorkshire,2016-08-11,0,RL2,-,NA
