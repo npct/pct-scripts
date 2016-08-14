@@ -31,8 +31,8 @@ northamptonshire,2016-08-11,1,RL2,-,java crashing and rnet not covering whole ar
 north-east,2016-05-20,maybe,RL2,-,rnet seems patchy
 northumberland,2016-05-20,0,RL2,AG,-
 north-yorkshire,2016-08-11,0,RL2,AG,(9 lines not routed right in cycstreets)
-nottinghamshire,2016-05-20,0,RL2,-,NA
-oxfordshire,2016-08-11,0,RL2,-,NA
+nottinghamshire,2016-05-20,0,RL2,AG,-
+oxfordshire,2016-08-11,1,RL2,-,rnet patchy
 shropshire,2016-08-11,0,RL2,-,NA
 somerset,2016-05-20,0,RL2,-,NA
 south-yorkshire,2016-08-11,0,RL2,-,NA
