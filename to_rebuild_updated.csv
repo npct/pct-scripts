@@ -9,7 +9,7 @@ cleveland,2016-08-10,0,RL1,AG,NA
 cornwall-and-isles-of-scilly,2016-08-10,0,RL1,AG,NA
 cumbria,2016-08-10,0,RL1,AG,NA
 derbyshire,2016-08-10,maybe,RL1,-,37 lines failed to route and one missing line
-devon,2016-08-10,0,RL1,AG,NA
+devon,2016-08-10,1,RL1,AG,rnet incomplete - not showing plymouth
 dorset,2016-08-11,0,RL1,AG,NA
 east-sussex,2016-08-10,maybe,RL1,-,rnet sparse less good than pct.bike
 essex,2016-08-11,0,RL1,AG,NA
