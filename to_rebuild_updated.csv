@@ -24,9 +24,9 @@ kent,2016-08-09,0,RL1,AG,NA
 lancashire,2016-08-11,0,RL2,AG,NA
 leicestershire,2016-08-11,1,RL2,-,rnet patchy
 lincolnshire,2016-08-11,0,RL2,-,NA
-liverpool-city-region,2016-08-11,0,RL2,-,NA
+liverpool-city-region,2016-08-11,1,RL2,-,rnet patchy
 london,2016-08-11,1,RL3,-,NA
-norfolk,2016-08-11,0,RL2,-,NA
+norfolk,2016-08-11,0,RL2,AG,(one line missing)
 northamptonshire,2016-08-11,0,RL2,-,NA
 north-east,2016-05-20,0,RL2,-,NA
 northumberland,2016-05-20,0,RL2,-,NA
