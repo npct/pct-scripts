@@ -50,6 +50,13 @@ remove_style = function(x){
     x
 }
 
+# function to add model_output_table class to all tables
+add_table_class <- function(x){
+  
+  x <- gsub("<table>", "<table class='model_output_table'>", x)
+  x
+}
+
 save_formats <- function(to_save, name = F, csv = F){
   if (name == F){
     name <- substitute(to_save)
