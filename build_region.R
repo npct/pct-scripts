@@ -20,11 +20,11 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 10
-params$mflow_short <- 10
-
-# od pair selecion criteria
-params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
+# OD pair selecion criteria
+# Minimum flow between od pairs to show. High means fewer lines
+params$mflow <- 50
+params$mflow_short <- 50
+params$mdist <- 12 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 
