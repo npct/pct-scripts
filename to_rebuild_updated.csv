@@ -14,7 +14,7 @@ dorset,2016-08-11,0,RL1,AG,-
 east-sussex,2016-08-10,1,RL1,-,rnet sparse less good than pct.bike
 essex,2016-08-11,0,RL1,AG,-
 gloucestershire,2016-08-11,1,RL1,-,rnet sparse less good than pct.bike
-greater-manchester,2016-05-20,1,AU,-,NA
+greater-manchester,2016-05-20,1,AU,-,rnet sparse and missing southern areas
 hampshire,2016-08-11,0,RL1,AG,-
 hereford-and-worcester,2016-08-11,0,RL1,AG,-
 hertfordshire,2016-08-11,0,RL1,AG,-
@@ -25,7 +25,7 @@ lancashire,2016-08-11,0,RL2,AG,-
 leicestershire,2016-08-11,1,RL2,-,rnet patchy
 lincolnshire,2016-08-11,0,RL2,AG,-
 liverpool-city-region,2016-08-11,1,RL2,-,rnet patchy
-london,2016-08-11,1,RL3,-,NA
+london,2016-08-11,1,RL3,-,rnet sparse missing bridges over thames
 norfolk,2016-08-11,0,RL2,AG,-
 northamptonshire,2016-08-11,1,RL2,-,java crashing and rnet not covering whole area
 north-east,2016-05-20,1,RL2,-,rnet seems patchy
