@@ -22,8 +22,8 @@ params <- NULL
 
 # OD pair selecion criteria
 # Minimum flow between od pairs to show. High means fewer lines
-params$mflow <- 50
-params$mflow_short <- 50
+params$mflow <- 10
+params$mflow_short <- 10
 params$mdist <- 12 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
