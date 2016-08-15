@@ -90,6 +90,15 @@ The proportion of people who cycled as their main mode of travel to work baselin
 The percentage of cycling expected, based on the distance and hilliness of commutes in the region using the baseline model for England, was
 `r round(100 * (sum(zones$govtarget_slc) - sum(zones$bicycle)) / sum(zones$all) , 1)`%.
 
+| Scenario | % cyclists | % walking | % car drivers | % all other modes |
+| ------------- |:-------------: |:-------------: |:--------------:| ----------------: |
+| Census 2011 | `r paste((b <- round(100 * sum(zones$bicycle) / sum(zones$all) , 1)), '%')`|`r paste((f <- round(100 * sum(zones$foot) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$car_driver) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+| Government Target | `r paste((b <- round(100 * sum(zones$govtarget_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$govtarget_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$govtarget_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+| Gender Equity | `r paste((b <- round(100 * sum(zones$gendereq_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$gendereq_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$gendereq_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+| Go Dutch | `r paste((b <- round(100 * sum(zones$dutch_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$dutch_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$dutch_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+| Ebike  | `r paste((b <- round(100 * sum(zones$ebike_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$ebike_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$ebike_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+
+
 <!-- Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in Table 1 below. -->
 
 <!--Can we please have here a table for the whole region per scenario, using area-based data? This would look like the following.  Cycling/walking/car drivers cells the percent is equal to the scenario level of cycling across all the zones, divided by 'all'.  In the "all other modes" cell, the percent is equal to 100% minus the first 3 rows. I suggest one decimal place.
