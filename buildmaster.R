@@ -39,6 +39,8 @@ for(k in 1:length(la_all)){
     readLines(file.path(pct_data, region, "model-output.html"))
   # remove style section
   model_output <- remove_style(model_output)
+  # Add a special class to all tables for the shiny application
+  model_output <- add_table_style(model_output)
   # Re-write the model output file
   write(model_output, file.path(pct_data, region, "model-output.html"))
   message(paste0("Just built ", region))
