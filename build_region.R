@@ -30,7 +30,7 @@ params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero 
 
 # parameters related to the route network
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
-params$min_rnet_length <- 2 # minimum segment length for the Route Network to display - low currently due to holes in routes
+# params$min_rnet_length <- 2 # minimum segment length for the Route Network to display (may create holes in rnet)
 params$rft_keep = 0.12
 if(!exists("ukmsoas")){ # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
@@ -157,7 +157,7 @@ rnet = rnet[rnet$govtarget_slc > 0,] # remove segments with zero cycling flows
 rnet_osgb <- spTransform(rnet, CRS("+init=epsg:27700"))
 rnet_lengths = gLength(rnet_osgb, byid = T)
 summary(rnet_lengths)
-rnet = rnet[rnet_lengths > params$min_rnet_length,]
+# rnet = rnet[rnet_lengths > params$min_rnet_length,]
 
 proj4string(rnet) = proj4string(zones)
 
