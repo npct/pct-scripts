@@ -74,7 +74,6 @@ round_df <- function(df, digits) {
 }
 # ms_simplify gives Error: RangeError: Maximum call stack size exceeded
 # for large objects.  Turning the repair off fixed it...
-too_large <- function(to_save, max_size = 5.6){ format(object.size(to_save), units = 'Mb') > max_size }
 remove_cols <- function(df, col_regex){
   df[,!grepl(col_regex, names(df))]
 }
