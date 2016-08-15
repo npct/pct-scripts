@@ -12,20 +12,9 @@ to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[2:length(la_all)]) # the first n. not yet done
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
-# la_all = la_all[grep(pattern = "isle-of", regions$Region)] # from exist regions
+(la_all = la_all[grep(pattern = "glouc", la_all)]) # from exist regions
 # la_all = "dorset" # a single region
 
-# # # For custom regions:
-# regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
-# regions$Region <- tolower(regions$Name) # add region names
-# la_all <- regions$Region
-
-# # # For Local Authorities
-# regions <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
-# regions$Region <- regions$CTYUA12NM
-# regions$Region <- tolower(as.character(regions$Region))
-la_all = "greater-manchester"
-k = 1
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
   geo_level <- "regional"
@@ -56,3 +45,13 @@ for(k in 1:length(la_all)){
   # # Update the data sha - uncomment to automate this (from unix machines)
   source("update_sha.R")
 }
+
+# # # For custom regions:
+# regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
+# regions$Region <- tolower(regions$Name) # add region names
+# la_all <- regions$Region
+
+# # # For Local Authorities
+# regions <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
+# regions$Region <- regions$CTYUA12NM
+# regions$Region <- tolower(as.character(regions$Region))
