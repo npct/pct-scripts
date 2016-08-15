@@ -24,7 +24,7 @@ to_build$to_rebuild[sel_text] = 1 # don't rebuild 'maybes'
 # regions <- readOGR(dsn = "../pct-bigdata/cuas-mf.geojson", layer = "OGRGeoJSON")
 # regions$Region <- regions$CTYUA12NM
 # regions$Region <- tolower(as.character(regions$Region))
-# la_all = "london"
+la_all = "london"
 k = 1
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)

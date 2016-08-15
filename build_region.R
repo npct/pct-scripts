@@ -20,11 +20,11 @@ if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 # Minimum flow between od pairs to show. High means fewer lines
 params <- NULL
 
-params$mflow <- 10
-params$mflow_short <- 10
+params$mflow <- 50
+params$mflow_short <- 50
 
 # Distances
-params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
+params$mdist <- 12 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
@@ -124,7 +124,7 @@ l$avslope_q <- rq$av_incline * 100
 rft_too_large <-  too_large(rf)
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
-rft <- ms_simplify(input = rft, keep = 0.05, keep_shapes = T, no_repair = rft_too_large)
+rft <- ms_simplify(input = rft, keep = 0.12, keep_shapes = T, no_repair = rft_too_large)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
