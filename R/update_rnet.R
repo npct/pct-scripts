@@ -14,9 +14,8 @@ scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
 rf = readRDS(file.path(pct_data, region, "rf.Rds"))
 rq = readRDS(file.path(pct_data, region, "rq.Rds"))
 
-rft_too_large <-  too_large(rf)
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
-rft <- ms_simplify(input = rft, keep = 0.05, keep_shapes = T, no_repair = rft_too_large)
+rft <- ms_simplify(input = rft, keep = 0.05, keep_shapes = T)
 
 source("R/generate_rnet.R")

@@ -61,7 +61,7 @@ save_formats <- function(to_save, name = F, csv = F){
   to_save@data <- round_df(to_save@data, 5)
   
   # Simplify geom
-  geojson_write( ms_simplify(to_save, keep = 0.1, no_repair = too_large(to_save)), file = file.path(pct_data, region, name))
+  geojson_write( ms_simplify(to_save, keep = 0.1, file = file.path(pct_data, region, name))
   if(csv) write.csv(to_save@data, file.path(pct_data, region, paste0(name, ".csv")))
 }
 
