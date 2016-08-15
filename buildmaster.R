@@ -43,7 +43,7 @@ for(k in 1:length(la_all)){
   write(model_output, file.path(pct_data, region, "model-output.html"))
   message(paste0("Just built ", region))
   # # Update the data sha - uncomment to automate this (from unix machines)
-  source("update_sha.R")
+  # source("update_sha.R")
 }
 
 # # # For custom regions:

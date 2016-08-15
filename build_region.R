@@ -127,7 +127,7 @@ l$avslope_q <- rq$av_incline * 100
 rft_too_large <-  too_large(rf)
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
-rft <- ms_simplify(input = rft, keep = params$rft_keep, keep_shapes = T, no_repair = FALSE)
+rft <- ms_simplify(input = rft, keep = params$rft_keep, keep_shapes = T, no_repair = T)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
