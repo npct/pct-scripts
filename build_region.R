@@ -31,7 +31,7 @@ params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero 
 # parameters related to the route network
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 # params$min_rnet_length <- 2 # minimum segment length for the Route Network to display (may create holes in rnet)
-params$rft_keep = 0.12
+params$rft_keep = 0.07
 if(!exists("ukmsoas")){ # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
   ukmsoas$avslope = ukmsoas$avslope * 100
@@ -127,7 +127,7 @@ l$avslope_q <- rq$av_incline * 100
 rft_too_large <-  too_large(rf)
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
-rft <- ms_simplify(input = rft, keep = params$rft_keep, keep_shapes = T, no_repair = rft_too_large)
+rft <- ms_simplify(input = rft, keep = params$rft_keep, keep_shapes = T, no_repair = FALSE)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
