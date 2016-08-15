@@ -124,6 +124,10 @@ l$distq_f <- rq$length / rf$length
 l$avslope <- rf$av_incline * 100
 l$avslope_q <- rq$av_incline * 100
 
+# Simplify line geometries (if mapshaper is available)
+# this greatly speeds up the build (due to calls to overline)
+# needs mapshaper installed and available to system():
+# see https://github.com/mbloch/mapshaper/wiki/
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
 rft <- ms_simplify(input = rft, keep = params$rft_keep, keep_shapes = T)
@@ -133,14 +137,6 @@ rft <- ms_simplify(input = rft, keep = params$rft_keep, keep_shapes = T)
 #   row.names(rft) <- row.names(rf)
 #   rft <- SpatialLinesDataFrame(rft, rf@data)
 # } else print("Error: toptailed lines do not match lines")
-
-# Simplify line geometries (if mapshaper is available)
-# this greatly speeds up the build (due to calls to overline)
-# needs mapshaper installed and available to system():
-# see https://github.com/mbloch/mapshaper/wiki/
-if (rft_too_large){
-  file.create(file.path(pct_data, region, "rft_too_large"))
-}
 
 source("R/generate_rnet.R") # comment out to avoid slow rnet build
 # rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
