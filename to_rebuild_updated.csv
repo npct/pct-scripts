@@ -1,46 +1,46 @@
-name,date,to_rebuild,who,sign_off,outstanding_issues
-avon,2016-08-15,0,RL2,-,-
-bedfordshire,2016-08-10,0,RL1,AG,-
-berkshire,2016-08-10,0,RL1,AG,-
-buckinghamshire,2016-08-10,0,RL1,AG,-
-cambridgeshire,2016-08-09,0,RL1,AG,-
-cheshire,2016-08-10,0,RL1,AG,-
-cleveland,2016-08-10,0,RL1,AG,-
-cornwall-and-isles-of-scilly,2016-08-10,0,RL1,AG,-
-cumbria,2016-08-10,0,RL1,AG,-
-derbyshire,2016-08-14,0,RL1,AG,-
-devon,2016-08-15,0,RL1,-,-
-dorset,2016-08-12,0,RL1,AG,-
-east-sussex,2016-08-15,0,RL1,-,-
-essex,2016-08-12,0,RL1,AG,-
-gloucestershire,2016-08-15,0,RL1,-,-
-greater-manchester,2016-08-15,0,AU,-,-
-hampshire,2016-08-12,0,RL1,AG,-
-hereford-and-worcester,2016-08-12,0,RL1,AG,-
-hertfordshire,2016-08-12,0,RL1,AG,-
-humberside,2016-08-15,0,RL1,-,-
-isle-of-wight,2016-08-10,0,RL1,AG,-
-kent,2016-08-09,0,RL1,AG,-
-lancashire,2016-08-12,0,RL2,AG,-
-leicestershire,2016-08-15,1,RL2,-,rnet patchy
-lincolnshire,2016-08-12,0,RL2,AG,-
-liverpool-city-region,2016-08-15,1,RL2,-,rnet patchy
-london,2016-08-15,1,RL3,-,rnet sparse missing bridges over thames
-norfolk,2016-08-12,0,RL2,AG,-
-northamptonshire,2016-08-12,1,RL2,-,java crashing and rnet not covering whole area
-north-east,2016-08-12,1,RL2,-,rnet seems patchy
-northumberland,2016-08-12,0,RL2,AG,-
-north-yorkshire,2016-08-10,0,RL2,AG,(9 lines not routed right in cycstreets)
-nottinghamshire,2016-08-14,0,RL2,AG,-
-oxfordshire,2016-08-10,1,RL2,-,rnet patchy
-shropshire,2016-08-10,0,RL2,AG,-
-somerset,2016-08-14,0,RL2,AG,-
-south-yorkshire,2016-08-11,0,RL2,AG,-
-staffordshire,2016-08-11,0,RL2,AG,-
-suffolk,2016-08-11,0,RL2,AG,-
-surrey,2016-08-11,0,RL2,AG,-
-warwickshire,2016-08-11,0,RL2,AG,-
-west-midlands,2016-08-14,1,AU,-,mflow 50
-west-sussex,2016-08-11,0,RL2,AG,-
-west-yorkshire,2016-08-08,1,AA,-,mflow 50? server currently crashing
-wiltshire,2016-08-14,0,RL2,AG,-
+name,date,to_rebuild,who,sign_off,outstanding_issues,recently_built
+avon,2016-08-15,0,RL2,-,-,TRUE
+bedfordshire,2016-08-10,0,RL1,AG,-,FALSE
+berkshire,2016-08-10,0,RL1,AG,-,FALSE
+buckinghamshire,2016-08-10,0,RL1,AG,-,FALSE
+cambridgeshire,2016-08-09,0,RL1,AG,-,FALSE
+cheshire,2016-08-10,0,RL1,AG,-,FALSE
+cleveland,2016-08-10,0,RL1,AG,-,FALSE
+cornwall-and-isles-of-scilly,2016-08-10,0,RL1,AG,-,FALSE
+cumbria,2016-08-10,0,RL1,AG,-,FALSE
+derbyshire,2016-08-14,0,RL1,AG,-,FALSE
+devon,2016-08-15,0,RL1,-,-,TRUE
+dorset,2016-08-12,0,RL1,AG,-,FALSE
+east-sussex,2016-08-15,0,RL1,-,-,TRUE
+essex,2016-08-12,0,RL1,AG,-,FALSE
+gloucestershire,2016-08-15,0,RL1,-,-,TRUE
+greater-manchester,2016-08-15,0,AU,-,-,TRUE
+hampshire,2016-08-12,0,RL1,AG,-,FALSE
+hereford-and-worcester,2016-08-12,0,RL1,AG,-,FALSE
+hertfordshire,2016-08-12,0,RL1,AG,-,FALSE
+humberside,2016-08-15,0,RL1,-,-,TRUE
+isle-of-wight,2016-08-10,0,RL1,AG,-,FALSE
+kent,2016-08-09,0,RL1,AG,-,FALSE
+lancashire,2016-08-12,0,RL2,AG,-,FALSE
+leicestershire,2016-08-15,0,RL2,-,-,TRUE
+lincolnshire,2016-08-12,0,RL2,AG,-,FALSE
+liverpool-city-region,2016-08-15,1,RL2,-,rnet patchy,TRUE
+london,2016-08-15,0,RL3,-,-,TRUE
+norfolk,2016-08-12,0,RL2,AG,-,FALSE
+northamptonshire,2016-08-12,1,RL2,-,java crashing and rnet not covering whole area,FALSE
+north-east,2016-08-12,1,RL2,-,rnet seems patchy,FALSE
+northumberland,2016-08-12,0,RL2,AG,-,FALSE
+north-yorkshire,2016-08-10,1,RL2,AG,(9 lines not routed right in cycstreets),FALSE
+nottinghamshire,2016-08-14,0,RL2,AG,-,FALSE
+oxfordshire,2016-08-10,1,RL2,-,rnet patchy,FALSE
+shropshire,2016-08-10,0,RL2,AG,-,FALSE
+somerset,2016-08-14,0,RL2,AG,-,FALSE
+south-yorkshire,2016-08-11,0,RL2,AG,-,FALSE
+staffordshire,2016-08-11,0,RL2,AG,-,FALSE
+suffolk,2016-08-11,0,RL2,AG,-,FALSE
+surrey,2016-08-11,0,RL2,AG,-,FALSE
+warwickshire,2016-08-11,0,RL2,AG,-,FALSE
+west-midlands,2016-08-14,1,RL1,-,mflow 50,FALSE
+west-sussex,2016-08-11,0,RL2,AG,-,FALSE
+west-yorkshire,2016-08-08,0,RL3,-,-,FALSE
+wiltshire,2016-08-14,0,RL2,AG,-,FALSE
