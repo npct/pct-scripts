@@ -165,7 +165,7 @@ A modified version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-top
 
 Table 2 below illustrates the health and carbon impacts of the different scenarios.  For each scenario, comparisons are made with a counterfactual in which nobody in the region cycled ('No cyclists'), and with the observed level of cycling in the 2011 Census
 
-| Scenario | Comparison	| Change in deaths/year  | Value of change ( `r htmltools::HTML('&pound;')` millions)  | Change in tonnes CO2e/year |
+| Scenario | Comparison	| Change in deaths/year  | Value of change ( million pounds )  | Change in tonnes CO2e/year |
 | -------- |:----------:|:-----------------: |:----------:| :---------------:|
 | Census 2011 |	'No Cyclists' |  `r (round(sum(zones$govtarget_sldeath_heat) - sum(zones$govtarget_sideath_heat) , 2))` | `r (round((sum(zones$govtarget_slvalue_heat) - sum(zones$govtarget_sivalue_heat)) / 1000000  , 2))` | `r (round( ( sum(zones$govtarget_slco2) - sum(zones$govtarget_sico2) ) / 1000))` |
 | Government Target |	'No Cyclists' |  `r (round(sum(zones$govtarget_sldeath_heat) , 2))` | `r (round(sum(zones$govtarget_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$govtarget_slco2) / 1000))` |
