@@ -10,6 +10,7 @@ output:
 ---
 
 ```{r, include=FALSE}
+options(scipen=999)
 source("set-up.R")
 knitr::opts_chunk$set(message = FALSE)
 
