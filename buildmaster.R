@@ -6,9 +6,9 @@ pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
-to_build$to_rebuild[sel_text] = 1 # don't rebuild 'maybes'
+to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
-(la_all = la_all[!grepl(pattern = "london|west-m|av", x = la_all)])
+(la_all = la_all[!grepl(pattern = "london|west-y|greater", x = la_all)])
 # (la_all = la_all[2:length(la_all)]) # the first n. not yet done
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
