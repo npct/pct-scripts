@@ -27,10 +27,10 @@ lincolnshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 liverpool-city-region,2016-08-15,1,RL2,-,JAVA crashing! rnet patchy,TRUE,TRUE
 london,2016-08-15,0,RL3,2016-08-16,(NB model output tab not yet updated - says 12km/50 not 20/70),TRUE,TRUE
 norfolk,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-northamptonshire,2016-08-15,1,RL2,-,rnet not covering whole area,TRUE,TRUE
-north-east,2016-08-15,1,RL2,-,rnet seems patchy in Liverpool,TRUE,TRUE
+northamptonshire,2016-08-15,1,RL2,-,rnet still not covering whole area,TRUE,TRUE
+north-east,2016-08-15,1,RL2,-,rnet still seems patchy in Liverpool,TRUE,TRUE
 northumberland,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-north-yorkshire,2016-08-15,0,RL2,-,(9 lines not routed right in cycstreets),TRUE,TRUE
+north-yorkshire,2016-08-15,0,RL2,2016-08-16,-,TRUE,TRUE
 nottinghamshire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 oxfordshire,2016-08-15,0,RL2,2016-08-15,-,TRUE,TRUE
 shropshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
