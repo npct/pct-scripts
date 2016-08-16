@@ -44,17 +44,17 @@ las_in_region <- las[las_in_region,]
 
 ## Key information 
 
-This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r R.utils::capitalize(region)`. The data were generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0). Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others as long as attribution is made to the original.
+This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r capitalize_region(region)`. The data were generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the [AGPL Licence](https://www.gnu.org/licenses/agpl-3.0). Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others as long as attribution is made to the original.
 
-This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were `r prettyNum(sum(zones$all), big.mark = ",", scientific = F)` commuters living in `r R.utils::capitalize(region)` recorded in the 2011 Census. All of these are represented in the zones data produced by the PCT.
+This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were `r prettyNum(sum(zones$all), big.mark = ",", scientific = F)` commuters living in `r capitalize_region(region)` recorded in the 2011 Census. All of these are represented in the zones data produced by the PCT.
 
-In `r R.utils::capitalize(region)` there are `r nrow(l)` between-zone flows that a) start and end in `r R.utils::capitalize(region)`, b) have a straight-line (Euclidean) distance of less than `r mdist`km and a fast-route distance less than 30km, and c) contain more than `r mflow` commuters (by any mode, counting commuters in both directions).   These `r nrow(l)` between-zone flows are visualised as **Straight Lines**, **Routes** (fast and quiet) and the **Route Network** on the interactive map, and account for `r round(sum(l$all) / sum(zones$all) * 100)`% of all commuters living in `r R.utils::capitalize(region)`.
+In `r capitalize_region(region)` there are `r nrow(l)` between-zone flows that a) start and end in `r capitalize_region(region)`, b) have a straight-line (Euclidean) distance of less than `r mdist`km and a fast-route distance less than 30km, and c) contain more than `r mflow` commuters (by any mode, counting commuters in both directions).   These `r nrow(l)` between-zone flows are visualised as **Straight Lines**, **Routes** (fast and quiet) and the **Route Network** on the interactive map, and account for `r round(sum(l$all) / sum(zones$all) * 100)`% of all commuters living in `r capitalize_region(region)`.
 
-Between-zone flows exclude **within-zone travel**, when the zone of origin is the same as the zone of destination. Within-zone travel is represented by red points on the map when the lines are shown, and accounts for `r round(sum(cents$all) / sum(zones$all) * 100)`% of commuters in `r R.utils::capitalize(region)`. The between-zone flows visualised as lines and routes on the map also exclude commuters travelling outside `r R.utils::capitalize(region)` and people with no fixed place of work.
+Between-zone flows exclude **within-zone travel**, when the zone of origin is the same as the zone of destination. Within-zone travel is represented by red points on the map when the lines are shown, and accounts for `r round(sum(cents$all) / sum(zones$all) * 100)`% of commuters in `r capitalize_region(region)`. The between-zone flows visualised as lines and routes on the map also exclude commuters travelling outside `r capitalize_region(region)` and people with no fixed place of work.
 
 See [Lovelace et al. (2016)](http://arxiv.org/abs/1509.04425) for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and to visualise results at the area, line, route and route network level.
 
-## The `r R.utils::capitalize(region)` region
+## The `r capitalize_region(region)` region
 
 <!-- Can we show hilliness by comparison to other areas?  -->
 
@@ -70,7 +70,7 @@ lines(l[l$all > 100,], col = "green")
 
 The map below shows the average hilliness of the between-zone routes used by commuters living in each MSOA.
 The average hilliness of the fastest routes in
-`r R.utils::capitalize(region)` is
+`r capitalize_region(region)` is
 `r round(100 * mean(rf$av_incline, na.rm = T), 2)`%,
 compared with a national average of
 `r round(100 * mean(rf_nat$av_incline, na.rm = T), 2)`%.
@@ -84,9 +84,9 @@ tm_shape(zones) +
 
 **Figure 2:** Map showing the average hilliness of routes in zones across the study area.
 
-## Cycling levels in each scenario for `r R.utils::capitalize(region)`
+## Cycling levels in each scenario for `r capitalize_region(region)`
 
-The proportion of people who cycled as their main mode of travel to work baseline (2011 Census) data in `r R.utils::capitalize(region)` was 
+The proportion of people who cycled as their main mode of travel to work baseline (2011 Census) data in `r capitalize_region(region)` was 
 `r round(100 * sum(zones$bicycle) / sum(zones$all) , 1)`%, compared to the national average of 3.2%.
 The percentage of cycling expected, based on the distance and hilliness of commutes in the region using the baseline model for England, was
 `r round(100 * (sum(zones$govtarget_slc) - sum(zones$bicycle)) / sum(zones$all) , 1)`%.
@@ -99,7 +99,7 @@ The percentage of cycling expected, based on the distance and hilliness of commu
   Go Dutch
   Ebikes
 -->
-<!-- **Table 1:** Mode split among commuters living in `r R.utils::capitalize(region)` across scenarios
+<!-- **Table 1:** Mode split among commuters living in `r capitalize_region(region)` across scenarios
 -->
 
 Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in **Table 1**  below.
@@ -120,7 +120,7 @@ Figure 3 illustrates the overall number of people in between-zone flows cycling 
 <!--Anna note I think we Ideally should revisit this figure at some point and include within-zone flows, I think it would make the figure much more helpful-->
 ```{r, echo=FALSE, warning=FALSE, fig.cap=""}
 levels(dfsp$scenario) <- gsub("_slc", "", levels(dfsp$scenario))
-levels(dfsp$scenario) <- R.utils::capitalize(levels(dfsp$scenario))
+levels(dfsp$scenario) <- capitalize_region(levels(dfsp$scenario))
 levels(dfsp$scenario)[2:5] = c("Cyclists in Ebikes", "Cyclists in Go Dutch", "Cyclists in Gender Equality", "Cyclists in Government Target")
 ggplot(dfsp) +
   geom_freqpoly(aes(dist_fast, weight = slc,
@@ -132,7 +132,7 @@ ggplot(dfsp) +
   theme_bw()
 ```
 
-**Figure 3:** Number of between-zone commuters within `r R.utils::capitalize(region)` cycling by scenario and distance.
+**Figure 3:** Number of between-zone commuters within `r capitalize_region(region)` cycling by scenario and distance.
 
 
 <!-- ## Health and carbon impacts -->
@@ -158,7 +158,7 @@ Ebikes 'No Cyclists'
             Census 2011-->
 
 <!--
-**Table 2:** Mortality and carbon impacts of scenarios in `r R.utils::capitalize(region)`, relative to baseline and to a ‘no cyclists’ counterfactual.  Note that 'MTCO2e' stands for meg-tonnes of CO2-equivalent emissions
+**Table 2:** Mortality and carbon impacts of scenarios in `r capitalize_region(region)`, relative to baseline and to a ‘no cyclists’ counterfactual.  Note that 'MTCO2e' stands for meg-tonnes of CO2-equivalent emissions
 -->
 
 ## Health and carbon impacts
