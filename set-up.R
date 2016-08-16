@@ -84,3 +84,11 @@ round_df <- function(df, digits) {
 remove_cols <- function(df, col_regex){
   df[,!grepl(col_regex, names(df))]
 }
+
+# A function which capitalizes both words in a region
+capitalize_region <- function (region_name){
+  require(BBmisc)
+  region_name = gsub(pattern = "-", replacement = " ", x = region_name)
+  region_name = capitalizeStrings(region_name, all.words = T)
+  region_name
+}
