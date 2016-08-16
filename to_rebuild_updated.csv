@@ -1,4 +1,4 @@
-name,date,to_rebuild,who,AGcheck,notes_or_outstanding_issues,recently_rebuilt,recently_built
+name,date,to_rebuild,who,AG_signoff,notes_or_outstanding_issues,recently_rebuilt,recently_built
 avon,2016-08-15,0,RL2,2016-08-16,-,TRUE,TRUE
 bedfordshire,2016-08-10,0,RL1,AG,-,FALSE,FALSE
 berkshire,2016-08-10,0,RL1,AG,-,FALSE,FALSE
@@ -27,8 +27,8 @@ lincolnshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 liverpool-city-region,2016-08-15,1,RL2,-,JAVA crashing! rnet patchy,TRUE,TRUE
 london,2016-08-15,0,RL3,2016-08-16,(NB model output tab not yet updated - says 12km/50 not 20/70),TRUE,TRUE
 norfolk,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-northamptonshire,2016-08-15,1,RL2,-,java crashing and rnet not covering whole area,TRUE,TRUE
-north-east,2016-08-15,0,RL2,-,rnet seems patchy,TRUE,TRUE
+northamptonshire,2016-08-15,1,RL2,1,rnet not covering whole area,TRUE,TRUE
+north-east,2016-08-15,0,RL2,1,rnet seems patchy in Liverpool,TRUE,TRUE
 northumberland,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 north-yorkshire,2016-08-15,0,RL2,-,(9 lines not routed right in cycstreets),TRUE,TRUE
 nottinghamshire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
