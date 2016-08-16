@@ -110,7 +110,7 @@ Summary results for the proportion of people walking, driving and using other mo
 | Government Target | `r paste((b <- round(100 * sum(zones$govtarget_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$govtarget_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$govtarget_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
 | Gender Equity | `r paste((b <- round(100 * sum(zones$gendereq_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$gendereq_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$gendereq_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
 | Go Dutch | `r paste((b <- round(100 * sum(zones$dutch_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$dutch_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$dutch_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
-| Ebike  | `r paste((b <- round(100 * sum(zones$ebike_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$ebike_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$ebike_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+| Ebikes  | `r paste((b <- round(100 * sum(zones$ebike_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$ebike_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$ebike_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
 
 
 Figure 3 illustrates the overall number of people in between-zone flows cycling to work under each scenario (note that this does not include within-zone travel).
@@ -174,7 +174,7 @@ Table 2 below illustrates the health and carbon impacts of the different scenari
 |  |	Census 2011 |  `r (round(sum(zones$gendereq_sideath_heat) , 2))` | `r (round(sum(zones$gendereq_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$gendereq_sico2) / 1000))` |
 | Go Dutch |	'No Cyclists' |  `r (round(sum(zones$dutch_sldeath_heat) , 2))` | `r (round(sum(zones$dutch_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$dutch_slco2) / 1000))` |
 |  |	Census 2011 |  `r (round(sum(zones$dutch_sideath_heat) , 2))` | `r (round(sum(zones$dutch_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$dutch_sico2) / 1000))` |
-| Gender Equity |	'No Cyclists' |  `r (round(sum(zones$ebike_sldeath_heat) , 2))` | `r (round(sum(zones$ebike_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$ebike_slco2) / 1000))` |
+| Ebikes |	'No Cyclists' |  `r (round(sum(zones$ebike_sldeath_heat) , 2))` | `r (round(sum(zones$ebike_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$ebike_slco2) / 1000))` |
 |  |	Census 2011 |  `r (round(sum(zones$ebike_sideath_heat) , 2))` | `r (round(sum(zones$ebike_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$ebike_sico2) / 1000))` |
 
 <!-- For further information on -->
