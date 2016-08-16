@@ -1,4 +1,4 @@
-name,date,to_rebuild,who,sign_off,outstanding_issues,recently_built
+name,date,to_rebuild,who,sign_off,outstanding_issues,AG_to_check
 avon,2016-08-15,0,RL2,-,-,TRUE
 bedfordshire,2016-08-10,0,RL1,AG,-,FALSE
 berkshire,2016-08-10,0,RL1,AG,-,FALSE
