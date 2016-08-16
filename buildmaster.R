@@ -48,6 +48,8 @@ for(k in 1:length(la_all)){
   source("update_sha.R")
 }
 
+# update table tracking builds
+source("R/to_build.R")
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
 # regions$Region <- tolower(regions$Name) # add region names

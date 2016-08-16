@@ -19,6 +19,6 @@ to_rebuild_updated = read_csv("to_rebuild_updated.csv")
 to_rebuild_updated$date = region_dates$date
 to_rebuild_updated$recently_built = start_date <= as_date(region_dates$date)
 to_rebuild_updated$name[!to_rebuild_updated$recently_built]
-to_rebuild_updated$to_rebuild[recently_built] = 0
+# to_rebuild_updated$to_rebuild[recently_built] = 0
 
 write_csv(to_rebuild_updated, "to_rebuild_updated.csv")
