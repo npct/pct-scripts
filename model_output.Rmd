@@ -163,7 +163,7 @@ Ebikes 'No Cyclists'
 
 A modified version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update) was used to calculate health impacts, based on the extra physical activity gained through new cycling trips in each scenario, minus the physical activity displaced in any former walking trips that have now been switched to cycling. CO2 impacts are derived from changes in distance driven per scenario.
 
-Table 2 below illustrates the health and carbon impacts of the different scenarios.  For each scenario, comparisons are made with a counterfactual in which nobody in the region cycled ('No cyclists'), and with the observed level of cycling in the 2011 Census
+**Table 2** below illustrates the health and carbon impacts of the different scenarios.  For each scenario, comparisons are made with a counterfactual in which nobody in the region cycled ('No cyclists'), and with the observed level of cycling in the 2011 Census
 
 | Scenario | Comparison	| Change in deaths/year  | Value of change ( million pounds )  | Change in tonnes CO2e/year |
 | -------- |:----------:|:-----------------: |:----------:| :---------------:|
@@ -177,7 +177,6 @@ Table 2 below illustrates the health and carbon impacts of the different scenari
 | Ebikes |	'No Cyclists' |  `r (round(sum(zones$ebike_sldeath_heat) , 2))` | `r (round(sum(zones$ebike_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$ebike_slco2) / 1000))` |
 |  |	Census 2011 |  `r (round(sum(zones$ebike_sideath_heat) , 2))` | `r (round(sum(zones$ebike_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$ebike_sico2) / 1000))` |
 
-<!-- For further information on -->
 
 ## References
 
