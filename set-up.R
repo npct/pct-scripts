@@ -51,7 +51,7 @@ remove_style = function(x){
 }
 
 # function to add model_output_table class to all tables
-add_table_style <- function(x){
+add_table_class <- function(x){
   
   x <- gsub("<table>", "<table class='model_output_table'>", x)
   x
