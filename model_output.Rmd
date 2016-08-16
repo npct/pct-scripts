@@ -106,11 +106,11 @@ Summary results for the proportion of people walking, driving and using other mo
 
 | Scenario | % cyclists | % walking | % car drivers | % all other modes |
 | ------------- |:-------------: |:-------------: |:--------------:| :----------------: |
-| Census 2011 | `r paste((b <- round(100 * sum(zones$bicycle) / sum(zones$all) , 1)), '%')`|`r paste((f <- round(100 * sum(zones$foot) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$car_driver) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
-| Government Target | `r paste((b <- round(100 * sum(zones$govtarget_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$govtarget_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$govtarget_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
-| Gender Equity | `r paste((b <- round(100 * sum(zones$gendereq_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$gendereq_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$gendereq_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
-| Go Dutch | `r paste((b <- round(100 * sum(zones$dutch_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$dutch_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$dutch_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
-| Ebikes  | `r paste((b <- round(100 * sum(zones$ebike_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$ebike_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$ebike_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+| Census 2011 | `r paste(sprintf('%.1f', (b <- round(100 * sum(zones$bicycle) / sum(zones$all) , 1))), '%')`|`r paste(sprintf('%.1f', (f <- round(100 * sum(zones$foot) / sum(zones$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(zones$car_driver) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Government Target | `r paste(sprintf('%.1f', (b <- round(100 * sum(zones$govtarget_slc) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(zones$govtarget_slw) / sum(zones$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(zones$govtarget_sld) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Gender Equity | `r paste(sprintf('%.1f', (b <- round(100 * sum(zones$gendereq_slc) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(zones$gendereq_slw) / sum(zones$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(zones$gendereq_sld) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Go Dutch | `r paste(sprintf('%.1f', (b <- round(100 * sum(zones$dutch_slc) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(zones$dutch_slw) / sum(zones$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(zones$dutch_sld) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Ebikes  | `r paste(sprintf('%.1f', (b <- round(100 * sum(zones$ebike_slc) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(zones$ebike_slw) / sum(zones$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(zones$ebike_sld) / sum(zones$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
 
 
 <br><br>
@@ -169,15 +169,15 @@ A modified version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-top
 
 | Scenario | Comparison	| Change in deaths/year  | Value of change ( million pounds )  | Change in tonnes CO2e/year |
 | -------- |:----------:|:-----------------: |:----------:| :---------------:|
-| Census 2011 |	'No Cyclists' |  `r (round(sum(zones$govtarget_sldeath_heat) - sum(zones$govtarget_sideath_heat) , 2))` | `r (round((sum(zones$govtarget_slvalue_heat) - sum(zones$govtarget_sivalue_heat)) / 1000000  , 2))` | `r (round( ( sum(zones$govtarget_slco2) - sum(zones$govtarget_sico2) ) / 1000))` |
-| Government Target |	'No Cyclists' |  `r (round(sum(zones$govtarget_sldeath_heat) , 2))` | `r (round(sum(zones$govtarget_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$govtarget_slco2) / 1000))` |
-|  |	Census 2011 |  `r (round(sum(zones$govtarget_sideath_heat) , 2))` | `r (round(sum(zones$govtarget_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$govtarget_sico2) / 1000))` |
-| Gender Equity |	'No Cyclists' |  `r (round(sum(zones$gendereq_sldeath_heat) , 2))` | `r (round(sum(zones$gendereq_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$gendereq_slco2) / 1000))` | 
-|  |	Census 2011 |  `r (round(sum(zones$gendereq_sideath_heat) , 2))` | `r (round(sum(zones$gendereq_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$gendereq_sico2) / 1000))` |
-| Go Dutch |	'No Cyclists' |  `r (round(sum(zones$dutch_sldeath_heat) , 2))` | `r (round(sum(zones$dutch_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$dutch_slco2) / 1000))` |
-|  |	Census 2011 |  `r (round(sum(zones$dutch_sideath_heat) , 2))` | `r (round(sum(zones$dutch_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$dutch_sico2) / 1000))` |
-| Ebikes |	'No Cyclists' |  `r (round(sum(zones$ebike_sldeath_heat) , 2))` | `r (round(sum(zones$ebike_slvalue_heat) / 1000000  , 2))` | `r (round( sum(zones$ebike_slco2) / 1000))` |
-|  |	Census 2011 |  `r (round(sum(zones$ebike_sideath_heat) , 2))` | `r (round(sum(zones$ebike_sivalue_heat) / 1000000  , 2))` | `r (round( sum(zones$ebike_sico2) / 1000))` |
+| Census 2011 |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(zones$govtarget_sldeath_heat) - sum(zones$govtarget_sideath_heat) , 2)))` | `r (sprintf('%.2f', round((sum(zones$govtarget_slvalue_heat) - sum(zones$govtarget_sivalue_heat)) / 1000000  , 2)))` | `r (round( ( sum(zones$govtarget_slco2) - sum(zones$govtarget_sico2) ) / 1000))` |
+| Government Target |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(zones$govtarget_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$govtarget_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$govtarget_slco2) / 1000))` |
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(zones$govtarget_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$govtarget_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$govtarget_sico2) / 1000))` |
+| Gender Equity |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(zones$gendereq_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$gendereq_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$gendereq_slco2) / 1000))` | 
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(zones$gendereq_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$gendereq_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$gendereq_sico2) / 1000))` |
+| Go Dutch |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(zones$dutch_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$dutch_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$dutch_slco2) / 1000))` |
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(zones$dutch_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$dutch_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$dutch_sico2) / 1000))` |
+| Ebikes |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(zones$ebike_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$ebike_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$ebike_slco2) / 1000))` |
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(zones$ebike_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(zones$ebike_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(zones$ebike_sico2) / 1000))` |
 
 
 ## References
