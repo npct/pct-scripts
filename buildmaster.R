@@ -13,7 +13,7 @@ to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
 # (la_all = la_all[grep(pattern = "glouc", la_all)]) # from exist regions
-# la_all = "dorset" # a single region
+la_all = "west-yorkshire" # a single region
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
@@ -34,15 +34,15 @@ for(k in 1:length(la_all)){
     output = file.path(pct_data, region, "model-output.html"),
     envir = globalenv(), force_v1 = T
   )
-  # # Re read the model output file
-  # model_output =
-  #   readLines(file.path(pct_data, region, "model-output.html"))
-  # # remove style section
-  # model_output <- remove_style(model_output)
-  # # Add a special class to all tables for the shiny application
-  # model_output <- add_table_style(model_output)
-  # # Re-write the model output file
-  # write(model_output, file.path(pct_data, region, "model-output.html"))
+  # Re read the model output file
+  model_output =
+    readLines(file.path(pct_data, region, "model-output.html"))
+  # remove style section
+  model_output <- remove_style(model_output)
+  # Add a special class to all tables for the shiny application
+  model_output <- add_table_class(model_output)
+  # Re-write the model output file
+  write(model_output, file.path(pct_data, region, "model-output.html"))
   message(paste0("Just built ", region))
   # # Update the data sha - uncomment to automate this (from unix machines)
   source("update_sha.R")
