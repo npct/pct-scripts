@@ -85,10 +85,13 @@ remove_cols <- function(df, col_regex){
   df[,!grepl(col_regex, names(df))]
 }
 
-# A function which capitalizes both words in a region
+# A function which capitalizes all words in a region (except 'and' and 'of')
 capitalize_region <- function (region_name){
   require(BBmisc)
-  region_name = gsub(pattern = "-", replacement = " ", x = region_name)
-  region_name = capitalizeStrings(region_name, all.words = T)
+  region_name <- gsub(pattern = "-", replacement = " ", x = region_name)
+  region_name <- capitalizeStrings(region_name, all.words = T)
+  region_name <- gsub(pattern = "And", replacement = "and", x = region_name)
+  region_name <- gsub(pattern = "Of", replacement = "of", x = region_name)
+  
   region_name
 }
