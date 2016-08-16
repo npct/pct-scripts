@@ -105,12 +105,14 @@ The percentage of cycling expected, based on the distance and hilliness of commu
 Summary results for the proportion of people walking, driving and using other modes under each scenario are illustrated in **Table 1**  below.
 
 | Scenario | % cyclists | % walking | % car drivers | % all other modes |
-| ------------- |:-------------: |:-------------: |:--------------:| ----------------: |
+| ------------- |:-------------: |:-------------: |:--------------:| :----------------: |
 | Census 2011 | `r paste((b <- round(100 * sum(zones$bicycle) / sum(zones$all) , 1)), '%')`|`r paste((f <- round(100 * sum(zones$foot) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$car_driver) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
 | Government Target | `r paste((b <- round(100 * sum(zones$govtarget_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$govtarget_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$govtarget_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
 | Gender Equity | `r paste((b <- round(100 * sum(zones$gendereq_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$gendereq_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$gendereq_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
 | Go Dutch | `r paste((b <- round(100 * sum(zones$dutch_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$dutch_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$dutch_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
 | Ebikes  | `r paste((b <- round(100 * sum(zones$ebike_slc) / sum(zones$all) , 1)), '%')` | `r paste((f <- round(100 * sum(zones$ebike_slw) / sum(zones$all) , 1)), '%')`|`r paste((cd <- round(100 * sum(zones$ebike_sld) / sum(zones$all) , 1)), '%')` | `r paste((100 - b - f - cd), '%')` |
+
+
 
 
 Figure 3 illustrates the overall number of people in between-zone flows cycling to work under each scenario (note that this does not include within-zone travel).
