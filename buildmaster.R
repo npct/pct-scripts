@@ -7,12 +7,11 @@ regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
 la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
-(la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
-(la_all = la_all[!grepl(pattern = "west", x = la_all)])
+# (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
+# (la_all = la_all[!grepl(pattern = "west", x = la_all)])
 # (la_all = la_all[2:length(la_all)]) # the first n. not yet done
-# la_all = la_all[1]
 # select regions of interest (uncomment/change as appropriate)
-# (la_all = la_all[grep(pattern = "glouc", la_all)]) # from exist regions
+(la_all = la_all[grep(pattern = "humbers|xxx", la_all)]) # from exist regions
 # la_all = "west-yorkshire" # a single region
 
 for(k in 1:length(la_all)){
@@ -26,6 +25,7 @@ for(k in 1:length(la_all)){
 
   # Build the regions (comment out if the data has already been build)
   message(paste0("Building for ", region))
+  source("shared_build.R")
   source("build_region.R") # comment out to skip build
   # Write the model output files (comment out to not report data)
   # message(paste0("Writing the output file for ", region))
