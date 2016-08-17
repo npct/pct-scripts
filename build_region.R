@@ -157,4 +157,3 @@ server_text <- paste0('starting_city <- "', region, '"\n',
                       'source(file.path(shiny_root, "server-base.R"), local = T)')
 write(ui_text, file = file.path(region_dir, "ui.R"))
 write(server_text, file = file.path(region_dir, "server.R"))
-if(!file.exists( file.path(region_dir, "www"))){ file.symlink(file.path("..", "..","www"), region_dir) }
