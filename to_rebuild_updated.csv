@@ -28,7 +28,7 @@ liverpool-city-region,2016-08-16,0,RL2,2016-08-17,-,TRUE,TRUE
 london,2016-08-15,0,RL3,2016-08-16,-,TRUE,TRUE
 norfolk,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 northamptonshire,2016-08-16,1,RL2,-,rnet still not covering whole area,TRUE,TRUE
-north-east,2016-08-16,maybe,RL2,-,2016-08-17: I can live with rnet but are still holes.  could try mflow=20?,TRUE,TRUE
+north-east,2016-08-16,maybe,RL2,-,2016-08-17: rnet better but are still holes.  could try mflow=20, like other large cities?,TRUE,TRUE
 northumberland,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 north-yorkshire,2016-08-16,0,RL2,2016-08-16,-,TRUE,TRUE
 nottinghamshire,2016-08-14,0,RL2,AG,-,FALSE,FALSE
