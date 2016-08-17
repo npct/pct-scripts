@@ -22,13 +22,13 @@ humberside,2016-08-15,0,RL1,2016-08-16,-,TRUE,TRUE
 isle-of-wight,2016-08-10,0,RL1,AG,-,FALSE,FALSE
 kent,2016-08-09,0,RL1,AG,-,FALSE,FALSE
 lancashire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-leicestershire,2016-08-16,1,RL2,-,rnet still patchy after rebuild,TRUE,TRUE
+leicestershire,2016-08-17,1,RL2,-,mflow 50,TRUE,TRUE
 lincolnshire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 liverpool-city-region,2016-08-16,0,RL2,2016-08-17,-,TRUE,TRUE
 london,2016-08-15,0,RL3,2016-08-16,-,TRUE,TRUE
 norfolk,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-northamptonshire,2016-08-16,1,RL2,-,rnet still not covering whole area,TRUE,TRUE
-north-east,2016-08-16,1,RL2,-,2016-08-17: rnet better but are still holes.  could try mflow=20 like other large cities?,TRUE,TRUE
+northamptonshire,2016-08-17,1,RL2,-,mflow 50,TRUE,TRUE
+north-east,2016-08-17,1,RL2,-,mflow 50,TRUE,TRUE
 northumberland,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 north-yorkshire,2016-08-16,0,RL2,2016-08-16,-,TRUE,TRUE
 nottinghamshire,2016-08-14,0,RL2,AG,-,FALSE,FALSE
@@ -40,7 +40,7 @@ staffordshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 suffolk,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 surrey,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 warwickshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
-west-midlands,2016-08-16,1,RL1,-,mflow 50,FALSE,TRUE
+west-midlands,2016-08-17,maybe,RL1,-,mflow 50,FALSE,TRUE
 west-sussex,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 west-yorkshire,2016-08-16,0,RL3,2016-08-16,-,TRUE,TRUE
 wiltshire,2016-08-14,0,RL2,AG,-,FALSE,FALSE
