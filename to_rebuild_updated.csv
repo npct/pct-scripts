@@ -27,8 +27,8 @@ lincolnshire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 liverpool-city-region,2016-08-16,0,RL2,2016-08-17,Mflow 20,TRUE,TRUE
 london,2016-08-15,0,RL3,2016-08-16,Mflow 70,TRUE,TRUE
 norfolk,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-northamptonshire,2016-08-17,1,RL2,-,Mflow 30,TRUE,TRUE
-north-east,2016-08-17,1,RL2,-,Mflow 30,TRUE,TRUE
+northamptonshire,2016-08-17,0,RL2,-,-,TRUE,TRUE
+north-east,2016-08-17,0,RL2,-,Mflow 20,TRUE,TRUE
 northumberland,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 north-yorkshire,2016-08-16,0,RL2,2016-08-16,-,TRUE,TRUE
 nottinghamshire,2016-08-14,0,RL2,AG,-,FALSE,FALSE
@@ -40,7 +40,7 @@ staffordshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 suffolk,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 surrey,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 warwickshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
-west-midlands,2016-08-17,1,RL1,-,mfow 50,FALSE,TRUE
+west-midlands,2016-08-17,0,RL1,-,mfow 50,FALSE,TRUE
 west-sussex,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 west-yorkshire,2016-08-16,0,RL3,2016-08-16,Mflow 20,TRUE,TRUE
 wiltshire,2016-08-14,0,RL2,AG,-,FALSE,FALSE
