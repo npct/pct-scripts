@@ -4,15 +4,15 @@ to_build = read_csv("to_rebuild_updated.csv")
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
 regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
-la_all <- as.character(regions$Region)
+(la_all <- as.character(regions$Region))
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
 # (la_all = la_all[!grepl(pattern = "west", x = la_all)])
 # (la_all = la_all[2:length(la_all)]) # the first n. not yet done
 # select regions of interest (uncomment/change as appropriate)
-(la_all = la_all[grep(pattern = "humbers|xxx", la_all)]) # from exist regions
-# la_all = "west-yorkshire" # a single region
+# (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
+# la_all = "herefordshire" # a single region
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
