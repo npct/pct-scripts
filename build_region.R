@@ -85,8 +85,8 @@ rft <- ms_simplify(input = rft, keep = params$rft_keep, keep_shapes = T)
 #   rft <- SpatialLinesDataFrame(rft, rf@data)
 # } else print("Error: toptailed lines do not match lines")
 
-# source("R/generate_rnet.R") # comment out to avoid slow rnet build
-rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
+source("R/generate_rnet.R") # comment out to avoid slow rnet build
+# rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # debug rnet so it is smaller and contains only useful results
 # summary(rnet) # diagnostic check of what it contains
