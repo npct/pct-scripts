@@ -1,3 +1,11 @@
+#This script is called by buildmaster.R to build each region
+
+#If you wish to run this script on it own then uncomment these 2 lines
+# source("shared_build.R")
+# source("set-up.R")
+
+#Start of script
+
 # region specific build script
 # select msoas of interest
 if(proj4string(region_shape) != proj4string(centsa))
