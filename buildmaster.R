@@ -11,8 +11,8 @@ to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[!grepl(pattern = "west", x = la_all)])
 # (la_all = la_all[2:length(la_all)]) # the first n. not yet done
 # select regions of interest (uncomment/change as appropriate)
-# (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-# la_all = "herefordshire" # a single region
+(la_all = la_all[grep(pattern = "northam|xxx", la_all)]) # from exist regions
+# la_all = "northamptonshire" # a single region
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
@@ -45,7 +45,7 @@ for(k in 1:length(la_all)){
   write(model_output, file.path(pct_data, region, "model-output.html"))
   message(paste0("Just built ", region))
   # # Update the data sha - uncomment to automate this (from unix machines)
-  source("update_sha.R")
+  # isource("update_sha.R")
 }
 
 # update table tracking builds

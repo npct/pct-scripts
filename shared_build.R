@@ -25,7 +25,7 @@ params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero 
 # parameters related to the route network
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 # params$min_rnet_length <- 2 # minimum segment length for the Route Network to display (may create holes in rnet)
-params$rft_keep = 0.08 # h?run but rnet less likely to fail)
+params$rft_keep = 0.04 # h?run but rnet less likely to fail)
 if(!exists("ukmsoas")){ # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
   ukmsoas$avslope = ukmsoas$avslope * 100
