@@ -7,6 +7,10 @@ flow_cens = readr::read_csv("wu03ew_msoa.csv")
 file.remove("wu03ew_msoa.csv")
 nrow(flow_cens) # 2.4 m
 
+# subset the centroids for testing (comment to generate national data)
+cents = cents[grep(pattern = "Camb", x = cents$geo_label),]
+plot(cents)
+
 omatch = match(flow_cens$`Area of residence`, cents$geo_code)
 dmatch = match(flow_cens$`Area of workplace`, cents$geo_code)
 
