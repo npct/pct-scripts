@@ -16,7 +16,13 @@ It even reports summary statistics from the data as it is created.
 To run `build_region.R` you should be able to simply hit 'Knit HTML' while loaded RStudio.
 There are other dependencies, listed below.
 
+The script [buildmaster.R ](https://github.com/npct/pct-load/blob/master/buildmaster.R) calls `build_region.R` repeatedly for each region to build for the whole country. THis takes several days.
+
 **Note: `rq.Rds` and `rf.Rds` must be downloaded from here before the build: https://github.com/npct/pct-bigdata/releases **
+
+## File Descriptions
+
+[set-up.R](https://github.com/npct/pct-load/blob/master/set-up.R) contains setup values and packages  
 
 ## Relationship to other pct- folders
 
