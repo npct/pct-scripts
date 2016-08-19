@@ -4,9 +4,9 @@ bedfordshire,2016-08-10,0,RL1,2016-08-19,-,FALSE,FALSE
 berkshire,2016-08-10,0,RL1,2016-08-19,-,FALSE,FALSE
 buckinghamshire,2016-08-10,0,RL1,2016-08-19,-,FALSE,FALSE
 cambridgeshire,2016-08-09,0,RL1,2016-08-19,(small holes rnet but ok),FALSE,FALSE
-cheshire,2016-08-10,0,RL1,AG,-,FALSE,FALSE
-cleveland,2016-08-10,0,RL1,AG,-,FALSE,FALSE
-cornwall-and-isles-of-scilly,2016-08-10,0,RL1,AG,-,FALSE,FALSE
+cheshire,2016-08-10,0,RL1,2016-08-19,-,FALSE,FALSE
+cleveland,2016-08-10,0,RL1,2016-08-19,-,FALSE,FALSE
+cornwall-and-isles-of-scilly,2016-08-19,0,RL1,2016-08-19,-,FALSE,FALSE
 cumbria,2016-08-10,0,RL1,2016-08-19,-,FALSE,FALSE
 derbyshire,2016-08-14,0,RL1,AG,-,FALSE,FALSE
 devon,2016-08-15,0,RL1,2016-08-16,-,TRUE,TRUE
@@ -23,17 +23,17 @@ isle-of-wight,2016-08-10,0,RL1,AG,-,FALSE,FALSE
 kent,2016-08-09,0,RL1,AG,-,FALSE,FALSE
 lancashire,2016-08-12,0,RL2,2016-08-19,-,FALSE,FALSE
 leicestershire,2016-08-17,0,RL2,2016-08-17,Mflow 20,TRUE,TRUE
-lincolnshire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
+lincolnshire,2016-08-12,0,RL2,2016-08-19,-,FALSE,FALSE
 liverpool-city-region,2016-08-16,0,RL2,2016-08-19,Mflow 20,TRUE,TRUE
 london,2016-08-15,0,RL3,2016-08-19,Mflow 70,TRUE,TRUE
 norfolk,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-northamptonshire,2016-08-17,0,RL2,2016-08-17,(still some small holes in rnet but good enough)-,TRUE,TRUE
+northamptonshire,2016-08-17,0,RL2,2016-08-19,(still some small holes in rnet but good enough)-,TRUE,TRUE
 north-east,2016-08-17,0,RL2,2016-08-19,Mflow 20,TRUE,TRUE
 northumberland,2016-08-12,0,RL2,2016-08-19,-,FALSE,FALSE
 north-yorkshire,2016-08-16,0,RL2,2016-08-19,-,TRUE,TRUE
 nottinghamshire,2016-08-14,0,RL2,AG,-,FALSE,FALSE
 oxfordshire,2016-08-16,0,RL2,2016-08-15,-,TRUE,TRUE
-shropshire,2016-08-10,0,RL2,AG,-,FALSE,FALSE
+shropshire,2016-08-10,0,RL2,2016-08-19,-,FALSE,FALSE
 somerset,2016-08-14,0,RL2,AG,-,FALSE,FALSE
 south-yorkshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 staffordshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
