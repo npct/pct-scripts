@@ -9,14 +9,20 @@ This repository generates data hosted in [pct-data](https://github.com/npct/pct-
 
 It was originally cloned from [pct](https://github.com/npct/pct).
 
-The main script on this repo is [load.Rmd](https://github.com/npct/pct-load/blob/master/load.Rmd).
+The main script on this repo is [build_region.R](https://github.com/npct/pct-load/blob/master/build_region.R).
 This script runs the R code contained within while creating a summary of the data generating process.
 It even reports summary statistics from the data as it is created.
 
-To run `load.Rmd` you should be able to simply hit 'Knit HTML' while loaded RStudio.
+To run `build_region.R` you should be able to simply hit 'Knit HTML' while loaded RStudio.
 There are other dependencies, listed below.
 
+The script [buildmaster.R ](https://github.com/npct/pct-load/blob/master/buildmaster.R) calls `build_region.R` repeatedly for each region to build for the whole country. THis takes several days.
+
 **Note: `rq.Rds` and `rf.Rds` must be downloaded from here before the build: https://github.com/npct/pct-bigdata/releases **
+
+## File Descriptions
+
+[set-up.R](https://github.com/npct/pct-load/blob/master/set-up.R) contains setup values and packages  
 
 ## Relationship to other pct- folders
 
