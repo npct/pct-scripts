@@ -14,18 +14,18 @@ dorset,2016-08-12,0,RL1,AG,-,FALSE,FALSE
 east-sussex,2016-08-15,0,RL1,2016-08-16,-,TRUE,TRUE
 essex,2016-08-12,0,RL1,AG,-,FALSE,FALSE
 gloucestershire,2016-08-15,0,RL1,2016-08-16,-,TRUE,TRUE
-greater-manchester,2016-08-16,0,RL,2016-08-16,Mflow 20,TRUE,TRUE
+greater-manchester,2016-08-16,0,RL,2016-08-19,Mflow 20,TRUE,TRUE
 hampshire,2016-08-12,0,RL1,AG,-,FALSE,FALSE
 hereford-and-worcester,2016-08-12,0,RL1,AG,-,FALSE,FALSE
 hertfordshire,2016-08-12,0,RL1,AG,-,FALSE,FALSE
 humberside,2016-08-15,0,RL1,2016-08-16,-,TRUE,TRUE
 isle-of-wight,2016-08-10,0,RL1,AG,-,FALSE,FALSE
 kent,2016-08-09,0,RL1,AG,-,FALSE,FALSE
-lancashire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
+lancashire,2016-08-12,0,RL2,2016-08-19,-,FALSE,FALSE
 leicestershire,2016-08-17,0,RL2,2016-08-17,Mflow 20,TRUE,TRUE
 lincolnshire,2016-08-12,0,RL2,AG,-,FALSE,FALSE
-liverpool-city-region,2016-08-16,0,RL2,2016-08-17,Mflow 20,TRUE,TRUE
-london,2016-08-15,0,RL3,2016-08-16,Mflow 70,TRUE,TRUE
+liverpool-city-region,2016-08-16,0,RL2,2016-08-19,Mflow 20,TRUE,TRUE
+london,2016-08-15,0,RL3,2016-08-19,Mflow 70,TRUE,TRUE
 norfolk,2016-08-12,0,RL2,AG,-,FALSE,FALSE
 northamptonshire,2016-08-17,0,RL2,2016-08-17,(still some small holes in rnet but good enough)-,TRUE,TRUE
 north-east,2016-08-17,0,RL2,2016-08-19,Mflow 20,TRUE,TRUE
@@ -42,5 +42,5 @@ surrey,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 warwickshire,2016-08-11,0,RL2,AG,-,FALSE,FALSE
 west-midlands,2016-08-17,0,RL1,-,mfow 50,FALSE,TRUE
 west-sussex,2016-08-11,0,RL2,AG,-,FALSE,FALSE
-west-yorkshire,2016-08-16,0,RL3,2016-08-16,Mflow 20,TRUE,TRUE
+west-yorkshire,2016-08-16,0,RL3,2016-08-19,Mflow 20,TRUE,TRUE
 wiltshire,2016-08-14,0,RL2,AG,-,FALSE,FALSE
