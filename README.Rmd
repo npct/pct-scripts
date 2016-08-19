@@ -9,7 +9,7 @@ This repository generates data hosted in [pct-data](https://github.com/npct/pct-
 
 It was originally cloned from [pct](https://github.com/npct/pct).
 
-The main script on this repo is [load.Rmd](https://github.com/npct/pct-load/blob/master/load.Rmd).
+The main script on this repo is [build_region.R](https://github.com/npct/pct-load/blob/master/build_region.R).
 This script runs the R code contained within while creating a summary of the data generating process.
 It even reports summary statistics from the data as it is created.
 
