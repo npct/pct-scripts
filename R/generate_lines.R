@@ -8,6 +8,7 @@ file.remove("wu03ew_msoa.csv")
 nrow(flow_cens) # 2.4 m
 
 # subset the centroids for testing (comment to generate national data)
+
 cents = cents[grep(pattern = "Camb", x = cents$geo_label),]
 plot(cents)
 

@@ -1,7 +1,7 @@
 # Project settings - libraries you'll need to load
 # NB: devtools allows installation of the latest packages
 if(!require(devtools)) install.packages("devtools")
-if(!require(rmapshaper)) install_github("ateucher/rmapshaper")
+if(!require(rmapshaper)) install.packages("rmapshaper")
 
 pkgs <- c(
   "ggmap",
