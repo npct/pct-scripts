@@ -2,7 +2,6 @@
 # NB: devtools allows installation of the latest packages
 if(!require(devtools)) install.packages("devtools")
 if(!require(rmapshaper)) install.packages("rmapshaper")
-if(!require(rmapshaper)) install_github("berndbischl/BBmisc")
 
 pkgs <- c(
   "ggmap",
