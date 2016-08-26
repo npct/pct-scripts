@@ -94,3 +94,12 @@ It is possible to use the following Personal Package Archive (PPA) to get the la
 sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt-get update
 sudo apt-get install gdal-bin libgdal-dev
 ```
+
+
+### WIndows Install
+
+Does not install easily on windows 
+
+Stplanr requires
+
+chron, RJSONIO, bitops,  R.oo, R.methodss3, installr, 
