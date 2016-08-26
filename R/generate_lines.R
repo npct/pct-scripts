@@ -9,11 +9,13 @@ nrow(flow_cens) # 2.4 m
 
 # subset the centroids for testing (comment to generate national data)
 
-cents = cents[grep(pattern = "Camb", x = cents$geo_label),]
+# cents = cents[grep(pattern = "Camb", x = cents$geo_label),]
 plot(cents)
+cents$geo_code = as.character(cents$geo_code)
 o <- flow_cens$`Area of residence` %in% cents$geo_code
 d <- flow_cens$`Area of workplace` %in% cents$geo_code
-flow <- flow_cens[o & d, ] # subset OD pairs with o and d in study area
+# flow <- flow_cens[o & d, ] # subset OD pairs with o and d in study area
+flow = flow_cens
 
 omatch = match(flow$`Area of residence`, cents$geo_code)
 dmatch = match(flow$`Area of workplace`, cents$geo_code)
@@ -28,12 +30,14 @@ summary(is.na(geodist))
 hist(geodist, breaks = 0:800)
 flow$dist = geodist
 flow = flow[!is.na(flow$dist),] # there are 36k destinations with no matching cents - remove
-flow = flow[flow$dist < 5,] # subset based on euclidean distance
+flow = flow[flow$dist < 20,] # subset based on euclidean distance
 names(flow) = gsub(pattern = " ", "_", names(flow))
 flow_twoway = flow
 flow = onewayid(flow, attrib = 3:14)
 flow[1:2] = cbind(pmin(flow[[1]], flow[[2]]), pmax(flow[[1]], flow[[2]]))
 nrow(flow) # down to 0.9m, removed majority of lines
+flow = flow[1:50000,]
+write.csv(flow, "~/Dropbox/PCT/flow-50000.csv")
 lines = od2line2(flow = flow, zones = cents)
 plot(lines)
 
