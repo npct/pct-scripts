@@ -2,7 +2,7 @@
 
 # setup
 source("set-up.R")
-regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
+regions <- readOGR("../pct-data/regions.geojson", layer = "OGRGeoJSON")
 la_all <- as.character(regions$Region)
 
 # create data frame of variables to check - ADD MORE for debugging

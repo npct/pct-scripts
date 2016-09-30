@@ -2,7 +2,7 @@
 source("set-up.R")
 
 # load data
-regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
+regions <- readOGR("../pct-data/regions.geojson", layer = "OGRGeoJSON")
 
 # check national lines data
 # after downloading latest data from github, e.g. with download-data.R
@@ -44,7 +44,7 @@ summary(r$length[sel])
 
 # checks per region
 pct_data <- file.path("..", "pct-data")
-regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
+regions <- readOGR("../pct-data/regions.geojson", layer = "OGRGeoJSON")
 la_all <- regions$Region <- as.character(regions$Region)
 i = 1
 offending_region = NULL
