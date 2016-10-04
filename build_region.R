@@ -105,6 +105,9 @@ if(nrow(rf) != nrow(rq)) next()
 rf <- remove_cols(rf, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 rq <- remove_cols(rq, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
 
+# create rq_increase variable
+rq$rq_incr <- rq$length / rf$length
+
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length / 1000 # convert m to km
 l$dist_quiet <- rq$length / 1000 # convert m to km
@@ -153,6 +156,10 @@ rnet@data[rnet$Singlezone == 0, grep(pattern = "upto", names(rnet))] = NA
 
 if(!"gendereq_slc" %in% scens)
   rnet$gendereq_slc <- NA
+
+
+# create id variable
+rnet$id <- 1:nrow(rnet)
 
 # # # # # # # # #
 # Save the data #
