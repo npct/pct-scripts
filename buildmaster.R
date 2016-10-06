@@ -3,8 +3,8 @@ source("set-up.R")
 to_build = read_csv("to_rebuild_updated.csv")
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
-regions <- readOGR("../pct-bigdata/regions.geojson", layer = "OGRGeoJSON")
-(la_all <- as.character(regions$Region))
+regions <- readOGR(file.path(pct_data, "regions.geojson"), layer = "OGRGeoJSON")
+la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])

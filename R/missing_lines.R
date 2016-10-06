@@ -21,6 +21,6 @@ l_missing = l[!l$id %in% rf$id,]
 plot(l_missing)
 plot(rf, add = T, col = "red")
 
-regions = geojson_read("../pct-bigdata/regions.geojson")
+regions = geojson_read("../pct-data/regions.geojson")
 library(mapview)
 mapview()

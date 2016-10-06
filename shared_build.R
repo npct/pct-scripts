@@ -5,7 +5,7 @@ if(!exists("geo_level")) geo_level <- "regional"
 if(!exists("regions")){
   if (geo_level == "regional")
     regions <-
-  readOGR(file.path(pct_bigdata, "regions.geojson"), layer = "OGRGeoJSON")
+  readOGR(file.path(pct_data, "regions.geojson"), layer = "OGRGeoJSON")
   else {
     regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
     regions$Region <- regions$CTYUA12NM
