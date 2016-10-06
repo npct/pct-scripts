@@ -56,8 +56,8 @@ rm(ukmsoas)
 
 # load flow dataset, depending on availability
 if(!exists("flow_nat"))
-  flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated.Rds"))
-flow_nat <- flow_nat[flow_nat$dist > 0,]   #throws error
+  flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated_GM.Rds"))
+flow_nat <- flow_nat[flow_nat$dist > 0,]  
 summary(flow_nat$dutch_slc / flow_nat$all)
 
 # Subset by zones in the study area
@@ -67,9 +67,9 @@ d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 backup_flow <- flow
 
-l=readRDS('../pct/gm_scenarios/Output/l.rds')     #l_aggr.rds
-flow@data = inner_join(l@data,flow@data[,c(1,2,14,17,18,19)],
-                       by=c('msoa1'='msoa1', 'msoa2'='msoa2'))
+# l=readRDS('../pct/gm_scenarios/Output/l.rds')     
+# flow@data = inner_join(l@data,flow@data[,c(1,2,14,17,18,19)],
+#                        by=c('msoa1'='msoa1', 'msoa2'='msoa2'))
 
 # Remove national flows from the memory
 rm(flow_nat)
