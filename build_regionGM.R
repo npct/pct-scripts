@@ -37,7 +37,7 @@ if(!exists("centsa")) # Population-weighted centroids
   centsa <- readRDS(file.path(pct_bigdata, "cents-scenarios_GM.rds"))
 centsa$geo_code <- as.character(centsa$geo_code)
 
-source('shared_build.R') #replace by L5shared_build.R
+source('shared_build.R') 
 
 # load in codebook data
 codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
