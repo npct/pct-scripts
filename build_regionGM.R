@@ -67,6 +67,11 @@ d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 backup_flow <- flow
 
+# Check if id column doesn't exist, then add it
+if (!"id" %in% names(l)){
+  l$id <- paste(l$msoa1, l$msoa2)
+}
+
 # l=readRDS('../pct/gm_scenarios/Output/l.rds')     
 # flow@data = inner_join(l@data,flow@data[,c(1,2,14,17,18,19)],
 #                        by=c('msoa1'='msoa1', 'msoa2'='msoa2'))
@@ -125,8 +130,8 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
 rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
 if(nrow(rf) != nrow(rq)) next()
-# rf$id = l$id
-# rq$id = l$id
+rf$id = l$id
+rq$id = l$id
 
 # Remove unwanted columns from routes
 rf <- remove_cols(rf, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
