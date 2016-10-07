@@ -110,20 +110,21 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # 2: Load routes pre-generated and stored in pct-bigdata
 
 # Read files by file chooser
-if(!exists("rf_nat"))
-  rf_nat <- readRDS(file.choose()) # 'C:/temp/pct.releases/rf_nat.Rds')
-if(!exists("rq_nat"))
-  rq_nat <- readRDS(file.choose()) # 'C:/temp/pct.releases/rq_nat.Rds')
-rf <- rf_nat[rf_nat$id %in% l$id,]
-rq <- rq_nat[rq_nat$id %in% l$id,]
-if(nrow(rf) != nrow(rq)) next()
-
-# Remove national routes
-rm(rf_nat, rq_nat)
+# if(!exists("rf_nat"))
+#   rf_nat <- readRDS(file.choose()) # 'C:/temp/pct.releases/rf_nat.Rds')
+# if(!exists("rq_nat"))
+#   rq_nat <- readRDS(file.choose()) # 'C:/temp/pct.releases/rq_nat.Rds')
+# rf <- rf_nat[rf_nat$id %in% l$id,]
+# rq <- rq_nat[rq_nat$id %in% l$id,]
+# if(nrow(rf) != nrow(rq)) next()
+# 
+# # Remove national routes
+# rm(rf_nat, rq_nat)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
-# rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
-# rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+if(nrow(rf) != nrow(rq)) next()
 # rf$id = l$id
 # rq$id = l$id
 
