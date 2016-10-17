@@ -39,7 +39,7 @@ centsa$geo_code <- as.character(centsa$geo_code)
 source('shared_build.R') 
 
 # load in codebook data
-codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
+yecodebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
 codebook_z = readr::read_csv("../pct-shiny/static/codebook_zones.csv")
 
 # select msoas of interest
@@ -68,7 +68,7 @@ flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 backup_flow <- flow
 
 # Check if id column doesn't exist, then add it
-if (!"id" %in% names(l)){
+if (!"id" %in% names(flow)){
   l$id <- paste(l$msoa1, l$msoa2)
 }
 
