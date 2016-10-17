@@ -39,7 +39,7 @@ centsa$geo_code <- as.character(centsa$geo_code)
 source('shared_build.R') 
 
 # load in codebook data
-yecodebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
+codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
 codebook_z = readr::read_csv("../pct-shiny/static/codebook_zones.csv")
 
 # select msoas of interest
@@ -67,10 +67,6 @@ d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
 backup_flow <- flow
 
-# Check if id column doesn't exist, then add it
-if (!"id" %in% names(flow)){
-  l$id <- paste(l$msoa1, l$msoa2)
-}
 
 # l=readRDS('../pct/gm_scenarios/Output/l.rds')     
 # flow@data = inner_join(l@data,flow@data[,c(1,2,14,17,18,19)],
@@ -97,6 +93,11 @@ l <- flow
 # add geo_label of the lines
 l$geo_label1 = left_join(l@data["msoa1"], zones@data[c("geo_code", "geo_label")], by = c("msoa1" = "geo_code"))[[2]]
 l$geo_label2 = left_join(l@data["msoa2"], zones@data[c("geo_code", "geo_label")], by = c("msoa2" = "geo_code"))[[2]]
+
+# Check if id column doesn't exist, then add it
+if (!"id" %in% names(l)){
+  l$id <- paste(l$msoa1, l$msoa2)
+}
 
 # proportion of OD pairs in min-flow based subset
 params$pmflow <- round(nrow(l) / params$n_flow_region * 100, 1)
