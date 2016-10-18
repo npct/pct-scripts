@@ -128,8 +128,8 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # rm(rf_nat, rq_nat)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
-rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
-rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+rf = line2route(l = l, route_fun = route_cyclestreet, plan = "fastest", base_url = "http://pct.cyclestreets.net")
+rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest", base_url = "http://pct.cyclestreets.net")
 if(nrow(rf) != nrow(rq)) next()
 rf$id = l$id
 rq$id = l$id
