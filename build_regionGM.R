@@ -39,7 +39,7 @@ centsa$geo_code <- as.character(centsa$geo_code)
 source('shared_build.R') 
 
 # load in codebook data
-yecodebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
+codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
 codebook_z = readr::read_csv("../pct-shiny/static/codebook_zones.csv")
 
 # select msoas of interest
@@ -57,7 +57,7 @@ rm(ukmsoas)
 # load flow dataset, depending on availability
 if(!exists("flow_nat"))
   flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated_GM.Rds"))
-flow_nat <- flow_nat[flow_nat$dist > 0,]  
+#flow_nat <- flow_nat[flow_nat$dist > 0,]  
 summary(flow_nat$dutch_slc / flow_nat$all)
 
 # Subset by zones in the study area
@@ -69,12 +69,9 @@ backup_flow <- flow
 
 # Check if id column doesn't exist, then add it
 if (!"id" %in% names(flow)){
-  l$id <- paste(l$msoa1, l$msoa2)
+  flow$id <- paste(flow$msoa1, flow$msoa2)
 }
 
-# l=readRDS('../pct/gm_scenarios/Output/l.rds')     
-# flow@data = inner_join(l@data,flow@data[,c(1,2,14,17,18,19)],
-#                        by=c('msoa1'='msoa1', 'msoa2'='msoa2'))
 
 # Remove national flows from the memory
 rm(flow_nat)
@@ -91,7 +88,7 @@ params$sel_short <- flow$dist < params$max_all_dist & flow$all > params$mflow_sh
 sel <- params$sel_long | params$sel_short
 flow <- flow[sel, ]
 # summary(flow$dist)
-# l <- od2line(flow = flow, zones = cents)
+
 l <- flow
 
 # add geo_label of the lines
@@ -109,8 +106,9 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # # # # # # # # # # # # # # # # # # #
 
 # # 1: Load rf and rq data pre-saved for region, comment for 2 or 3
-# rf = readRDS(file.path(pct_data, region, "rf.Rds"))
-# rq = readRDS(file.path(pct_data, region, "rq.Rds"))
+rf = readRDS(file.path(pct_bigdata, "rf_gm.rds"))
+rq = readRDS(file.path(pct_bigdata, "rq_gm.rds"))
+
 
 # 2: Load routes pre-generated and stored in pct-bigdata
 
@@ -127,11 +125,11 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # rm(rf_nat, rq_nat)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
-rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
-rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
-if(nrow(rf) != nrow(rq)) next()
-rf$id = l$id
-rq$id = l$id
+# rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+# rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+# if(nrow(rf) != nrow(rq)) next()
+# rf$id = l$id
+# rq$id = l$id
 
 # Remove unwanted columns from routes
 rf <- remove_cols(rf, "(waypoint|co2_saving|calories|busyness|plan|start|finish|nv)")
@@ -161,8 +159,8 @@ rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shap
 #   rft <- SpatialLinesDataFrame(rft, rf@data)
 # } else print("Error: toptailed lines do not match lines")
 
-source("R/generate_rnet.R") # comment out to avoid slow rnet build
-#rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
+#source("R/generate_rnet.R") # comment out to avoid slow rnet build
+rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # debug rnet so it is smaller and contains only useful results
 # summary(rnet) # diagnostic check of what it contains
