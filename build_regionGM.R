@@ -15,8 +15,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 50 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 50 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mflow <- 200 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 200 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -125,7 +125,10 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
 rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+saveRDS(rf, '../pct-bigdata/rf_gm.rds')
 rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+saveRDS(rq, '../pct-bigdata/rq_gm.rds')
+
 if(nrow(rf) != nrow(rq)) next()
 rf$id = l$id
 rq$id = l$id
@@ -158,8 +161,8 @@ rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shap
 #   rft <- SpatialLinesDataFrame(rft, rf@data)
 # } else print("Error: toptailed lines do not match lines")
 
-#source("R/generate_rnet.R") # comment out to avoid slow rnet build
-rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
+source("R/generate_rnet.R") # comment out to avoid slow rnet build
+#rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # debug rnet so it is smaller and contains only useful results
 # summary(rnet) # diagnostic check of what it contains
