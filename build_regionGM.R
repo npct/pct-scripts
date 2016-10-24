@@ -198,7 +198,10 @@ cents@data$avslope <- NULL
 cents@data <- left_join(cents@data, zones@data)
 
 # Rename region
-region <- "greater-manchester-NC" 
+region <- "greater-manchester" 
+
+# Fix the path to all-trips folder
+region <- "greater-manchester/all-trips" 
 
 # # Save objects
 l@data = round_df(l@data, 5)
