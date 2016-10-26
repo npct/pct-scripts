@@ -15,8 +15,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 200 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 200 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mflow <- 400 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 400 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -116,17 +116,18 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 #   rf_nat <- readRDS(file.choose()) # 'C:/temp/pct.releases/rf_nat.Rds')
 # if(!exists("rq_nat"))
 #   rq_nat <- readRDS(file.choose()) # 'C:/temp/pct.releases/rq_nat.Rds')
-# rf <- rf_nat[rf_nat$id %in% l$id,]
-# rq <- rq_nat[rq_nat$id %in% l$id,]
+# rf <- rf[rf$id %in% l$id,]
+# rq <- rq[rq$id %in% l$id,]
 # if(nrow(rf) != nrow(rq)) next()
 # 
 # # Remove national routes
 # rm(rf_nat, rq_nat)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
-rf = line2route(l = l, route_fun = "route_cyclestreet", plan = "fastest")
+rf = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "fastest")
 saveRDS(rf, '../pct-bigdata/rf_gm.rds')
-rq = line2route(l = l, route_fun = "route_cyclestreet", plan = "quietest")
+
+rq = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "quietest")
 saveRDS(rq, '../pct-bigdata/rq_gm.rds')
 
 if(nrow(rf) != nrow(rq)) next()
