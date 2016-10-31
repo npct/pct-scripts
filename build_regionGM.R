@@ -36,7 +36,7 @@ if(!exists("centsa")) # Population-weighted centroids
   centsa <- readRDS(file.path(pct_bigdata, "cents-scenarios_GM.rds"))
 centsa$geo_code <- as.character(centsa$geo_code)
 
-source('shared_build.R') 
+source('shared_build.R')
 
 # load in codebook data
 codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
@@ -57,7 +57,7 @@ rm(ukmsoas)
 # load flow dataset, depending on availability
 if(!exists("flow_nat"))
   flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated_GM.Rds"))
-#flow_nat <- flow_nat[flow_nat$dist > 0,]  
+#flow_nat <- flow_nat[flow_nat$dist > 0,]
 summary(flow_nat$dutch_slc / flow_nat$all)
 
 # Subset by zones in the study area
@@ -119,14 +119,14 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # rf <- rf[rf$id %in% l$id,]
 # rq <- rq[rq$id %in% l$id,]
 # if(nrow(rf) != nrow(rq)) next()
-# 
+#
 # # Remove national routes
 # rm(rf_nat, rq_nat)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
 rf = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "fastest")
 saveRDS(rf, '../pct-bigdata/rf_gm.rds')
-# 
+#
 rq = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "quietest")
 saveRDS(rq, '../pct-bigdata/rq_gm.rds')
 
@@ -199,13 +199,12 @@ cents@data$avslope <- NULL
 cents@data <- left_join(cents@data, zones@data)
 
 # Rename region
-region <- "greater-manchester" 
+region <- "greater-manchester"
 
 # Fix the path to all-trips folder
-region <- "greater-manchester/all-trips" 
+region <- "greater-manchester/all-trips"
 
 # # Save objects
-l@data = round_df(l@data, 5)
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
 # the next line diagnoses missing variables or incorrectly names variables
 # codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)]
