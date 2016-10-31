@@ -15,8 +15,8 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 400 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 400 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mflow <- 200 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 200 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -51,7 +51,7 @@ cents <- centsa
 # Subset zones to GM area
 zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 
-# Remmove ukmsoas object
+# Remove ukmsoas object
 rm(ukmsoas)
 
 # load flow dataset, depending on availability
@@ -106,8 +106,8 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # # # # # # # # # # # # # # # # # # #
 
 # # 1: Load rf and rq data pre-saved for region, comment for 2 or 3
-# rf = readRDS(file.path(pct_bigdata, "rf_gm.rds"))
-# rq = readRDS(file.path(pct_bigdata, "rq_gm.rds"))
+# rf = readRDS(file.path(pct_bigdata, "rf_gm1.rds"))
+# rq = readRDS(file.path(pct_bigdata, "rq_gm1.rds"))
 
 # 2: Load routes pre-generated and stored in pct-bigdata
 
@@ -126,7 +126,7 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
 rf = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "fastest")
 saveRDS(rf, '../pct-bigdata/rf_gm.rds')
-
+# 
 rq = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "quietest")
 saveRDS(rq, '../pct-bigdata/rq_gm.rds')
 
