@@ -56,33 +56,17 @@ remove_style = function(x){
 
 # function to add model_output_table class to all tables
 add_table_class <- function(x){
-  
   x <- gsub("<table>", "<table class='model_output_table'>", x)
   x
 }
 
-save_formats <- function(to_save, name = F, csv = F){
+save_formats <- function(to_save, name = F){
   if (name == F){
     name <- substitute(to_save)
   }
   saveRDS(to_save, file.path(pct_data, region, paste0(name, ".Rds")))
-  
-  # Simplify data checked with before and after using:
-  # plot(l$gendereq_sideath_webtag)
-  to_save@data <- round_df(to_save@data, 5)
-  
-  # Simplify geom
-  geojson_write( ms_simplify(to_save, keep = 0.1), file = file.path(pct_data, region, name))
-  if(csv) write.csv(to_save@data, file.path(pct_data, region, paste0(name, ".csv")))
 }
 
-round_df <- function(df, digits) {
-  nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
-  
-  df[,nums] <- round(df[,nums], digits = digits)
-  
-  (df)
-}
 # ms_simplify gives Error: RangeError: Maximum call stack size exceeded
 # for large objects.  Turning the repair off fixed it...
 remove_cols <- function(df, col_regex){
@@ -96,6 +80,6 @@ capitalize_region <- function (region_name){
   region_name <- capitalizeStrings(region_name, all.words = T)
   region_name <- gsub(pattern = "And", replacement = "and", x = region_name)
   region_name <- gsub(pattern = "Of", replacement = "of", x = region_name)
-  
+
   region_name
 }
