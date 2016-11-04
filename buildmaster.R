@@ -5,20 +5,20 @@ to_build = read_csv("to_rebuild.csv")
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
-regions <- geojson_read("../pct-bigdata/regions-london.geojson", what = "sp")
+regions <- geojson_read("../pct-shiny/regions.geojson", what = "sp")
 la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
-# (la_all = la_all[!grepl(pattern = "west", x = la_all)])
-# (la_all = la_all[2:length(la_all)]) # the first n. not yet done
+#(la_all = la_all[!grepl(pattern = "west-york|london|manch", x = la_all) ])
+#(la_all = la_all[1:3]) # the first n. not yet done
 # select regions of interest (uncomment/change as appropriate)
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
 #la_all = "isle-of-wight" # a single region
 
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 10 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mflow <- 50 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 50 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -57,7 +57,7 @@ for(k in 1:length(la_all)){
   write(model_output, file.path(pct_data, region, "model-output.html"))
   message(paste0("Just built ", region))
   # # Update the data sha - uncomment to automate this (from unix machines)
-  source("update_sha.R")
+  # source("update_sha.R")
 }
 
 # update table tracking builds

@@ -2,7 +2,7 @@
 # that will help decide which to rebuild
 source("set-up.R")
 library(lubridate)
-regions = readOGR("../pct-data/regions.geojson", layer = "OGRGeoJSON")
+regions = readOGR("../pct-shiny/regions.geojson", layer = "OGRGeoJSON")
 regions = as.character(regions$Region)
 i = 1
 start_date = as_date("2016-08-15")
