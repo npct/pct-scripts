@@ -6,16 +6,22 @@ unzip("../pct-bigdata/wu03ew_msoa.zip")
 flow_cens = readr::read_csv("wu03ew_msoa.csv")
 file.remove("wu03ew_msoa.csv")
 nrow(flow_cens) # 2.4 m
+missing = readr::read_csv("D:/Users/earmmor/OneDrive - University of Leeds/Cycling/Data/161012_UnsuccessfulODpairs.csv")
 
+cent_missing = subset(flow_cens,which(flow_cens$`Area of residence` %in% missing$msoa1))
+f <- flow_cens[flow_cens$`Area of residence` %in% missing$msoa1,]
+f <- f[f$`Area of workplace` %in% missing$msoa2,]
+f$mjoind <- paste(f$`Area of residence`, f$`Area of workplace`)
+missing$mjoined <- paste(missing$msoa1, missing$msoa2)
+f <- f[f$mjoind %in% missing$mjoined, ]
+flow <- f
 # subset the centroids for testing (comment to generate national data)
 
-# cents = cents[grep(pattern = "Camb", x = cents$geo_label),]
-plot(cents)
-cents$geo_code = as.character(cents$geo_code)
+#cents = cents[grep(pattern = "Camb", x = cents$geo_label),]
+#plot(cents)
 o <- flow_cens$`Area of residence` %in% cents$geo_code
 d <- flow_cens$`Area of workplace` %in% cents$geo_code
-# flow <- flow_cens[o & d, ] # subset OD pairs with o and d in study area
-flow = flow_cens
+flow <- flow_cens[o & d, ] # subset OD pairs with o and d in study area
 
 omatch = match(flow$`Area of residence`, cents$geo_code)
 dmatch = match(flow$`Area of workplace`, cents$geo_code)
@@ -30,14 +36,17 @@ summary(is.na(geodist))
 hist(geodist, breaks = 0:800)
 flow$dist = geodist
 flow = flow[!is.na(flow$dist),] # there are 36k destinations with no matching cents - remove
-flow = flow[flow$dist < 20,] # subset based on euclidean distance
+
+#####Important settings #######
+flow = flow[flow$dist >= 20,] # subset based on euclidean distance
+flow = flow[flow$dist < 30,]
+##############################
+
 names(flow) = gsub(pattern = " ", "_", names(flow))
 flow_twoway = flow
 flow = onewayid(flow, attrib = 3:14)
 flow[1:2] = cbind(pmin(flow[[1]], flow[[2]]), pmax(flow[[1]], flow[[2]]))
 nrow(flow) # down to 0.9m, removed majority of lines
-flow = flow[1:50000,]
-write.csv(flow, "~/Dropbox/PCT/flow-50000.csv")
 lines = od2line2(flow = flow, zones = cents)
 plot(lines)
 
@@ -64,19 +73,19 @@ lines$dist = od_dist(flow = lines@data, zones = cents) / 1000
 summary(lines$dist)
 
 lines@data <- dplyr::rename(lines@data,
-                        msoa1 = Area_of_residence,
-                        msoa2 = Area_of_workplace,
-                        all = `All_categories:_Method_of_travel_to_work`,
-                        bicycle = Bicycle,
-                        train = Train,
-                        bus = `Bus,_minibus_or_coach`,
-                        car_driver = `Driving_a_car_or_van`,
-                        car_passenger = `Passenger_in_a_car_or_van`,
-                        foot = On_foot,
-                        taxi = Taxi,
-                        motorbike = `Motorcycle,_scooter_or_moped`,
-                        light_rail = `Underground,_metro,_light_rail,_tram`,
-                        other = Other_method_of_travel_to_work
+                            msoa1 = Area_of_residence,
+                            msoa2 = Area_of_workplace,
+                            all = `All_categories:_Method_of_travel_to_work`,
+                            bicycle = Bicycle,
+                            train = Train,
+                            bus = `Bus,_minibus_or_coach`,
+                            car_driver = `Driving_a_car_or_van`,
+                            car_passenger = `Passenger_in_a_car_or_van`,
+                            foot = On_foot,
+                            taxi = Taxi,
+                            motorbike = `Motorcycle,_scooter_or_moped`,
+                            light_rail = `Underground,_metro,_light_rail,_tram`,
+                            other = Other_method_of_travel_to_work
 )
 
 lines$Work_mainly_at_or_from_home <- NULL
@@ -84,5 +93,12 @@ lines$Work_mainly_at_or_from_home <- NULL
 names(lines)
 
 # generate the fastest routes
-rf = line2route(l = lines, route_fun = route_cyclestreet, plan = "fastest")
-rq = line2route(l = lines, route_fun = route_cyclestreet, plan = "quietest")
+rq = line2route(l = lines, route_fun = route_cyclestreet, plan = "quietest", base_url = "http://pct.cyclestreets.net/api/")
+saveRDS(rq,file ="../pct-bigdata/msoa_rerun/oldway/rq_EW_20-30.Rds")
+
+
+rf = line2route(l = lines, route_fun = route_cyclestreet, plan = "fastest", base_url = "http://pct.cyclestreets.net/api/")
+saveRDS(rf,file ="../pct-bigdata/msoa_rerun/oldway/rf_EW_20-30.Rds")
+
+saveRDS(lines, file ="../pct-bigdata/msoa_rerun/oldway/lines_missing_2.Rds")
+
