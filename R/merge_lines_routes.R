@@ -12,8 +12,8 @@ library(leaflet)
 
 #Set up these parameters
 path <- "../pct-bigdata/msoa_rerun/oldway/"  #path to the working directory where everything is saved
-route_file <- "rq_EW_20-30" #name of the route file without .Rds
-line_file <- "lines_EW_20-30"  #name of the line file without .Rds
+route_file <- "rq_500_test2" #name of the route file without .Rds
+line_file <- "lines_500_test2"  #name of the line file without .Rds
 
 # Load in Files
 routes <- readRDS(paste0(path,route_file,".Rds"))
@@ -34,12 +34,12 @@ print(paste0("The max difference in finishing locations is ", as.integer(max(tes
 
 #plot the results
 print("plotting the largest errors for you")
-leaflet() %>% 
-  addTiles() %>% 
-  addPolylines(data = routes[which.max(tests[,1]),]) %>% 
-  addPolylines(data = lines[which.max(tests[,1]),])  %>%
-  addPolylines(data = routes[which.max(tests[,2]),]) %>% 
-  addPolylines(data = lines[which.max(tests[,2]),])
+#leaflet() %>% 
+#  addTiles() %>% 
+#  addPolylines(data = routes[which.max(tests[,1]),]) %>% 
+#  addPolylines(data = lines[which.max(tests[,1]),])  %>%
+#  addPolylines(data = routes[which.max(tests[,2]),]) %>% 
+#  addPolylines(data = lines[which.max(tests[,2]),])
 
 #cbind them togther
 both <- cbind(routes,lines)
