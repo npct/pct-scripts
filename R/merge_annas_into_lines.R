@@ -6,8 +6,8 @@
 
 require(dplyr)
 l_nat <- readRDS(file.path("..", "pct-bigdata", "l_nat_noScens.Rds")) # without scinario data
-#rf <- readRDS(file.path("..", "pct-bigdata", "rf_nat.Rds"))
-#rq <- readRDS(file.path("..", "pct-bigdata", "rq_nat.Rds"))
+rf <- readRDS(file.path("..", "pct-bigdata", "rf_nat.Rds"))
+rq <- readRDS(file.path("..", "pct-bigdata", "rq_nat.Rds"))
 l_anna = read.csv(file = "D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/xx-PCTAreaLines_TEMP/161103_PCTarealines_csv/pct_lines.csv")
 
 
@@ -22,11 +22,15 @@ l_nat$id <- id
 l_nat_merged <- left_join(l_nat@data, l_anna_eng, by = c("id" = "id"))
 
 not_in_annas_data <- l_nat_merged[is.na(l_nat_merged$ebike_siw), ] # need to ask Anna why...
-l_nat_merged <- l_nat_merged[!is.na(l_nat_merged$ebike_siw), ] # need to ask Anna why...
 
 in_annas_not_in_nat <- left_join(l_anna_eng, l_nat@data, by = c("id" = "id"))
 in_annas_not_in_nat <- in_annas_not_in_nat[is.na(in_annas_not_in_nat$is_two_way), ] # empty, we have it all
 
-saveRDS(l_nat, file.path("..", "pct-bigdata", "l_nat_noScens.Rds"))
-saveRDS(l_nat_merged, file.path("..", "pct-bigdata", "l_nat.Rds"))
+to_drop <- !is.na(l_nat_merged$ebike_siw) # rows not in Anna's
+l_nat <- l_nat[to_drop, ]
+l_nat@data <- l_nat_merged[to_drop, ]
+rf@data <- rf[to_drop, ]
+rq@data <- rq[to_drop, ]
+
+saveRDS(l_nat, file.path("..", "pct-bigdata", "l_nat.Rds"))
 write.csv(not_in_annas_data, file = "../pct-bigdata/not_in_annas_data.csv")
