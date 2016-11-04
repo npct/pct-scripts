@@ -1,0 +1,46 @@
+name,date,to_rebuild,who,sign_off,outstanding_issues
+avon,2016-08-10,1,AA,-,rnet looks funny+mflow 50
+bedfordshire,2016-08-10,0,RL1,AG,NA
+berkshire,2016-08-10,0,RL1,AG,NA
+buckinghamshire,2016-08-10,0,RL1,AG,NA
+cambridgeshire,2016-08-09,0,RL1,AG,NA
+cheshire,2016-08-10,0,RL1,AG,NA
+cleveland,2016-08-10,0,RL1,AG,NA
+cornwall-and-isles-of-scilly,2016-08-10,0,RL1,AG,NA
+cumbria,2016-08-10,0,RL1,AG,NA
+derbyshire,2016-08-10,maybe,RL1,-,37 lines failed to route and one missing line
+devon,2016-08-10,0,RL1,AG,NA
+dorset,2016-08-11,0,RL1,AG,NA
+east-sussex,2016-08-10,maybe,RL1,-,rnet sparse less good than pct.bike
+essex,2016-08-11,0,RL1,AG,NA
+gloucestershire,2016-08-11,maybe,RL1,-,rnet sparse less good than pct.bike
+greater-manchester,2016-05-20,1,AU,-,NA
+hampshire,2016-08-11,0,RL1,-,NA
+hereford-and-worcester,2016-08-11,0,RL1,-,NA
+hertfordshire,2016-08-11,0,RL1,-,NA
+humberside,2016-08-11,0,RL1,-,NA
+isle-of-wight,2016-08-10,0,RL1,-,NA
+kent,2016-08-09,0,RL1,AG,NA
+lancashire,2016-08-11,0,RL2,-,NA
+leicestershire,2016-08-11,0,RL2,-,NA
+lincolnshire,2016-08-11,0,RL2,-,NA
+liverpool-city-region,2016-08-11,0,RL2,-,NA
+london,2016-08-11,1,RL3,-,NA
+norfolk,2016-08-11,0,RL2,-,NA
+northamptonshire,2016-08-11,0,RL2,-,NA
+north-east,2016-05-20,0,RL2,-,NA
+northumberland,2016-05-20,0,RL2,-,NA
+north-yorkshire,2016-08-11,0,RL2,-,NA
+nottinghamshire,2016-05-20,0,RL2,-,NA
+oxfordshire,2016-08-11,0,RL2,-,NA
+shropshire,2016-08-11,0,RL2,-,NA
+somerset,2016-05-20,0,RL2,-,NA
+south-yorkshire,2016-08-11,0,RL2,-,NA
+staffordshire,2016-08-11,0,RL2,-,NA
+suffolk,2016-08-11,0,RL2,-,NA
+surrey,2016-08-11,0,RL2,-,NA
+warwickshire,2016-08-11,0,RL2,-,NA
+west-midlands,2016-08-10,1,AU,-,mflow 50
+west-sussex,2016-08-11,0,RL2,-,NA
+west-yorkshire,2016-05-20,maybe,AA,-,mflow 50? server currently crashing
+wiltshire,2016-08-11,0,RL2,-,NA
