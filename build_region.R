@@ -2,9 +2,7 @@
 start_time <- Sys.time() # for timing the script
 
 if(!exists("region")) region <- "cambridgeshire" # create LA name if none exists,  then set-up data repo
-pct_data <- file.path("..", "pct-data")
-pct_bigdata <- file.path("..", "pct-bigdata")
-pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
+
 if(!file.exists(pct_data)) stop(paste("The pct-data repository cannot be found.  Please clone https://github.com/npct/pct-data in", dirname(getwd())))
 if(!file.exists(pct_bigdata)) stop(paste("The pct-bigdata repository cannot be found.  Please clone https://github.com/npct/pct-bigdata in", dirname(getwd())))
 scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
@@ -13,15 +11,6 @@ scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
 region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
-params <- NULL # build parameters (saved for future reference)
-params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 10 # minimum flow between od pairs to show for short lines, high means fewer lines
-params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
-params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
-params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
-# parameters related to the route network
-params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
-# params$min_rnet_length <- 2 # minimum segment length for the Route Network to display (may create holes in rnet)
 params$rft_keep = 0.05 # how aggressively to simplify the route network (higher values - longer to run but rnet less likely to fail)
 if(!exists("ukmsoas")){ # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
@@ -88,9 +77,9 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
 # 2: Load routes pre-generated and stored in pct-bigdata
 if(!exists("rf_nat"))
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf_nat.Rds"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "rf_new.Rds"))
 if(!exists("rq_nat"))
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq_nat.Rds"))
+  rq_nat <- readRDS(file.path(pct_bigdata, "rq_new.Rds"))
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rq_nat$id %in% l$id,]
 if(nrow(rf) != nrow(rq)) next()

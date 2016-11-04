@@ -1,9 +1,11 @@
 rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
-to_build = read_csv("to_rebuild_updated.csv")
+to_build = read_csv("to_rebuild.csv")
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
-regions <- readOGR(file.path(pct_data, "regions.geojson"), layer = "OGRGeoJSON")
+pct_bigdata <- file.path("..", "pct-bigdata")
+pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
+regions <- geojson_read("../pct-bigdata/regions-london.geojson", what = "sp")
 la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
@@ -12,7 +14,17 @@ to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[2:length(la_all)]) # the first n. not yet done
 # select regions of interest (uncomment/change as appropriate)
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-# la_all = "herefordshire" # a single region
+#la_all = "isle-of-wight" # a single region
+
+params <- NULL # build parameters (saved for future reference)
+params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 10 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
+params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
+params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
+# parameters related to the route network
+params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
+# params$min_rnet_length <- 2 # minimum segment length for the Route Network to display (may create holes in rnet)
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
