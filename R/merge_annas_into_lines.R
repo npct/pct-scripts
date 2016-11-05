@@ -13,6 +13,12 @@ l_nat@data = l_nat_orig@data[c("id", "is_two_way", "dist")]
 # Add new lines
 rf <- readRDS("../pct-bigdata/rf_nat.Rds")
 rq <- readRDS("../pct-bigdata/rq_nat.Rds")
+# check they're the same
+n = 100001 # try many values
+plot(rf[n,]); plot(rq[n,], add = TRUE) # yes, good
+rf_geo_id = stplanr::line2df(rf)
+
+
 f = "C://Users/georl/Dropbox/PCT/xx-PCTAreaLines_TEMP/161103_PCTarealines_csv.zip"
 unzip(zipfile = f)
 l_anna = readr::read_csv("161103_PCTarealines_csv/pct_lines.csv")
@@ -26,6 +32,10 @@ cor(l_nat$govtarget_slc, l_nat_orig$govtarget_slc, use = "complete.obs") # 0.998
 cor(l_nat$dutch_slc, l_nat_orig$dutch_slc, use = "complete.obs") # 0.9944
 summary(l_nat@data) # 12 nas in all vars - remove them
 l_nat = l_nat[!is.na(l_nat$all),]
+saveRDS(l_nat, "../pct-bigdata/lines_oneway_shapes_updated.Rds")
+
+# check geographical integrity
+plot(l[sample()])
 
 not_in_annas_data <- l_nat_merged[is.na(l_nat_merged$ebike_siw), ] # need to ask Anna why...
 in_annas_not_in_nat <- left_join(l_anna_eng, l_nat@data, by = c("id" = "id"))

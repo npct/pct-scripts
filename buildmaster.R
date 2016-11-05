@@ -2,7 +2,7 @@ rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
 to_build = read_csv("to_rebuild.csv")
 # For PCT regions:
-pct_data <- file.path("..", "pct-data")
+pct_data <- file.path("..", "pct-new-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
 regions <- geojson_read("../pct-shiny/regions.geojson", what = "sp")
@@ -14,7 +14,7 @@ to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 #(la_all = la_all[1:3]) # the first n. not yet done
 # select regions of interest (uncomment/change as appropriate)
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-#la_all = "isle-of-wight" # a single region
+la_all = "isle-of-wight" # a single region
 
 params <- NULL # build parameters (saved for future reference)
 params$mflow <- 50 # minimum flow between od pairs to show for longer lines, high means fewer lines
