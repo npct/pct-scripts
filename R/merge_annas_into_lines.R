@@ -18,7 +18,14 @@ unzip(zipfile = f)
 l_anna = readr::read_csv("161103_PCTarealines_csv/pct_lines.csv")
 l_anna$id <- paste(l_anna$msoa1, l_anna$msoa2)
 l_nat_merged <- left_join(l_nat@data, l_anna)
-l_nat_orig@data = l_nat_merged
+l_nat@data = l_nat_merged
+
+# test compatibility of l_nat new with old data
+cor(l_nat$all, l_nat_orig$all, use = "complete.obs") # 1 = perfect fit
+cor(l_nat$govtarget_slc, l_nat_orig$govtarget_slc, use = "complete.obs") # 0.9982
+cor(l_nat$dutch_slc, l_nat_orig$dutch_slc, use = "complete.obs") # 0.9944
+summary(l_nat@data) # 12 nas in all vars - remove them
+l_nat = l_nat[!is.na(l_nat$all),]
 
 not_in_annas_data <- l_nat_merged[is.na(l_nat_merged$ebike_siw), ] # need to ask Anna why...
 in_annas_not_in_nat <- left_join(l_anna_eng, l_nat@data, by = c("id" = "id"))
