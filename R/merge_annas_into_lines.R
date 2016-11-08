@@ -34,18 +34,20 @@ summary(l_nat@data) # 12 nas in all vars - remove them
 l_nat = l_nat[!is.na(l_nat$all),]
 saveRDS(l_nat, "../pct-bigdata/lines_oneway_shapes_updated.Rds")
 
-# check geographical integrity
-plot(l[sample()])
+# Merge regional data
+fz = "../pct-bigdata/ukmsoas-scenarios.Rds"
+ukmsoas = readRDS(fz)
+z_anna = readr::read_csv("161103_PCTarealines_csv/pct_area.csv")
+z_cols_keep = names(ukmsoas)[!names(ukmsoas) %in% names(z_anna)]
+ukmsoas@data = ukmsoas@data[z_cols_keep][1:2]
+ukmsoas@data = dplyr::rename(ukmsoas@data,
+                             home_msoa = geo_code
+                             )
+ukmsoas@data = dplyr::inner_join(ukmsoas@data, z_anna)
+ukmsoas@data = dplyr::rename(ukmsoas@data,
+                                            geo_code = home_msoa,
+                                            geo_label = home_msoa_name
+)
 
-not_in_annas_data <- l_nat_merged[is.na(l_nat_merged$ebike_siw), ] # need to ask Anna why...
-in_annas_not_in_nat <- left_join(l_anna_eng, l_nat@data, by = c("id" = "id"))
-in_annas_not_in_nat <- in_annas_not_in_nat[is.na(in_annas_not_in_nat$is_two_way), ] # empty, we have it all
-to_drop <- !is.na(l_nat_merged$ebike_siw) # rows not in Anna's
-l_nat <- l_nat[to_drop, ]
-l_nat@data <- l_nat_merged[to_drop, ]
-rf@data <- rf[to_drop, ]
-rq@data <- rq[to_drop, ]
-
-# save output
-saveRDS(l_nat_orig, file.path("..", "pct-bigdata", "l_nat.Rds"))
-write.csv(not_in_annas_data, file = "../pct-bigdata/not_in_annas_data.csv")
+names(ukmsoas)
+saveRDS(ukmsoas, fz)

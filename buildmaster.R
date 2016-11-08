@@ -2,10 +2,10 @@ rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
 to_build = read_csv("to_rebuild.csv")
 # For PCT regions:
-pct_data <- file.path("..", "pct-new-data")
+pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
-regions <- geojson_read("../pct-shiny/regions.geojson", what = "sp")
+regions <- geojson_read("../pct-data/regions.geojson", what = "sp")
 la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
@@ -17,8 +17,8 @@ to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 la_all = "isle-of-wight" # a single region
 
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 50 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 50 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 10 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -61,7 +61,7 @@ for(k in 1:length(la_all)){
 }
 
 # update table tracking builds
-source("R/to_build.R")
+# source("R/to_build.R")
 # # # For custom regions:
 # regions <- shapefile("../pct-bigdata/custom-regions/CloHAM.shp")
 # regions$Region <- tolower(regions$Name) # add region names
