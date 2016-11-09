@@ -16,13 +16,8 @@ for(i in 1:n){
   rf_n = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet",
                   plan = "fastest", base_url = "http://pct.cyclestreets.net/api/")
   rf_n$id = l[sel[[i]],]$id
-  # rq_n = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet",
-  #                 plan = "quietest")
-  # rq_n$id = l[sel[[i]],]$id
   print(sel_names_rf[i])
   saveRDS(rf_n, paste0("../pct-bigdata/chunks/", sel_names_rf[i]))
-  # print(sel_names_rq[i])
-  # saveRDS(rq_n, paste0("../pct-bigdata/chunks/", sel_names_rq[i]))
 }
 
 
@@ -57,8 +52,6 @@ for(i in 1:n){
   rq_n = line2route(l = l[sel[[i]],], route_fun = "route_cyclestreet",
                   plan = "quietest")
   rq_n$id = l[sel[[i]],]$id
-  print(sel_names_rf[i])
-  saveRDS(rf_n, paste0("../pct-bigdata/chunks/", sel_names_rf[i]))
   print(sel_names_rq[i])
   saveRDS(rq_n, paste0("../pct-bigdata/chunks/", sel_names_rq[i]))
 }
