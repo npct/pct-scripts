@@ -163,7 +163,7 @@ rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shap
 #   rft <- SpatialLinesDataFrame(rft, rf@data)
 # } else print("Error: toptailed lines do not match lines")
 
-# Rename region
+# Rename region-
 region <- "greater-manchester"
 
 # Fix the path to all-trips folder
