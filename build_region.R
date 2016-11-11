@@ -97,6 +97,25 @@ rq <- remove_cols(rq, "(waypoint|co2_saving|calories|busyness|plan|start|finish|
 # create rq_increase variable
 rq$rq_incr <- rq$length / rf$length
 
+###########################################
+#Temp error checks
+############################################
+print(paste0("l and rf are equal ",nrow(l) == nrow(rf)))
+'%!in%' <- function(x,y)!('%in%'(x,y))
+allid <- c(rf$id,l$id)
+allid <-allid[!duplicated(allid)]
+compare <- data.frame(id=allid,l=0,rf=0,tot=0)
+for(i in 1:nrow(compare)){
+  if(compare$id[i] %in% l$id){compare$l[i] = 1}
+  if(compare$id[i] %in% rf$id){compare$rf[i] = 1}
+  compare$tot[i] <- compare$l[i] + compare$rf[i]
+}
+compare_sub <- compare[which(compare$tot < 2),]
+write.csv(compare_sub,file.path(pct_data, region, "mismachedlines.csv"))
+
+#############################################
+
+
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length / 1000 # convert m to km
 l$dist_quiet <- rq$length / 1000 # convert m to km
@@ -162,6 +181,7 @@ cents@data$avslope <- NULL
 cents@data <- left_join(cents@data, zones@data)
 
 # # Save objects
+#l@data = round_df(l@data, 5)
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
 # the next line diagnoses missing variables or incorrectly names variables
 # codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)]
@@ -172,7 +192,8 @@ save_formats(l)
 save_formats(rf)
 save_formats(rq)
 save_formats(rnet)
-save_formats(cents, 'c')
+
+saveRDS(cents, file.path(pct_data, region, "c.Rds"))
 
 # gather params
 params$nrow_flow = nrow(flow)

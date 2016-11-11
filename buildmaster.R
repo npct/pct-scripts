@@ -10,11 +10,12 @@ la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
-#(la_all = la_all[!grepl(pattern = "west-york|london|manch", x = la_all) ])
+(la_all = la_all[!grepl(pattern = "cleveland|kent|nottinghamshire", x = la_all) ]) #not done
+(la_all = la_all[!grepl(pattern = "avon|bedfordshire|berkshire|buckinghamshire|cambridgeshire|cheshire|cornwall-and-isles-of-scilly|cumbria|derbyshire|dorset|east-sussex|gloucestershire|hereford-and-worcester|hertfordshire|isle-of-wight|north-yorkshire|northumberland|northamptonshire|norfolk|lincolnshire|leicestershire", x = la_all) ]) #done before
 #(la_all = la_all[1:3]) # the first n. not yet done
 # select regions of interest (uncomment/change as appropriate)
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-la_all = "isle-of-wight" # a single region
+#la_all = "isle-of-wight" # a single region
 
 params <- NULL # build parameters (saved for future reference)
 params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
@@ -25,6 +26,8 @@ params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero 
 # parameters related to the route network
 params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points for network
 # params$min_rnet_length <- 2 # minimum segment length for the Route Network to display (may create holes in rnet)
+
+starttime = proc.time()
 
 for(k in 1:length(la_all)){
   # What geographic level are we working at (cua or regional)
@@ -59,6 +62,9 @@ for(k in 1:length(la_all)){
   # # Update the data sha - uncomment to automate this (from unix machines)
   # source("update_sha.R")
 }
+
+endtime = proc.time()
+print(endtime-starttime)
 
 # update table tracking builds
 # source("R/to_build.R")
