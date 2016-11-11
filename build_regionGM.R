@@ -1,5 +1,5 @@
 rm(list=ls())
-.libpath()
+.libPaths("C:/Program Files/R/R-3.3.1/library" )
 source("set-up.R") # load packages needed - commented as run in buildmaster
 start_time <- Sys.time() # for timing the script
 
