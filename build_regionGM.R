@@ -211,13 +211,12 @@ l@data <- as.data.frame(l@data) # convert from tibble to data.frame
 # codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)]
 l@data <- l@data[codebook_l$`Variable name`] # fix order and vars kept in l
 zones@data <- zones@data[codebook_z$`Variable name`]
-save_formats(zones, 'z', csv = T)
-save_formats(l, csv = T)
+save_formats(zones, 'z')
+save_formats(l)
 save_formats(rf)
 save_formats(rq)
 save_formats(rnet)
-
-saveRDS(cents, file.path(pct_data, region, "c.Rds"))
+save_formats(cents, 'c')
 
 # gather params
 params$nrow_flow = nrow(flow)
@@ -229,4 +228,4 @@ saveRDS(params, file.path(pct_data, region, "params.Rds"))
 # Save the initial parameters to reproduce results
 
 # # Save the script that loaded the lines into the data directory
-file.copy("build_region.R", file.path(pct_data, region, "build_regionGM.R"), overwrite = T)
+file.copy("build_regionGM.R", file.path(pct_data, region, "build_regionGM.R"), overwrite = T)
