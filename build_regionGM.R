@@ -125,10 +125,10 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # rm(rf_nat, rq_nat)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
-rf = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "fastest")
+rf = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "fastest",n_print = 20)
 saveRDS(rf, '../pct-bigdata/rf_gm.rds')
-#
-rq = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "quietest")
+
+rq = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "quietest",n_print = 20)
 saveRDS(rq, '../pct-bigdata/rq_gm.rds')
 
 if(nrow(rf) != nrow(rq)) next()
@@ -169,8 +169,8 @@ region <- "greater-manchester"
 # Fix the path to all-trips folder
 region <- "greater-manchester/all-trips"
 
-source("R/generate_rnet.R") # comment out to avoid slow rnet build
-#rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
+#source("R/generate_rnet.R") # comment out to avoid slow rnet build
+rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # debug rnet so it is smaller and contains only useful results
 # summary(rnet) # diagnostic check of what it contains
