@@ -125,10 +125,10 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 # rm(rf_nat, rq_nat)
 
 # # 3: Create routes on-the-fly, uncomment the next 4 lines:
-rf = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "fastest")
+rf = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "fastest",n_print = 20)
 saveRDS(rf, '../pct-bigdata/rf_gm.rds')
-#
-rq = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "quietest")
+
+rq = line2route(l=l, route_fun = route_cyclestreet, base_url = "http://pct.cyclestreets.net", plan = "quietest",n_print = 20)
 saveRDS(rq, '../pct-bigdata/rq_gm.rds')
 
 if(nrow(rf) != nrow(rq)) next()
@@ -169,8 +169,8 @@ region <- "greater-manchester"
 # Fix the path to all-trips folder
 region <- "greater-manchester/all-trips"
 
-source("R/generate_rnet.R") # comment out to avoid slow rnet build
-#rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
+#source("R/generate_rnet.R") # comment out to avoid slow rnet build
+rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # debug rnet so it is smaller and contains only useful results
 # summary(rnet) # diagnostic check of what it contains
@@ -211,13 +211,12 @@ l@data <- as.data.frame(l@data) # convert from tibble to data.frame
 # codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)]
 l@data <- l@data[codebook_l$`Variable name`] # fix order and vars kept in l
 zones@data <- zones@data[codebook_z$`Variable name`]
-save_formats(zones, 'z', csv = T)
-save_formats(l, csv = T)
+save_formats(zones, 'z')
+save_formats(l)
 save_formats(rf)
 save_formats(rq)
 save_formats(rnet)
-
-saveRDS(cents, file.path(pct_data, region, "c.Rds"))
+save_formats(cents, 'c')
 
 # gather params
 params$nrow_flow = nrow(flow)
@@ -229,4 +228,4 @@ saveRDS(params, file.path(pct_data, region, "params.Rds"))
 # Save the initial parameters to reproduce results
 
 # # Save the script that loaded the lines into the data directory
-file.copy("build_region.R", file.path(pct_data, region, "build_regionGM.R"), overwrite = T)
+file.copy("build_regionGM.R", file.path(pct_data, region, "build_regionGM.R"), overwrite = T)
