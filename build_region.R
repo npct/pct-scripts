@@ -34,15 +34,13 @@ zones <- ukmsoas[ukmsoas@data$geo_code %in% cents$geo_code, ]
 
 # load flow dataset, depending on availability
 if(!exists("flow_nat"))
-  flow_nat <- readRDS(file.path(pct_bigdata, "lines_oneway_shapes_updated.Rds"))
+  flow_nat <- readRDS(file.path(pct_bigdata, "msoa", "l_nat.Rds"))
   flow_nat <- flow_nat[flow_nat$dist > 0,]
-summary(flow_nat$dutch_slc / flow_nat$all)
 
 # Subset by zones in the study area
 o <- flow_nat$msoa1 %in% cents$geo_code
 d <- flow_nat$msoa2 %in% cents$geo_code
 flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
-flow <- flow[!is.na(flow$dutch_slc),] # remove flows with no scenario data
 
 params$n_flow_region <- nrow(flow)
 params$n_commutes_region <- sum(flow$all)
@@ -53,8 +51,6 @@ params$sel_long <- flow$all > params$mflow & flow$dist < params$mdist
 params$sel_short <- flow$dist < params$max_all_dist & flow$all > params$mflow_short
 sel <- params$sel_long | params$sel_short
 flow <- flow[sel, ]
-# summary(flow$dist)
-# l <- od2line(flow = flow, zones = cents)
 l <- flow
 
 # add geo_label of the lines
@@ -77,9 +73,9 @@ params$pmflowa <- round(sum(l$all) / params$n_commutes_region * 100, 1)
 
 # 2: Load routes pre-generated and stored in pct-bigdata
 if(!exists("rf_nat"))
-  rf_nat <- readRDS(file.path(pct_bigdata, "rf_nat.Rds"))
+  rf_nat <- readRDS(file.path(pct_bigdata, "msoa", "rf_nat.Rds"))
 if(!exists("rq_nat"))
-  rq_nat <- readRDS(file.path(pct_bigdata, "rq_nat.Rds"))
+  rq_nat <- readRDS(file.path(pct_bigdata, "msoa", "rq_nat.Rds"))
 rf <- rf_nat[rf_nat$id %in% l$id,]
 rq <- rq_nat[rq_nat$id %in% l$id,]
 if(nrow(rf) != nrow(rq)) next()
@@ -96,25 +92,6 @@ rq <- remove_cols(rq, "(waypoint|co2_saving|calories|busyness|plan|start|finish|
 
 # create rq_increase variable
 rq$rq_incr <- rq$length / rf$length
-
-###########################################
-#Temp error checks
-############################################
-print(paste0("l and rf are equal ",nrow(l) == nrow(rf)))
-'%!in%' <- function(x,y)!('%in%'(x,y))
-allid <- c(rf$id,l$id)
-allid <-allid[!duplicated(allid)]
-compare <- data.frame(id=allid,l=0,rf=0,tot=0)
-for(i in 1:nrow(compare)){
-  if(compare$id[i] %in% l$id){compare$l[i] = 1}
-  if(compare$id[i] %in% rf$id){compare$rf[i] = 1}
-  compare$tot[i] <- compare$l[i] + compare$rf[i]
-}
-compare_sub <- compare[which(compare$tot < 2),]
-write.csv(compare_sub,file.path(pct_data, region, "mismachedlines.csv"))
-
-#############################################
-
 
 # Allocate route characteristics to OD pairs
 l$dist_fast <- rf$length / 1000 # convert m to km
@@ -143,18 +120,9 @@ rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shap
 source("R/generate_rnet.R") # comment out to avoid slow rnet build
 # rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
-# debug rnet so it is smaller and contains only useful results
-# summary(rnet) # diagnostic check of what it contains
-sel_rnet_zero = rnet$govtarget_slc > 0
-# plot(rnet[!sel_rnet_zero,]) # diagnostic check of the segments with no cyclists
+# diagnostic check of the segments with no cyclists
 # links to: https://github.com/npct/pct-shiny/issues/336
 rnet = rnet[rnet$govtarget_slc > 0,] # remove segments with zero cycling flows
-# # Add maximum amount of interzone flow to rnet
-# create line midpoints (sp::over does not work with lines it seems)
-rnet_osgb <- spTransform(rnet, CRS("+init=epsg:27700"))
-rnet_lengths = gLength(rnet_osgb, byid = T)
-summary(rnet_lengths)
-# rnet = rnet[rnet_lengths > params$min_rnet_length,]
 
 proj4string(rnet) = proj4string(zones)
 
@@ -164,7 +132,6 @@ rnet@data[rnet$Singlezone == 0, grep(pattern = "upto", names(rnet))] = NA
 
 if(!"gendereq_slc" %in% scens)
   rnet$gendereq_slc <- NA
-
 
 # create id variable
 rnet$id <- 1:nrow(rnet)

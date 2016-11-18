@@ -10,8 +10,8 @@ la_all <- as.character(regions$Region)
 sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
 to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
 # (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
-(la_all = la_all[!grepl(pattern = "cleveland|kent|nottinghamshire", x = la_all) ]) #not done
-(la_all = la_all[!grepl(pattern = "avon|bedfordshire|berkshire|buckinghamshire|cambridgeshire|cheshire|cornwall-and-isles-of-scilly|cumbria|derbyshire|dorset|east-sussex|gloucestershire|hereford-and-worcester|hertfordshire|isle-of-wight|north-yorkshire|northumberland|northamptonshire|norfolk|lincolnshire|leicestershire", x = la_all) ]) #done before
+(la_all = la_all[!grepl(pattern = "london", x = la_all) ]) #not done
+#(la_all = la_all[!grepl(pattern = "avon|bedfordshire|berkshire|buckinghamshire|cambridgeshire|cheshire|cornwall-and-isles-of-scilly|cumbria|derbyshire|dorset|east-sussex|gloucestershire|hereford-and-worcester|hertfordshire|isle-of-wight|north-yorkshire|northumberland|northamptonshire|norfolk|lincolnshire|leicestershire|south-yorkshire|somerset|shropshire|oxfordshire|suffolk|wiltshire|west-sussex|warwickshire", x = la_all) ]) #done before
 #(la_all = la_all[1:3]) # the first n. not yet done
 # select regions of interest (uncomment/change as appropriate)
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
