@@ -1,4 +1,3 @@
-# source("set-up.R") # load packages needed - commented as run in buildmaster
 start_time <- Sys.time() # for timing the script
 
 if(!exists("region")) region <- "cambridgeshire" # create LA name if none exists,  then set-up data repo
