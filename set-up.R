@@ -2,6 +2,7 @@
 # NB: devtools allows installation of the latest packages
 if(!require(devtools)) install.packages("devtools")
 if(!require(rmapshaper)) install.packages("rmapshaper")
+# capitalize_region() below requires capitalizeStrings() from the dev branch of BBmisc
 if(!require(BBmisc)) install_github("berndbischl/BBmisc")
 
 pkgs <- c(
@@ -26,10 +27,6 @@ pkgs <- c(
 reqs <- as.numeric(lapply(pkgs, require, character.only = TRUE))
 # Install packages we require
 if(sum(!reqs) > 0) install.packages(pkgs[!reqs])
- # Load publicly available test data
-
-# capitalize_region() below requires capitalizeStrings() from the dev branch of BBmisc
-devtools::install_github("berndbischl/BBmisc")
 
 # Option 1: clone the repository directly - if you have git installed
 # system2("git", args=c("clone", "git@github.com:Robinlovelace/pct-data.git", "--depth=1"))
