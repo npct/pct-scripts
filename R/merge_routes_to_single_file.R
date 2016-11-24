@@ -1,10 +1,10 @@
 # Reads in generated routes in several files and merges them into one big file
 
-a = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/oldway/lines_EW_0-5.Rds")
-b = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/oldway/lines_EW_5-10.Rds")
-c = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/oldway/lines_EW_10-20.Rds")
-d = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/oldway/lines_EW_20-30.Rds")
-e = readRDS("D:/Git/pct-bigdata/msoa_rerun/oldway/lines_missing_2.Rds")
+a = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/msoa_rerun/oldway/lines_EW_0-5.Rds")
+b = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/msoa_rerun/oldway/lines_EW_5-10.Rds")
+c = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/msoa_rerun/oldway/lines_EW_10-20.Rds")
+d = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/msoa_rerun/oldway/lines_EW_20-30.Rds")
+e = readRDS("D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/msoa_rerun/oldway/lines_missing_2.Rds")
 #anna = read.csv(file = "D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/xx-PCTAreaLines_TEMP/161103_PCTarealines_csv/pct_lines.csv")
 
 #names(a)
@@ -32,7 +32,7 @@ rbefore <- nrow(a) + nrow(b) + nrow(c) + nrow(d) + nrow(e)
 
 rafter <- nrow(m)
 
-saveRDS(m,file = "D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/oldway/l_nat_noScens.Rds")
+saveRDS(m,file = "D:/Users/earmmor/OneDrive - University of Leeds/Cycling Big Data/ToNatBuild/lines_allonefile.Rds")
 names(m)
 head(m@data)
 head(m$id)
