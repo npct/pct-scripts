@@ -38,9 +38,9 @@ somerset,24/11/2016,0,AG,
 south-yorkshire,24/11/2016,0,AG,
 staffordshire,24/11/2016,0,AG,
 suffolk,24/11/2016,?0,AG,error when you click CSV in the zones
-surrey,-,1,-,
-warwickshire,-,1,-,
+surrey,24/11/2016,1,-,rnet not ok
+warwickshire,24/11/2016,1,-,reversion coventry should be included here
 west-midlands,-,1,-,
-west-sussex,-,1,-,
-west-yorkshire,-,1,-,
-wiltshire,-,1,-,
+west-sussex,24/11/2016,1,-,rnet not ok
+west-yorkshire,24/11/2016,0,AG,
+wiltshire,24/11/2016,0,AG,
