@@ -19,19 +19,19 @@ hampshire,24/11/2016,0,AG,
 hereford-and-worcester,24/11/2016,0,AG,
 hertfordshire,24/11/2016,0,AG,
 humberside,24/11/2016,0,AG,
-isle-of-wight,23/11/2016,0,-,
+isle-of-wight,23/11/2016,0,AG,
 kent,24/11/2016,0,AG,
 lancashire,24/11/2016,0,AG,
 leicestershire,24/11/2016,1,-,rnet not ok
 lincolnshire,24/11/2016,0,AG,
 liverpool-city-region,24/11/2016,1,-,rnet not ok
 london,-,1,-,
-norfolk,-,1,-,
-northamptonshire,-,1,-,
-north-east,-,1,-,
-northumberland,-,1,-,
-north-yorkshire,-,1,-,
-nottinghamshire,-,1,-,
+norfolk,24/11/2016,0,AG,
+northamptonshire,24/11/2016,1,-,rnet not ok
+north-east,24/11/2016,1,-,rnet not ok...Merge with cleveland
+northumberland,24/11/2016,0,AG,
+north-yorkshire,24/11/2016,1,-,rnet not ok
+nottinghamshire,24/11/2016,1,-,rnet not ok
 oxfordshire,-,1,-,
 shropshire,-,1,-,
 somerset,-,1,-,
