@@ -32,12 +32,12 @@ north-east,24/11/2016,1,-,rnet not ok...Merge with cleveland
 northumberland,24/11/2016,0,AG,
 north-yorkshire,24/11/2016,1,-,rnet not ok
 nottinghamshire,24/11/2016,1,-,rnet not ok
-oxfordshire,-,1,-,
-shropshire,-,1,-,
-somerset,-,1,-,
-south-yorkshire,-,1,-,
-staffordshire,-,1,-,
-suffolk,-,1,-,
+oxfordshire,24/11/2016,0,AG,
+shropshire,24/11/2016,0,AG,
+somerset,24/11/2016,0,AG,
+south-yorkshire,24/11/2016,0,AG,
+staffordshire,24/11/2016,0,AG,
+suffolk,24/11/2016,1,-,error when you click CSV in the zones
 surrey,-,1,-,
 warwickshire,-,1,-,
 west-midlands,-,1,-,
