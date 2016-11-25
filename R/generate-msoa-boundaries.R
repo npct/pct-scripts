@@ -30,3 +30,18 @@ plot(ukmsoas[1,])
 plot(msoa_geo$dutch_sic, ukmsoas$dutch_sic)
 
 saveRDS(msoa_geo, "../pct-bigdata/ukmsoas-scenarios.Rds")
+
+i = 1
+regions = geojson_read("../pct-shiny/regions_www/regions.geojson", what = "sp")
+for(i in 1:nrow(regions)){
+  f_msoa = paste0("../pct-data/", regions$Region[i], "/z.Rds")
+  old_msoas = readRDS(f_msoa)
+  new_msoas = msoa_geo[msoa_geo$geo_code %in% old_msoas$geo_code,]
+  plot(old_msoas)
+  plot(new_msoas)
+  plot(old_msoas$bicycle, new_msoas$bicycle)
+  order_msoas = match(old_msoas$geo_code, new_msoas$geo_code)
+  new_msoas = new_msoas[order_msoas,]
+  plot(old_msoas$bicycle, new_msoas$bicycle)
+  saveRDS(new_msoas, f_msoa)
+}
