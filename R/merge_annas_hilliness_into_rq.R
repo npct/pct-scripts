@@ -18,6 +18,12 @@ hilliness <- hilliness[,c("id", "change_elev_q", "av_incline_q")]
 to_keep <- l_nat$all > 10 & l_nat$dist <= 20 & rf$length <= 30000
 
 l_nat <- l_nat[to_keep,]
+rq$serror <- NULL
+rq$ferror <- NULL
+rq$dist <- NULL
+rf$serror <- NULL
+rf$ferror <- NULL
+rf$dist <- NULL
 rf    <- rf[to_keep,]
 rq    <- rq[to_keep,]
 rq_data <- rq@data
@@ -26,15 +32,15 @@ rq_data <- dplyr::left_join(rq_data, hilliness, by = "id")
 rq_data <- dplyr::rename(rq_data, change_elev = change_elev_q, av_incline = av_incline_q)
 rq@data <- rq_data
 
-l_missing <- l_nat[is.na(rq$time),]
+l_missing <- l_nat[rq$id != l_nat$id,]
 rq_missing = line2route(l =  l_missing, route_fun = "route_cyclestreet", plan = "quietest")
 
-for(i in 1:nrow(rq_nat)){
-  id <- rq_nat$id[i]
+for(i in 1:nrow(rq)){
+  id <- rq$id[i]
   if(id %in% rq_missing$id){
     l_to_add <- rq_missing[id == rq_missing$id,]
-    rq_nat@data[i,] <- l_to_add@data
-    rq_nat@lines[[i]] <- Lines(l_to_add@lines[[1]]@Lines, row.names(rq_nat[i,]))
+    rq@data[i,] <- l_to_add@data[names(rq)]
+    rq@lines[[i]] <- Lines(l_to_add@lines[[1]]@Lines, row.names(rq[i,]))
   }
 }
 
