@@ -21,14 +21,17 @@ msoa_geo@data = inner_join(msoa_geo@data, ukmsoas@data)
 # checking
 head(ukmsoas@data)
 head(msoa_geo@data)
-tm_shape(ukmsoas) + tm_fill(col = "govtarget_slc")
-tm_shape(msoa_geo) + tm_fill(col = "govtarget_slc")
+# tm_shape(ukmsoas) + tm_fill(col = "govtarget_slc")
+# tm_shape(msoa_geo) + tm_fill(col = "govtarget_slc")
 object.size(ukmsoas)
 object.size(msoa_geo)
 plot(msoa_geo[1,])
 plot(ukmsoas[1,])
 plot(msoa_geo$dutch_sic, ukmsoas$dutch_sic)
-
+plot(ukmsoas$bicycle, msoa_geo$bicycle)
+order_msoas = match(ukmsoas$geo_code, msoa_geo$geo_code)
+msoa_geo = msoa_geo[order_msoas,]
+plot(ukmsoas$bicycle, msoa_geo$bicycle)
 saveRDS(msoa_geo, "../pct-bigdata/ukmsoas-scenarios.Rds")
 
 i = 1
