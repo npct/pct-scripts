@@ -6,7 +6,7 @@ library(stplanr)
 path <- "../pct-bigdata/msoa"  #path to the working directory where everything is saved
 rq_file <- "rq_nat.Rds"
 rf_file <- "rf_nat.Rds"
-l_file  <- "l_nat2.Rds"
+l_file  <- "l_nat.Rds"
 
 l_nat <- readRDS(file.path(path, l_file))
 rf <- readRDS(file.path(path, rf_file))
@@ -15,7 +15,7 @@ rq <- readRDS(file.path(path, rq_file))
 hilliness <- readr::read_csv("../pct-bigdata/161113_CorrectHilliness_rf_rq.csv")
 hilliness <- hilliness[,c("id", "change_elev_q", "av_incline_q")]
 
-to_keep <- l_nat$all > 10 & l_nat$dist <= 20# & rf$length <= 30000
+to_keep <- l_nat$all > 10 & l_nat$dist <= 20 & rf$length <= 30000
 
 l_nat <- l_nat[to_keep,]
 rf    <- rf[to_keep,]
