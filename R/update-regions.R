@@ -8,7 +8,7 @@ u2 = "https://github.com/npct/pct-shiny/raw/960e30f73eef898843c2283e86e2f506fccb
 regions_geo = geojson_read(x = u2, method = "w", what = "sp")
 summary(regions_data_ali$Region == regions_geo$Region)
 regions_geo@data = regions_data_ali@data
-geojson_write(regions, file = "../pct-shiny/regions_www/regions.geojson")
+geojson_write(regions_geo, file = "../pct-shiny/regions_www/regions.geojson")
 
 # Add new region for northwest
 
