@@ -21,12 +21,6 @@ centsa$geo_code <- as.character(centsa$geo_code)
 
 source('shared_build.R')
 
-# load in codebook data
-codebook_l = readr::read_csv("../pct-shiny/static/codebook_lines.csv")
-codebook_z = readr::read_csv("../pct-shiny/static/codebook_zones.csv")
-codebook_r = readr::read_csv("../pct-shiny/static/codebook_routes.csv")
-codebook_rnet = readr::read_csv("../pct-shiny/static/codebook_rnet.csv")
-
 # select msoas of interest
 if(proj4string(region_shape) != proj4string(centsa))
   region_shape <- spTransform(region_shape, proj4string(centsa))
@@ -151,13 +145,6 @@ cents@data <- left_join(cents@data, zones@data)
 # # Save objects
 #l@data = round_df(l@data, 5)
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
-# the next line diagnoses missing variables or incorrectly names variables
-# codebook_l$`Variable name`[! codebook_l$`Variable name` %in% names(l)]
-l@data <- l@data[codebook_l$`Variable name`] # fix order and vars kept in l
-zones@data <- zones@data[codebook_z$`Variable name`]
-rf@data <- rf@data[codebook_r$`Variable name`]
-rq@data <- rq@data[codebook_r$`Variable name`]
-rnet@data <- rnet@data[codebook_rnet$`Variable name`]
 save_formats(zones, 'z')
 save_formats(l)
 save_formats(rf)
