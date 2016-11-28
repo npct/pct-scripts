@@ -24,7 +24,7 @@ kent,24/11/2016,0,AG,
 lancashire,24/11/2016,0,AG,
 leicestershire,24/11/2016,1,-,rnet not ok
 lincolnshire,24/11/2016,0,AG,
-liverpool-city-region,24/11/2016,1,-,rnet not ok
+liverpool-city-region,26/11/2016,1,AG,
 london,-,1,-,
 norfolk,24/11/2016,0,AG,
 northamptonshire,24/11/2016,1,-,rnet not ok
@@ -38,9 +38,9 @@ somerset,24/11/2016,0,AG,
 south-yorkshire,24/11/2016,0,AG,
 staffordshire,24/11/2016,0,AG,
 suffolk,24/11/2016,?0,AG,error when you click CSV in the zones
-surrey,24/11/2016,1,-,rnet not ok
+surrey,26/11/2016,1,AG,
 warwickshire,24/11/2016,1,-,reversion coventry should be included here
 west-midlands,-,1,-,
-west-sussex,24/11/2016,1,-,rnet not ok
+west-sussex,26/11/2016,1,AG,
 west-yorkshire,24/11/2016,0,AG,
 wiltshire,24/11/2016,0,AG,
