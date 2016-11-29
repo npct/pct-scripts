@@ -3,26 +3,25 @@ if(!file.exists("../pct-bigdata/msoa/rf_nat.Rds")) {
 }
 rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
-to_build = read_csv("to_rebuild.csv")
+to_build = read_csv("to_rebuild_updated.csv")
+
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
-regions <- geojson_read("../pct-shiny/regions_www/regions.geojson", what = "sp")
+regions <- geojson_read("../pct-data/regions.geojson", what = "sp")
 la_all <- as.character(regions$Region)
-sel_text = grep(pattern = "[a-z]", x = to_build$to_rebuild)
-to_build$to_rebuild[sel_text] = 1 # rebuild 'maybes'?
-# (la_all = la_all[as.logical(as.numeric(to_build$to_rebuild))])
-(la_all = la_all[!grepl(pattern = "london", x = la_all) ]) #not done
-#(la_all = la_all[!grepl(pattern = "avon|bedfordshire|berkshire|buckinghamshire|cambridgeshire|cheshire|cornwall-and-isles-of-scilly|cumbria|derbyshire|dorset|east-sussex|gloucestershire|hereford-and-worcester|hertfordshire|isle-of-wight|north-yorkshire|northumberland|northamptonshire|norfolk|lincolnshire|leicestershire|south-yorkshire|somerset|shropshire|oxfordshire|suffolk|wiltshire|west-sussex|warwickshire", x = la_all) ]) #done before
-(la_all = la_all[2:3]) # the first n. not yet done
-# select regions of interest (uncomment/change as appropriate)
+tobuild = as.logical(as.numeric(to_build$to_rebuild))
+tobuild[is.na(tobuild)] = FALSE
+(la_all = la_all[tobuild])
+(la_all = la_all[!grepl(pattern = "london|clev|dors|greater", x = la_all) ]) # regions to omit
+# (la_all = la_all[2:3]) # the first n. not yet done
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-la_all = "isle-of-wight" # a single region
+la_all = "london" # a single region
 
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 10 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mflow <- 50 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 50 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -32,10 +31,17 @@ params$buff_geo_dist <- 100 # buffer (m) for removing line start and end points 
 
 starttime = proc.time()
 
+k = 1 # for testing in the for loop
 for(k in 1:length(la_all)){
+  
   # What geographic level are we working at (cua or regional)
   geo_level <- "regional"
   region <- la_all[k]
+  
+  # to override parameters set above
+  # params = readRDS(paste0("../pct-data/", region, "/params.Rds"))
+  params$rft_keep = 0.1 # how aggressively to simplify the route network
+  
   isolated <- FALSE # make the region not isolated (default)
   if(grepl(pattern = "london", region))
     isolated <- TRUE
