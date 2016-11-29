@@ -9,19 +9,19 @@ to_build = read_csv("to_rebuild_updated.csv")
 pct_data <- file.path("..", "pct-data")
 pct_bigdata <- file.path("..", "pct-bigdata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
-regions <- geojson_read("../pct-data/regions.geojson", what = "sp")
+regions <- geojson_read("../pct-shiny/regions_www/regions.geojson", what = "sp")
 la_all <- as.character(regions$Region)
 tobuild = as.logical(as.numeric(to_build$to_rebuild))
 tobuild[is.na(tobuild)] = FALSE
 (la_all = la_all[tobuild])
-(la_all = la_all[!grepl(pattern = "london|clev|dors|greater", x = la_all) ]) # regions to omit
+(la_all = la_all[grepl(pattern = "west-mid|north-east|leicest|notti|north-york|northamptons", x = la_all) ]) # regions to omit
 # (la_all = la_all[2:3]) # the first n. not yet done
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-la_all = "london" # a single region
+# la_all = "london" # a single region
 
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 50 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 50 # minimum flow between od pairs to show for short lines, high means fewer lines
+params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
+params$mflow_short <- 10 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -40,7 +40,7 @@ for(k in 1:length(la_all)){
   
   # to override parameters set above
   # params = readRDS(paste0("../pct-data/", region, "/params.Rds"))
-  params$rft_keep = 0.1 # how aggressively to simplify the route network
+  params$rft_keep = 0.15 # how aggressively to simplify the route network
   
   isolated <- FALSE # make the region not isolated (default)
   if(grepl(pattern = "london", region))
