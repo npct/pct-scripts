@@ -10,7 +10,6 @@ scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
 region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
-params$rft_keep = 0.05 # how aggressively to simplify the route network (higher values - longer to run but rnet less likely to fail)
 if(!exists("ukmsoas")){ # MSOA zones
   ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
   ukmsoas$avslope = ukmsoas$avslope * 100
