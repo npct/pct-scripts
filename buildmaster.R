@@ -40,7 +40,7 @@ for(k in 1:length(la_all)){
   
   # to override parameters set above
   # params = readRDS(paste0("../pct-data/", region, "/params.Rds"))
-  params$rft_keep = 0.15 # how aggressively to simplify the route network
+  params$rft_keep = 0.20 # how aggressively to simplify the route network
   
   isolated <- FALSE # make the region not isolated (default)
   if(grepl(pattern = "london", region))
