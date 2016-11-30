@@ -103,7 +103,7 @@ l$avslope_q <- rq$av_incline * 100
 # see https://github.com/mbloch/mapshaper/wiki/
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
-rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shapes = TRUE, no_repair = FALSE, snap = TRUE)
+rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shapes = TRUE, no_repair = TRUE, snap = TRUE)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){

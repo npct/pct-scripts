@@ -11,9 +11,9 @@ pct_bigdata <- file.path("..", "pct-bigdata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
 regions <- geojson_read("../pct-shiny/regions_www/regions.geojson", what = "sp")
 la_all <- as.character(regions$Region)
-tobuild = as.logical(as.numeric(to_build$to_rebuild))
-tobuild[is.na(tobuild)] = FALSE
-(la_all = la_all[tobuild])
+# tobuild = as.logical(as.numeric(to_build$to_rebuild))
+# tobuild[is.na(tobuild)] = FALSE
+# (la_all = la_all[tobuild])
 (la_all = la_all[grepl(pattern = "west-mid|north-east|leicest|notti|north-york|northamptons", x = la_all) ]) # regions to omit
 # (la_all = la_all[2:3]) # the first n. not yet done
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
