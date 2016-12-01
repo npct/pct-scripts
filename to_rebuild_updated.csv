@@ -13,7 +13,7 @@ dorset,24/11/2016,1,-,rnet not ok ... Add in missing 3 MSOAs
 east-sussex,24/11/2016,0,AG,
 essex,24/11/2016,0,AG,
 gloucestershire,24/11/2016,0,AG,
-greater-manchester,-,1,-,
+greater-manchester,01/12/2016,0,AG,
 hampshire,24/11/2016,0,AG,
 hereford-and-worcester,24/11/2016,0,AG,
 hertfordshire,24/11/2016,0,AG,
@@ -21,16 +21,16 @@ humberside,24/11/2016,0,AG,
 isle-of-wight,23/11/2016,0,AG,
 kent,24/11/2016,0,AG,
 lancashire,24/11/2016,0,AG,
-leicestershire,24/11/2016,1,-,rnet not ok
+leicestershire,30/11/2016,0,AG,
 lincolnshire,24/11/2016,0,AG,
 liverpool-city-region,26/11/2016,0,AG,
-london,25/11/2016,1,-,rnet not ok
+london,30/11/2016,0,AG,
 norfolk,24/11/2016,0,AG,
-northamptonshire,24/11/2016,1,-,rnet worse than last time
-north-east,24/11/2016,1,-,rnet not ok 
+northamptonshire,24/11/2016,0,AG,
+north-east,24/11/2016,1,-,rnet not great and why 70 commuters?
 northumberland,24/11/2016,0,AG,
 north-yorkshire,29/11/2016,?1,-,rnet better but still worse than last time
-nottinghamshire,24/11/2016,1,-,rnet not ok
+nottinghamshire,24/11/2016,1,-,rnet not ok...70 commuters
 oxfordshire,24/11/2016,0,AG,
 shropshire,24/11/2016,0,AG,
 somerset,24/11/2016,0,AG,
@@ -41,5 +41,5 @@ surrey,26/11/2016,0,AG,
 warwickshire,26/11/2016,0,AG,
 west-midlands,-,1,-,
 west-sussex,26/11/2016,0,AG,
-west-yorkshire,24/11/2016,1,AG,centroids wrong
+west-yorkshire,30/11/2016,0,AG,
 wiltshire,24/11/2016,0,AG,
