@@ -26,8 +26,8 @@ lincolnshire,24/11/2016,0,AG,
 liverpool-city-region,26/11/2016,0,AG,
 london,25/11/2016,1,-,rnet not ok
 norfolk,24/11/2016,0,AG,
-northamptonshire,24/11/2016,1,-,rnet not ok
-north-east,24/11/2016,1,-,rnet not ok...Merge with cleveland
+northamptonshire,24/11/2016,1,-,rnet worse than last time
+north-east,24/11/2016,1,-,rnet not ok 
 northumberland,24/11/2016,0,AG,
 north-yorkshire,29/11/2016,?1,-,rnet better but still worse than last time
 nottinghamshire,24/11/2016,1,-,rnet not ok
@@ -36,7 +36,7 @@ shropshire,24/11/2016,0,AG,
 somerset,24/11/2016,0,AG,
 south-yorkshire,24/11/2016,0,AG,
 staffordshire,24/11/2016,0,AG,
-suffolk,24/11/2016,?0,AG,error when you click CSV in the zones
+suffolk,24/11/2016,0,AG,
 surrey,26/11/2016,0,AG,
 warwickshire,26/11/2016,0,AG,
 west-midlands,-,1,-,
