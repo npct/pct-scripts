@@ -5,7 +5,6 @@ berkshire,23/11/2016,0,AG,
 buckinghamshire,23/11/2016,0,AG,
 cambridgeshire,23/11/2016,0,AG,
 cheshire,23/11/2016,0,AG,
-cleveland,23/11/2016,1,-,Merge with north east
 cornwall-and-isles-of-scilly,23/11/2016,0,AG,
 cumbria,23/11/2016,0,AG,
 derbyshire,24/11/2016,0,AG,
@@ -39,8 +38,8 @@ south-yorkshire,24/11/2016,0,AG,
 staffordshire,24/11/2016,0,AG,
 suffolk,24/11/2016,?0,AG,error when you click CSV in the zones
 surrey,26/11/2016,0,AG,
-warwickshire,26/11/2016,1,-,Anna check lines/zones ok...centroid wrong
+warwickshire,26/11/2016,0,AG,
 west-midlands,-,1,-,
 west-sussex,26/11/2016,0,AG,
-west-yorkshire,24/11/2016,0,AG,
+west-yorkshire,24/11/2016,1,AG,centroids wrong
 wiltshire,24/11/2016,0,AG,
