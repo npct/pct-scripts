@@ -9,7 +9,7 @@ cornwall-and-isles-of-scilly,23/11/2016,0,AG,
 cumbria,23/11/2016,0,AG,
 derbyshire,24/11/2016,0,AG,
 devon,24/11/2016,0,AG,
-dorset,24/11/2016,1,-,rnet not ok ... Add in missing 3 MSOAs
+dorset,24/11/2016,1,-,rnet replace ... Add in missing 3 MSOAs...should be 10 not 20 commuters?
 east-sussex,24/11/2016,0,AG,
 essex,24/11/2016,0,AG,
 gloucestershire,24/11/2016,0,AG,
@@ -27,9 +27,9 @@ liverpool-city-region,26/11/2016,0,AG,
 london,30/11/2016,0,AG,
 norfolk,24/11/2016,0,AG,
 northamptonshire,24/11/2016,0,AG,
-north-east,24/11/2016,1,-,rnet notok
+north-east,24/11/2016,1,-,rnet replace
 northumberland,24/11/2016,0,AG,
-north-yorkshire,02/12/2016,?1,-,rnet better but still worse than last time
+north-yorkshire,02/12/2016,?1,-,rnet replace
 nottinghamshire,12/02/2016,0,AG,
 oxfordshire,24/11/2016,0,AG,
 shropshire,24/11/2016,0,AG,
