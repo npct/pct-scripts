@@ -2,10 +2,12 @@
 if(!exists("geo_level")) geo_level <- "regional"
 # if you use a custom geometry, regions should already be saved from buildmaster.R
 
+pct_json = "../pct-shiny/regions_www/"
+
 if(!exists("regions")){
   if (geo_level == "regional")
     regions <-
-  readOGR(file.path(pct_data, "regions.geojson"), layer = "OGRGeoJSON")
+  readOGR(file.path(pct_json, "regions.geojson"), layer = "OGRGeoJSON")
   else {
     regions <- readOGR(dsn = file.path(pct_bigdata, "cuas-mf.geojson"), layer = "OGRGeoJSON")
     regions$Region <- regions$CTYUA12NM
