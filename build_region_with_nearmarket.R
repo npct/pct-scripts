@@ -14,7 +14,7 @@ region_path <- file.path(pct_data, region)
 if(!dir.exists(region_path)) dir.create(region_path) # create data directory
 
 if(!exists("ukmsoas")){ # MSOA zones
-  ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios.Rds"))
+  ukmsoas <- readRDS(file.path(pct_bigdata, "ukmsoas-scenarios-nearmkt.Rds"))
   ukmsoas$avslope = ukmsoas$avslope * 100
 }
 if(!exists("centsa")) # Population-weighted centroids
