@@ -142,7 +142,11 @@ l$clc <- l$bicycle / l$all * 100
 
 # Transfer cents data to zones
 cents@data$avslope <- NULL
-cents@data <- left_join(cents@data, zones@data)
+## Calculate missing columns in cents, when compared with zones
+col_missing_in_new <- !names(zones) %in% names(cents)[names(cents) != "geo_code"]
+## Add missing columns to cents
+cents@data <- left_join(cents@data, zones@data[col_missing_in_new],  by= "geo_code")
+
 
 # # Save objects
 #l@data = round_df(l@data, 5)
