@@ -169,7 +169,7 @@ saveRDS(params, file.path(pct_data, region, "params.Rds"))
 # Save the initial parameters to reproduce results
 
 # # Save the script that loaded the lines into the data directory
-file.copy("build_region.R", file.path(pct_data, region, "build_region.R"), overwrite = T)
+file.copy("build_region_with_nearmarket.R", file.path(pct_data, region, "build_region.R"), overwrite = T)
 
 ## Include code to generate model_output file
 
