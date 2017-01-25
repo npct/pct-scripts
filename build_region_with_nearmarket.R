@@ -174,13 +174,13 @@ file.copy("build_region_with_nearmarket.R", file.path(pct_data, region, "build_r
 ## Include code to generate model_output file
 
 knitr::knit2html(quiet = T,
-                 input = "model_output.Rmd",
+                 input = "model-output_nearmkt.Rmd",
                  output = file.path(pct_data, region, "model-output.html"),
                  envir = globalenv(), force_v1 = T
 )
 # Re read the model output file
 model_output =
-  readLines(file.path(pct_data, region, "model-output_nearmkt.html"))
+  readLines(file.path(pct_data, region, "model-output.html"))
 # remove style section
 model_output <- remove_style(model_output)
 # Add a special class to all tables for the shiny application
