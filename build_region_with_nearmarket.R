@@ -170,3 +170,21 @@ saveRDS(params, file.path(pct_data, region, "params.Rds"))
 
 # # Save the script that loaded the lines into the data directory
 file.copy("build_region.R", file.path(pct_data, region, "build_region.R"), overwrite = T)
+
+## Include code to generate model_output file
+
+knitr::knit2html(quiet = T,
+                 input = "model_output.Rmd",
+                 output = file.path(pct_data, region, "model-output.html"),
+                 envir = globalenv(), force_v1 = T
+)
+# Re read the model output file
+model_output =
+  readLines(file.path(pct_data, region, "model-output_nearmkt.html"))
+# remove style section
+model_output <- remove_style(model_output)
+# Add a special class to all tables for the shiny application
+model_output <- add_table_class(model_output)
+# Re-write the model output file
+write(model_output, file.path(pct_data, region, "model-output.html"))
+message(paste0("Just built ", region))
