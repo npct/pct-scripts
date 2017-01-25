@@ -18,7 +18,7 @@ if(!exists("ukmsoas")){ # MSOA zones
   ukmsoas$avslope = ukmsoas$avslope * 100
 }
 if(!exists("centsa")) # Population-weighted centroids
-  centsa <- readOGR(file.path(pct_bigdata, "cents-scenarios.geojson"), "OGRGeoJSON")
+  centsa <- readOGR(file.path(pct_bigdata, "cents-scenarios-nearmkt.geojson"), "OGRGeoJSON")
 centsa$geo_code <- as.character(centsa$geo_code)
 
 source('shared_build.R')
@@ -140,7 +140,7 @@ rnet$id <- 1:nrow(rnet)
 # Creation of clc current cycling variable (temp)
 l$clc <- l$bicycle / l$all * 100
 
-# Transfer cents data to zones
+# Transfer zones data to cents
 cents@data$avslope <- NULL
 ## Calculate missing columns in cents, when compared with zones
 col_missing_in_new <- !names(zones) %in% names(cents)[names(cents) != "geo_code"]
