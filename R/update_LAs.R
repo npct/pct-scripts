@@ -19,8 +19,22 @@ for (i in 3:length(orignames)){
 la$NAME <- as.character(la$NAME)
 la@data <- dplyr::rename(la@data, name = NAME)
 
-la_updated <- readr::read_csv("http://pct.bike/laresults.csv")
+# 
+# 
+# # Rename Westminster to Westminster,City of London
+# la@data[la@data$name == "Westminster",]$name <- "Westminster,City of London" 
+# 
+# # Rename City of London to Westminster,City of London
+# la@data[la@data$name == "City of London",]$name <- "Westminster,City of London"
+# 
+# la@data[la@data$name == "Cornwall",]$name <- "Cornwall,Isles of Scilly" 
+# la@data[la@data$name == "Isles of Scilly",]$name <- "Cornwall,Isles of Scilly" 
+
+la_updated <- readr::read_csv(file.choose())
 la_updated <- dplyr::rename(la_updated, name = la)
 
 # find intrazonal flows
 la@data = inner_join(la@data, la_updated, by = "name")
+
+la <- la[name %in% la$name, ]
+geojson_write(la, file = "../pct-bigdata/LAs.geojson")
