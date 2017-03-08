@@ -33,8 +33,13 @@ la@data <- dplyr::rename(la@data, name = NAME)
 la_updated <- readr::read_csv(file.choose())
 la_updated <- dplyr::rename(la_updated, name = la)
 
-# find intrazonal flows
+
 la@data = inner_join(la@data, la_updated, by = "name")
 
-la <- la[name %in% la$name, ]
+# Convert absolute values of cycling to percentages
+for (i in 4:18){
+  la@data[[i]] <- la@data[[i]] / la@data$all
+}
+
+# Save it to the bigdata
 geojson_write(la, file = "../pct-bigdata/LAs.geojson")
