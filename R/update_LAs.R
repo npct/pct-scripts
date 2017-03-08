@@ -38,7 +38,7 @@ la@data = inner_join(la@data, la_updated, by = "name")
 
 # Convert absolute values of cycling to percentages
 for (i in 4:18){
-  la@data[[i]] <- la@data[[i]] / la@data$all
+  la@data[[i]] <- la@data[[i]] / la@data$all * 100
 }
 
 # Save it to the bigdata
