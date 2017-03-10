@@ -44,9 +44,10 @@ las_in_region <- las[las_in_region,]
 
 ## Key information 
 
-This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r capitalize_region(region)`. The data were generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the [Affero GPL](https://www.gnu.org/licenses/agpl-3.0). Both the [pct](https://github.com/npct/pct) and [pct-shiny](https://github.com/npct/pct-shiny) can be modified by others as long as attribution is made to the original.
+This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r capitalize_region(region)`. The data were generated on `r build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the 
+<a target="_blank" href="https://www.gnu.org/licenses/agpl-3.0">Affero GPL</a>. Both the <a target="_blank" href="https://github.com/npct/pct">pct</a> and <a target="_blank" href="https://github.com/npct/pct">pct-shiny</a> can be modified by others as long as attribution is made to the original.
 
-This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area ([MSOA](https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority)) zones. There were `r prettyNum(sum(zones$all), big.mark = ",", scientific = F)` commuters living in `r capitalize_region(region)` recorded in the 2011 Census. All of these are represented in the zones data produced by the PCT.
+This version of the PCT uses origin-destination (OD) data on travel to work from the 2011 Census. The dataset reports the number of people travelling by different modes from Middle Super Output Area (<a target="_blank" href="https://data.gov.uk/dataset/middle-layer-super-output-areas-2001-to-middle-layer-super-output-areas-2011-to-local-authority">MSOA</a>) zones. There were `r prettyNum(sum(zones$all), big.mark = ",", scientific = F)` commuters living in `r capitalize_region(region)` recorded in the 2011 Census. All of these are represented in the zones data produced by the PCT.
 
 In `r capitalize_region(region)` there are `r nrow(l)` flows between MSOAs that a) start and end in `r capitalize_region(region)`, b) have a straight-line (Euclidean) distance of less than `r mdist`km and a fast-route distance less than 30km, and c) contain more than `r mflow` commuters (by any mode, counting commuters in both directions).   These `r nrow(l)` between-zone MSOA flows are visualised as **Straight Lines**, **Routes** (fast and quiet) and the **Route Network (MSOA)** on the interactive map, and account for `r round(sum(l$all) / sum(zones$all) * 100)`% of all commuters living in `r capitalize_region(region)`.
 
@@ -54,7 +55,7 @@ Between-zone MSOA flows exclude **within-MSOA travel**, when the MSOA zone of or
 
 An **Route Network (LSOA)** is also available, to complement the MSOA-level lines, routes and route network.  This LSOA route network includes all commuters living in `r capitalize_region(region)` and travelling <20km, except for those living and working the same LSOA or having no fixed place of work.  Unlike the MSOA route network, the LSOA route network includes commuters living in `r capitalize_region(region)` but working in another region within England. For more details please see User Manual C.
 
-See [Lovelace et al. (2017)](https://www.jtlu.org/index.php/jtlu/article/view/862) for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and to visualise results at the area, line, route and route network level.
+See <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a> for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and to visualise results at the area, line, route and route network level.
 
 ## The `r capitalize_region(region)` region
 
@@ -129,7 +130,7 @@ ggplot(dfsp) +
 
 ## Health and carbon impacts
 
-A modified version of the 2014 [HEAT tool](http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update) was used to calculate health impacts, based on the extra physical activity gained through new cycling trips in each scenario, minus the physical activity displaced in any former walking trips that have now been switched to cycling. CO2 impacts are derived from changes in distance driven per scenario.
+A modified version of the 2014 <a target="_blank" href="http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update">HEAT tool</a> was used to calculate health impacts, based on the extra physical activity gained through new cycling trips in each scenario, minus the physical activity displaced in any former walking trips that have now been switched to cycling. CO2 impacts are derived from changes in distance driven per scenario.
 
 **Table 2** below illustrates the health and carbon impacts of the different scenarios.  For each scenario, comparisons are made with a counterfactual in which nobody in the region cycled ('No cyclists'), and with the observed level of cycling in the 2011 Census.
 
