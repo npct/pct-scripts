@@ -149,4 +149,4 @@ A modified version of the 2014 <a target="_blank" href="http://www.euro.who.int/
 
 ## References
 
-Lovelace, R., Goodman, A., Aldred, R., Berkoff, N., Abbas, A., Woodcock, J., 2017. The Propensity to Cycle Tool: An open source online system for sustainable transport planning. Journal of Transport and Land Use. 10:1, 505–528, <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">DOI: 10.5198/jtlu.2016.862</a>
+Lovelace, R., Goodman, A., Aldred, R., Berkoff, N., Abbas, A., Woodcock, J., 2017. The Propensity to Cycle Tool: An open source online system for sustainable transport planning. Journal of Transport and Land Use. 10:1, 505\–528, <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">DOI: 10.5198/jtlu.2016.862</a>
