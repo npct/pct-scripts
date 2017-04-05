@@ -34,7 +34,13 @@ if(!exists("flow_nat"))
 # Subset by zones in the study area
 o <- flow_nat$msoa1 %in% cents$geo_code
 d <- flow_nat$msoa2 %in% cents$geo_code
-flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
+# flow <- flow_nat[o & d, ] # subset OD pairs with o and d in study area
+
+# code for inter-regional flows
+flow <- flow_nat[o | d, ] # subset OD pairs with o and d in study area
+all_zone_codes = unique(c(flow$msoa1, flow$msoa2))
+cents <- centsa[centsa$geo_code %in% all_zone_codes,]
+zones = ukmsoas[ukmsoas$geo_code %in% all_zone_codes,]
 
 params$n_flow_region <- nrow(flow)
 params$n_commutes_region <- sum(flow$all)
@@ -103,7 +109,7 @@ l$avslope_q <- rq$av_incline * 100
 # see https://github.com/mbloch/mapshaper/wiki/
 rft <- rf
 rft@data <- cbind(rft@data, l@data[c("bicycle", scens)])
-rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shapes = TRUE, snap = TRUE)
+# rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shapes = TRUE, snap = TRUE)
 # Stop rnet lines going to centroid (optional)
 # rft <- toptailgs(rf, toptail_dist = params$buff_geo_dist) # commented as failing
 # if(length(rft) == length(rf)){
@@ -111,8 +117,8 @@ rft <- ms_simplify(input = rft, keep = params$rft_keep, method = "dp", keep_shap
 #   rft <- SpatialLinesDataFrame(rft, rf@data)
 # } else print("Error: toptailed lines do not match lines")
 
-source("R/generate_rnet.R") # comment out to avoid slow rnet build
-# rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
+# source("R/generate_rnet.R") # comment out to avoid slow rnet build
+rnet = readRDS(file.path(pct_data, region, "rnet.Rds")) # uncomment if built
 
 # diagnostic check of the segments with no cyclists
 # links to: https://github.com/npct/pct-shiny/issues/336
@@ -144,32 +150,32 @@ cents@data <- left_join(cents@data, zones@data)
 # # Save objects
 #l@data = round_df(l@data, 5)
 l@data <- as.data.frame(l@data) # convert from tibble to data.frame
-save_formats(zones, 'z')
+# save_formats(zones, 'z')
 save_formats(l)
 save_formats(rf)
 save_formats(rq)
-save_formats(rnet)
+# save_formats(rnet)
 
-saveRDS(cents, file.path(pct_data, region, "c.Rds"))
+# saveRDS(cents, file.path(pct_data, region, "c.Rds"))
 
 # gather params
-params$nrow_flow = nrow(flow)
-params$build_date = Sys.Date()
-params$run_time = Sys.time() - start_time
-
-saveRDS(params, file.path(pct_data, region, "params.Rds"))
+# params$nrow_flow = nrow(flow)
+# params$build_date = Sys.Date()
+# params$run_time = Sys.time() - start_time
+# 
+# saveRDS(params, file.path(pct_data, region, "params.Rds"))
 
 # Save the initial parameters to reproduce results
 
 # # Save the script that loaded the lines into the data directory
-file.copy("build_region.R", file.path(pct_data, region, "build_region.R"), overwrite = T)
-
-# Create folder in shiny app folder
-region_dir <- file.path(file.path(pct_shiny_regions, region))
-dir.create(region_dir)
-ui_text <- 'source("../../ui-base.R", local = T, chdir = T)'
-server_text <- paste0('starting_city <- "', region, '"\n',
-                      'shiny_root <- file.path("..", "..")\n',
-                      'source(file.path(shiny_root, "server-base.R"), local = T)')
-write(ui_text, file = file.path(region_dir, "ui.R"))
-write(server_text, file = file.path(region_dir, "server.R"))
+# file.copy("build_region.R", file.path(pct_data, region, "build_region.R"), overwrite = T)
+# 
+# # Create folder in shiny app folder
+# region_dir <- file.path(file.path(pct_shiny_regions, region))
+# dir.create(region_dir)
+# ui_text <- 'source("../../ui-base.R", local = T, chdir = T)'
+# server_text <- paste0('starting_city <- "', region, '"\n',
+#                       'shiny_root <- file.path("..", "..")\n',
+#                       'source(file.path(shiny_root, "server-base.R"), local = T)')
+# write(ui_text, file = file.path(region_dir, "ui.R"))
+# write(server_text, file = file.path(region_dir, "server.R"))

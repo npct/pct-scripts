@@ -17,7 +17,7 @@ la_all <- as.character(regions$Region)
 (la_all = la_all[grepl(pattern = "west-mid|north-east|leicest|notti|north-york|northamptons", x = la_all) ]) # regions to omit
 # (la_all = la_all[2:3]) # the first n. not yet done
 # (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-# la_all = "london" # a single region
+la_all = "warwickshire" # a single region
 
 params <- NULL # build parameters (saved for future reference)
 params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
@@ -54,22 +54,22 @@ for(k in 1:length(la_all)){
   source("build_region.R") # comment out to skip build
   # Write the model output files (comment out to not report data)
   # message(paste0("Writing the output file for ", region))
-  knitr::knit2html(quiet = T,
-    input = "model_output.Rmd",
-    output = file.path(pct_data, region, "model-output.html"),
-    envir = globalenv(), force_v1 = T
-  )
-  # Re read the model output file
-  model_output =
-    readLines(file.path(pct_data, region, "model-output.html"))
-  # remove style section
-  model_output <- remove_style(model_output)
-  # Add a special class to all tables for the shiny application
-  model_output <- add_table_class(model_output)
-  # Re-write the model output file
-  write(model_output, file.path(pct_data, region, "model-output.html"))
-  message(paste0("Just built ", region))
-  # # Update the data sha - uncomment to automate this (from unix machines)
+  # knitr::knit2html(quiet = T,
+  #   input = "model_output.Rmd",
+  #   output = file.path(pct_data, region, "model-output.html"),
+  #   envir = globalenv(), force_v1 = T
+  # )
+  # # Re read the model output file
+  # model_output =
+  #   readLines(file.path(pct_data, region, "model-output.html"))
+  # # remove style section
+  # model_output <- remove_style(model_output)
+  # # Add a special class to all tables for the shiny application
+  # model_output <- add_table_class(model_output)
+  # # Re-write the model output file
+  # write(model_output, file.path(pct_data, region, "model-output.html"))
+  # message(paste0("Just built ", region))
+  # # # Update the data sha - uncomment to automate this (from unix machines)
   # source("update_sha.R")
 }
 
