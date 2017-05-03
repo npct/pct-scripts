@@ -1,0 +1,67 @@
+---
+title: "PCT-Download Page"
+output: html_document
+---
+
+```{r, include=FALSE}
+options(scipen=999)
+knitr::opts_chunk$set(message = FALSE)
+
+# Set relative starting path for route directory
+root <- ".."
+
+# Read-in the data
+if(!exists("region")) region <- "london"
+cat(file.path(root, pct_data, purpose, geography, region, "z.Rds"), "\n")
+zones <- readRDS(file.path(root, pct_data, purpose, geography, region, "z.Rds"))
+cents <- readRDS(file.path(root, pct_data, purpose, geography, region, "c.Rds"))
+l <- readRDS(file.path(root, pct_data, purpose, geography, region, "l.Rds"))
+rf <- readRDS(file.path(root, pct_data, purpose, geography, region, "rf.Rds"))
+rq <- readRDS(file.path(root, pct_data, purpose, geography, region, "rq.Rds"))
+
+```
+
+## Region Data
+
+This page contains data downloads for the region currently displayed on the map. These are available as CSV files, and in geographic files that can be read by R (.Rds) or GIS programs such as QGIS (.geojson). 
+Zones data
+Download the Census 2011 and scenario attribute data for all MSOA zones in the chosen region.  
+
+1. Zones (MSOA): CSV GeoJSON Rds - Codebook 
+
+Click here to view an on-screen data table for selected information for the zones currently selected
+
+## Lines data
+
+Download the Census 2011 and scenario attribute data for selected between-zone and within-zone flows in the chosen region, at the level of the MSOA (see Model Output tab for details of the lines included: the full set of lines can be downloaded under the ‘National data’ tab).
+The attribute data present in the ‘straight lines’ files can be merged into the Fast and Quiet route geographic files using the line ID.  
+•	Straight lines with attribute data (MSOA): CSV GeoJSON Rds - Codebook 
+•	Within-zone flows (MSOA): CSV GeoJSON Rds - Codebook 
+•	Fast routes (MSOA): GeoJSON Rds - Codebook 
+•	Quiet routes (MSOA): GeoJSON Rds - Codebook 
+•	Route Network (MSOA): GeoJSON Rds - Codebook 
+•	Route Network (LSOA): raster 
+Click here to view an on-screen data table for selected information for the between-zone lines currently selected.
+
+## National Data
+
+Here you can download data for the whole of England. While the regional data currently does not include cross-border flows (e.g. between Lancashire and Yorkshire), the national data does include these flows. It may therefore be particularly useful for local analysis where there are substantial cross-border movements, which will not currently appear on the interface, as well as larger scale analysis.
+Downloads are available as CSV files, or in geographic files that can be read by R (.Rds) or GIS programs such as QGIS (.geojson).  
+Zones data
+Here you can download the Census 2011 and scenario attribute data for all zones in England, at the level of local authorities, MSOAs and LSOAs.  
+•	Zones (local authorities): CSV - Codebook
+•	Zones (MSOA): CSV GeoJSON Rds - Codebook 
+•	Zones (LSOA): CSV - Codebook
+Lines data
+Downloads are available for the Census 2011 and scenario attribute data for all OD pairs with an origin in England. For attribute data, destinations are grouped as ‘other’ for OD pairs with a fastest-route distance >30km, or with a destination outside England or Wales.  For geographic files (Straight lines/Fast route/Quiet route), between-zone lines with fastest route distance <30km are included. The attribute data can be merged into geographic files using the line ID.  
+MSOA-level data 
+•	Attribute data: CSV - Codebook 
+•	Straight lines: GeoJSON Rds - Codebook
+•	Fast routes: GeoJSON Rds - Codebook 
+•	Quiet routes: GeoJSON Rds - Codebook 
+LSOA-level data 
+•	Attribute data: available as a safeguarded dataset on CDRC
+•	Straight lines: GeoJSON Rds - Codebook
+•	Fast routes: GeoJSON Rds - Codebook 
+•	Quiet routes: GeoJSON Rds - Codebook 
+•	Route Network (LSOA): raster 
