@@ -57,11 +57,12 @@ add_table_class <- function(x){
   x
 }
 
-save_formats <- function(to_save, name = F){
+save_formats <- function(to_save, purpose, geography, region, name = F){
   if (name == F){
     name <- substitute(to_save)
   }
-  saveRDS(to_save, file.path(pct_data, region, paste0(name, ".Rds")))
+  # purpose, geography, region, 
+  saveRDS(to_save, file.path(pct_data, purpose, geography, region, paste0(name, ".Rds")))
 }
 
 # ms_simplify gives Error: RangeError: Maximum call stack size exceeded
@@ -80,3 +81,72 @@ capitalize_region <- function (region_name){
 
   region_name
 }
+
+set_paths <- function(){
+  # For PCT regions:
+  assign("pct_data", file.path("..", "pct-data"), envir = .GlobalEnv)
+  assign("pct_bigdata", file.path("..", "pct-bigdata"), envir = .GlobalEnv)
+  assign("pct_shiny_regions", file.path("..", "pct-shiny", "regions_www"), envir = .GlobalEnv)
+  
+}
+
+set_geography_and_purpose <- function(geography, purpose){
+  assign("geography", geography, envir = .GlobalEnv)
+  assign("purpose", purpose, envir = .GlobalEnv)
+  
+  cat(" Geogrpahy set to ", geography, " and purpose to ", purpose, "\n")
+}
+
+
+data_check <- function(geography, purpose){
+  if (geography == "msoa" && purpose == "commute"){
+    
+    if(!file.exists(file.path(pct_bigdata, "4_output_data", purpose, geography, "l_nat.Rds"))) {
+      stop("Error: download l_nat data from: https://github.com/npct/pct-bigdata/releases")
+    }
+    # Read msoa's rf_nat for commuting data
+    if(!file.exists(file.path(pct_bigdata, "4_output_data", purpose, geography, "rf_nat.Rds"))) {
+      stop("Error: download rf_nat data from: https://github.com/npct/pct-bigdata/releases")
+    }
+    
+    if(!file.exists(file.path(pct_bigdata, "4_output_data", purpose, geography, "rq_nat.Rds"))) {
+      stop("Error: download rq_nat data from: https://github.com/npct/pct-bigdata/releases")
+    }
+  }
+}
+
+init_vars <- function(region_type, purpose, geography){
+  if (region_type == "pct-regions"){
+    assign("regions", geojson_read(file.path(pct_shiny_regions, "regions.geojson"), what = "sp"), envir = .GlobalEnv)
+    assign("build_params", read_csv(file.path("2_create_pct-data", purpose, geography, "build_params_region.csv")), envir = .GlobalEnv)
+  }
+  
+  ## If region_type is other than "pct-regions" (like CUAS), adapt the commented code below
+  # else {
+  #   regions <- readOGR(dsn = file.path(pct_bigdata, "2_input_data", "cuas-mf.geojson"), layer = "OGRGeoJSON")
+  #   regions$Region <- regions$CTYUA12NM
+  # }
+  
+  # ASSIGN LAs
+  assign("las", readOGR(dsn = file.path(pct_bigdata, "2_input_data", "spatial_data", "las-pcycle.geojson"), layer = "OGRGeoJSON"), envir = .GlobalEnv)
+  assign("las_cents", SpatialPoints(coordinates(las)), envir = .GlobalEnv)
+  
+  
+
+}
+
+init_national_variables <- function(purpose, geography){
+  
+  assign("l_nat", readRDS(file.path(pct_bigdata, "4_output_data", purpose, geography, "l_nat.Rds")), envir = .GlobalEnv)
+  
+  assign("rf_nat", readRDS(file.path(pct_bigdata, "4_output_data", purpose, geography, "rf_nat.Rds")), envir = .GlobalEnv)
+  
+  assign("rq_nat", readRDS(file.path(pct_bigdata, "4_output_data", purpose, geography, "rq_nat.Rds")), envir = .GlobalEnv)
+  
+  assign("z_nat", readRDS(file.path(pct_bigdata, "4_output_data", purpose, geography,  "z_nat.Rds")), envir = .GlobalEnv)
+  
+  assign("c_nat", readOGR(file.path(pct_bigdata, "4_output_data",  purpose, geography,  "c_nat.geojson"), "OGRGeoJSON"), envir = .GlobalEnv)
+  
+}
+
+
