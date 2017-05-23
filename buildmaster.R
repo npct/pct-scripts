@@ -3,7 +3,6 @@ if(!file.exists("../pct-bigdata/msoa/rf_nat.Rds")) {
 }
 rm(list = ls()) # start with clear workspace (usually a good idea)
 source("set-up.R")
-to_build = read_csv("to_rebuild_updated.csv")
 
 # For PCT regions:
 pct_data <- file.path("..", "pct-data")
@@ -11,17 +10,9 @@ pct_bigdata <- file.path("..", "pct-bigdata")
 pct_shiny_regions <- file.path("..", "pct-shiny", "regions_www")
 regions <- geojson_read("../pct-shiny/regions_www/regions.geojson", what = "sp")
 la_all <- as.character(regions$Region)
-# tobuild = as.logical(as.numeric(to_build$to_rebuild))
-# tobuild[is.na(tobuild)] = FALSE
-# (la_all = la_all[tobuild])
-(la_all = la_all[grepl(pattern = "west-mid|north-east|leicest|notti|north-york|northamptons", x = la_all) ]) # regions to omit
-# (la_all = la_all[2:3]) # the first n. not yet done
-# (la_all = la_all[grep(pattern = "hereford|xxx", la_all)]) # from exist regions
-la_all = "warwickshire" # a single region
-
+(la_all = la_all[!grepl(pattern = "warw", x = la_all) ]) # regions to omit
+# la_all = "warwickshire" # a single region
 params <- NULL # build parameters (saved for future reference)
-params$mflow <- 10 # minimum flow between od pairs to show for longer lines, high means fewer lines
-params$mflow_short <- 10 # minimum flow between od pairs to show for short lines, high means fewer lines
 params$mdist <- 20 # maximum euclidean distance (km) for subsetting lines
 params$max_all_dist <- 7 # maximum distance (km) below which more lines are selected
 params$buff_dist <- 0 # buffer (km) used to select additional zones (often zero = ok)
@@ -40,7 +31,16 @@ for(k in 1:length(la_all)){
   region <- la_all[k]
   
   # to override parameters set above
-  # params = readRDS(paste0("../pct-data/", region, "/params.Rds"))
+  params$mflow_short <- 10 # minimum flow between od pairs to show for short lines
+  params$mflow <- 10 # minimum flow between od pairs to show for longer lines
+  l_old = readRDS(paste0("../pct-data-old/", region, "/l.Rds"))
+  mflow_old = min(l_old$all) - 1
+  if(mflow_old == params$mflow) {
+    next()
+  } else {
+    params$mflow_short = params$mflow = mflow_old
+  }
+  
   params$rft_keep = 0.20 # how aggressively to simplify the route network
   
   isolated <- FALSE # make the region not isolated (default)
@@ -68,9 +68,9 @@ for(k in 1:length(la_all)){
   # model_output <- add_table_class(model_output)
   # # Re-write the model output file
   # write(model_output, file.path(pct_data, region, "model-output.html"))
-  # message(paste0("Just built ", region))
+  message(paste0("Just built ", region))
   # # # Update the data sha - uncomment to automate this (from unix machines)
-  # source("update_sha.R")
+  source("update_sha.R")
 }
 
 endtime = proc.time()
