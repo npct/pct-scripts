@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+# Region stats files (should be deleted anyway by script 6a)
+figure/**
+region_stats.md
+regional-rasters
