@@ -1,0 +1,260 @@
+# SET UP
+rm(list = ls())
+source("00_setup_and_funs.R")
+memory.limit(size=1000000)
+
+# To only run for one region (comment out following lines for national build)
+region <- "isle-of-wight"
+pct_regions <- geojson_read(file.path(path_inputs, "02_intermediate/01_geographies/pct_regions_lowres.geojson"), what = "sp")
+region_shp <- pct_regions[grep(pattern = region, x = pct_regions$region_name),]
+
+# SET INPUT PARAMETERS
+purpose <- "commute"
+geography <- "msoa"  
+route_type <- "quietest" # fastest or quietest
+file_name <- "nat1707"   # Name for this batch of routes
+
+# CREATE DIRECTORIES (IF NEEDED)
+if(!dir.exists(file.path(path_inputs, "02_intermediate/02_travel_data", purpose))) { dir.create(file.path(path_inputs, "02_intermediate/02_travel_data", purpose)) }
+if(!dir.exists(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography))) { dir.create(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography)) }
+if(!dir.exists(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "archive"))) { dir.create(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "archive")) }
+if(!dir.exists(file.path(path_temp_cs, purpose))) { dir.create(file.path(path_temp_cs, purpose)) }
+if(!dir.exists(file.path(path_temp_cs, purpose, geography))) { dir.create(file.path(path_temp_cs, purpose, geography)) }
+
+#########################
+### PART 1: PREPARE TO RUN CS ROUTES
+#########################
+
+# OPEN LINES AND CENTS FILES, & SET INPUT PARAMETERS
+if (geography=="msoa" & purpose=="commute") {
+  maxdist_scenario <- 30  # max distance (km) model fastest route impact in scenario building
+  maxdist_visualise <- 20 # max distance (km) provide route shape files in downloads/interface
+  unzip(file.path(path_inputs, "01_raw/02_travel_data/commute/msoa/WU03BEW_msoa_v1.zip"), exdir = path_temp_unzip) 
+  lines <- readr::read_csv(file.path(path_temp_unzip, "wu03bew_msoa_v1.csv"), col_names = FALSE)
+  lines <- dplyr::rename(lines, o = X1, d = X2)
+  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/msoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  cents_o@data <- dplyr::rename(cents_o@data, geo_code = msoa11cd)
+  cents_all <- cents_d <- cents_o
+} else if (geography=="lsoa" & purpose=="commute")  {
+  maxdist_scenario <- 30  
+  maxdist_visualise <- 20 
+  #minflow_visualise <- 3
+  #Anna note: in future, could add variable 'all' to 'lines_cs' and set 'minflow_visualise', such that for rq you only route those above minflow_visualise
+  unzip(file.path(path_inputs, "01_raw/02_travel_data/commute/lsoa/WM12EW[CT0489]_lsoa.zip"), exdir = path_temp_unzip)
+  lines <- data.table::fread(file.path(path_temp_unzip, "WM12EW[CT0489]_lsoa.csv"),select=c(1,3))
+  lines <- dplyr::rename(lines, o = `Area of usual residence`, d = `Area of Workplace`)
+  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  cents_o@data <- dplyr::rename(cents_o@data, geo_code = `lsoa11cd`)
+  cents_all <- cents_d <- cents_o
+} else if (geography=="lsoa" & purpose=="school")  {
+  maxdist_scenario <- 15
+  maxdist_visualise <- 15
+  lines <- data.table::fread(file.path(path_inputs, "02_intermediate/02_travel_data/school/lsoa", "flows_2011.csv"),select=c(1,2,4))
+  lines <- dplyr::rename(lines, o = `lsoa11cd`, d = `urn`)
+  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  cents_o@data <- dplyr::rename(cents_o@data, geo_code = `lsoa11cd`)
+  cents_d <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"), layer = "OGRGeoJSON")
+  cents_d@data <- dplyr::rename(cents_d@data, geo_code = `urn`)
+} else {
+}
+
+# SUBSET TO WITHIN SINGLE REGION IF REGION SPECIFIED
+if(exists("region_shp")) {
+  cents_o <- cents_o[region_shp,]
+  cents_d <- cents_d[region_shp,]
+}
+
+# ADD CENTS COODRINATES & GET DIST
+omatch <- match(lines$o, cents_o$geo_code) # generates a number - where in cents is found each $home in lines
+dmatch <- match(lines$d, cents_d$geo_code)
+lines <- lines[!is.na(omatch) & !is.na(dmatch),] # remove line outside the rquired build region, or no geographical origin/dest
+coords_o <- cents_o@coords[match(lines$o, cents_o$geo_code),] # gets the coords from 'omatch' position of cents
+coords_d <- cents_d@coords[match(lines$d, cents_d$geo_code),]
+lines$e_dist_km <- geosphere::distHaversine(p1 = coords_o, p2 = coords_d) / 1000 # assign euclidean dist
+
+# SUBSET LINES FOR CYCLE STREETS (between-zone & under maxdist_scenario) & MAKE 2-WAY ID
+lines_cs_data <- lines[(lines$e_dist_km < maxdist_scenario) & !is.na(lines$e_dist_km) & (lines$o != lines$d),]
+if (purpose=="commute")  {
+  lines_cs_data$geo_code1 <- pmin(lines_cs_data$o, lines_cs_data$d)
+  lines_cs_data$geo_code2 <- pmax(lines_cs_data$o, lines_cs_data$d)  
+  lines_cs_data$id <- paste(lines_cs_data$geo_code1, lines_cs_data$geo_code2)
+} else if (purpose=="school")  {
+  lines_cs_data$geo_code1 <- lines_cs_data$o
+  lines_cs_data$geo_code2 <- lines_cs_data$d
+} else {
+}
+lines_cs_data <- unique(lines_cs_data[,c("geo_code1", "geo_code2", "id", "e_dist_km")])
+lines_cs_data <- lines_cs_data[order(lines_cs_data$id),]
+
+# MAKE A SPATIAL OBJECT OF CS LINES
+#row.names(lines_cs_data) <- c(1:nrow(lines_cs_data)) # Re number rows so they will match for SpatailLinesDataFrame()
+if (purpose=="commute")  {
+  lines_cs_lines <- od2line2(flow = lines_cs_data, zones = cents_all) # faster implementation for where o and d have same geography
+} else if (purpose=="school")  {
+  lines_cs_lines <- od2line(flow = lines_cs_data, zones = cents_all, destinations = cents_d) # slower implementation for where o and d have different geography
+} else {
+}
+lines_cs <- SpatialLinesDataFrame(sl = lines_cs_lines, data = lines_cs_data)
+<<<<<<< HEAD
+#lines_cs <- spTransform(lines_cs, proj_4326)
+proj4string(lines_cs) <-  proj_4326
+=======
+proj4string(lines_cs) <- proj_4326
+# proj4string(lines_cs) <-  proj_4326
+>>>>>>> 0fe97ebe87e5609ec6a0ca1787981aed89a1d735
+saveRDS(lines_cs, (file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds")))
+
+#########################
+### PART 2: RUN CS ROUTES (run this part first for fastest then for quietest)
+#########################
+
+# LOAD DATA AND RUN BATCHES.  FOR QUIET LINES, RESTRICT TO THOSE WITH FAST ROUTE UNDER MAX. VISUALSE LENGTH
+lines_cs <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds"))
+# if (route_type=="quietest") {
+#   rf_all_data <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/rf_",file_name,"_data.Rds")))
+#   rf_all_data <- rf_all_data[(rf_all_data$length < (maxdist_scenario * 1000)),]
+#   summary({sel_q_line <- lines_cs$id %in% rf_all_data$id})
+#   lines_cs <- lines_cs[sel_q_line,]
+# }
+source("https://github.com/ropensci/stplanr/raw/18a598674bb378d5577050178da1561489496157/R/od-funs.R")
+size_limit <- 5000 # maximum size of a batch
+nbatch <- ceiling(nrow(lines_cs)/size_limit)
+if(nbatch > 1) {
+  # Use parallel version of line2route (depreciated in stplanr 0.1.9)
+  # RUN BATCHES (1000 lines 5 min)] (before start national build ask for cycle streets update?)
+  for(i in 1:nbatch){
+    l_start <- as.integer(1 + (i - 1) * size_limit)
+    if (i * size_limit < nrow(lines_cs)) {
+      l_fin <- as.integer(i * size_limit)
+    } else {
+      l_fin <- as.integer(nrow(lines_cs))
+    }
+    lines_cs_sub <- lines_cs[c(l_start:l_fin), ]
+    
+    routes <- line2route(lines_cs_sub, route_fun = route_cyclestreet, plan = route_type, n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
+    routes@data <- routes@data[,!names(routes@data) %in% c("plan","start","finish")] # drop fields not wanted
+    routes@data <- left_join(routes@data, lines_cs_sub@data, by = "id")  # merge in data in lines file
+    saveRDS(routes,file = file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",i,"of",nbatch,".Rds")))
+    print(paste0("Batch ",i," of ",nbatch," finished at ",Sys.time()))
+  }
+  
+  #########################
+  ### PART 3: MERGE BATCHES FOR a) DATA AND b) ROUTES [do in 2 stages otherwise LSOA routes files get too big to handle]
+  #########################
+  
+  # REJOIN THE FILES FOR **DATA** (ALL LENGTHS, USED FOR SCENARIO BUILDING) & CHECK
+  file_first <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",1,"of",nbatch,".Rds")))
+  rownames(file_first@data) <- sapply(1:length(file_first), function(j) file_first@lines[[j]]@ID) # FORCE DATA ROW NAMES TO BE SAME AS ID IN LINES (in case don't start from '1')
+  stack_data <- file_first@data
+  for(i in 2:nbatch){
+    file_next <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",i,"of",nbatch,".Rds")))
+    rownames(file_next@data) <- sapply(1:length(file_next), function(j) file_next@lines[[j]]@ID)
+    file_next_data <- file_next@data
+    stack_data <- rbind(stack_data, file_next_data)
+    #print(paste0("Stack ",i," of ",nbatch," added at ",Sys.time()))
+  }
+  
+  nrow(stack_data) == nrow(lines_cs)
+  summary(stack_data$id == lines_cs@data$id) # check route IDS
+  
+  # REDO FAILED LINES & MERGE IN TO STACK DATA.
+  stack_keep <- stack_data[!is.na(stack_data$length) & !is.na(stack_data$av_incline) & !is.na(stack_data$time) & is.na(stack_data$error), ]
+  stack_redo <- stack_data[is.na(stack_data$length) | is.na(stack_data$av_incline) | is.na(stack_data$time) | !is.na(stack_data$error), ]
+  summary(stack_redo$error)
+  # View(stack_redo[c("geo_code1", "geo_code2", "id", "e_dist_km", "error")]) # view errors interactively if needs be
+  stack_redo_data <- stack_redo[c("geo_code1", "geo_code2", "id", "e_dist_km")]
+  if (purpose=="commute")  {
+    stack_redo_lines <- od2line2(flow = stack_redo_data, zones = cents_o)
+  } else if (purpose=="school")  {
+    stack_redo_lines <- od2line(flow = stack_redo_data, zones = cents_o, destinations = cents_d)
+  } else {
+  }
+  row.names(stack_redo_lines) <- row.names(stack_redo_data)
+  stack_redo <- SpatialLinesDataFrame(sl = stack_redo_lines, data = stack_redo_data)
+  stack_redo <- spTransform(stack_redo, proj_4326)
+  routes_redo <- line2route(l = stack_redo, route_fun = route_cyclestreet, plan = route_type, n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
+  routes_redo@data <- routes_redo@data[,!names(routes_redo@data) %in% c("plan","start","finish")] # drop fields not wanted
+  routes_redo@data <- left_join(routes_redo@data, stack_redo@data, by = "id")
+  row.names(routes_redo@data) <- sapply(1:length(routes_redo), function(j) routes_redo@lines[[j]]@ID)
+  saveRDS(routes_redo,file = file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_redo_of",nbatch,".Rds")))
+  routes_redo_data <- routes_redo@data
+  stack_data <- rbind(stack_keep, routes_redo_data)
+  stack_redo2 <- stack_data[is.na(stack_data$length) | is.na(stack_data$av_incline) | is.na(stack_data$time) | !is.na(stack_data$error), ]
+  summary(stack_redo2$error) # SHOULD BE ZERO - IF NOT RUN THIS SECTION AGAIN?
+  
+  # FOR FASTEST LINE, LIMIT TO LINES UNDER MAXIMUM SCENARIO LENGTH & SAVE
+  if (route_type=="fastest") {
+    stack_data <- stack_data[(stack_data$length < (maxdist_scenario * 1000)),]  # NB length in metres, maxdist_scenario in km
+  }
+  saveRDS(stack_data,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/r",substr(route_type, 1, 1),"_",file_name,"_data.Rds")))
+  
+  
+  # REJOIN THE FILES FOR **ROUTES** (FASTEST ROUTE LENGTH < VISUALISE DISTANCE), MERGE IN ROUTES THAT INITIALLY FAILED, & SAVE SHAPE
+  rf_data_visualise <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/rf_",file_name,"_data.Rds")))
+  rf_data_visualise <- rf_data_visualise[(rf_data_visualise$length < (maxdist_visualise * 1000)),]
+  size_per_stack <- 50  
+  nbatch_stacks <- floor(nbatch/size_per_stack)
+  for(j in 1:nbatch_stacks) {
+    # DEFINE WHICH FILES TO LOAD IN THIS BATCH
+    numload <- ((j-1) * size_per_stack) + 1
+    numstart <- numload + 1
+    if(j==nbatch_stacks){ numend <- nbatch} else {numend <- (j * size_per_stack)}
+    # MERGE SELECTED BATCH
+    print(paste0("Starting stack batch ",j," of ",nbatch_stacks," at ",Sys.time()))
+    stack_next <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",numload,"of",nbatch,".Rds")))
+    rownames(stack_next@data) <- sapply(1:length(stack_next), function(j) stack_next@lines[[j]]@ID) # FORCE DATA ROW NAMES TO BE SAME AS ID IN LINES (in case don't start from '1')
+    stack_next <- stack_next[((stack_next@data$id %in% rf_data_visualise$id) & is.na(stack_next@data$error)),]
+    for(i in numstart:numend){
+      file_next <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",i,"of",nbatch,".Rds")))
+      rownames(file_next@data) <- sapply(1:length(file_next), function(j) file_next@lines[[j]]@ID)
+      file_next <- file_next[((file_next@data$id %in% rf_data_visualise$id) & is.na(file_next@data$error)),]
+      stack_next <- spRbind(stack_next, file_next)
+      print(paste0("Stack ",i," of ",nbatch," added at ",Sys.time()))
+    }
+    # APPEND TO MAIN BATCH
+    if(j==1){
+      stack <- stack_next
+    } else {
+      stack <- spRbind(stack, stack_next)
+    }
+  }
+  routes_redo <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_redo_of",nbatch,".Rds")))
+  routes_redo <- routes_redo[((routes_redo@data$id %in% rf_data_visualise$id) & is.na(routes_redo@data$error)),]
+  stack <- spRbind(stack, routes_redo)
+  stack@data <- stack@data["id"]
+  saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/r",substr(route_type, 1, 1),"_",file_name,"_shape.Rds")))
+  saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("r",substr(route_type, 1, 1),"_shape.Rds")))
+  
+  
+  #########################
+  ### PART 4: PREPARE CS VARIABLES FOR SCENARiOS/ATTRIBUTES
+  #########################
+  
+  rf_all_data <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/rf_",file_name,"_data.Rds")))
+  rq_all_data <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/rq_",file_name,"_data.Rds")))
+} else {
+  routes <- line2route(lines_cs_sub, route_fun = route_cyclestreet, plan = route_type, n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
+  
+}
+
+rf_all_data <- line2route(lines_cs_sub, plan = "fastest", n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
+rf_all_data@data <- left_join(rf_all_data@data, lines_cs_sub@data, by = "id")  # merge in data in lines file
+rq_all_data <- line2route(lines_cs_sub, plan = "quietest", n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
+rf_all_data@data <- left_join(rq_all_data@data, lines_cs_sub@data, by = "id")  # merge in data in lines file
+
+rf_all_data$rf_dist_km <- rf_all_data$length / 1000
+rq_all_data$rq_dist_km <- rq_all_data$length / 1000
+rf_all_data$rf_avslope_perc <- rf_all_data$av_incline * 100
+rq_all_data$rq_avslope_perc <- rq_all_data$av_incline * 100
+rf_all_data$rf_time_min <- rf_all_data$time / 60
+rq_all_data$rq_time_min <- rq_all_data$time / 60
+
+rf_all_data <- rf_all_data[,names(rf_all_data) %in% c("id","geo_code1","geo_code2","e_dist_km","rf_dist_km","rf_avslope_perc","rf_time_min")]
+rq_all_data <- rq_all_data[,names(rq_all_data) %in% c("id","rq_dist_km","rq_avslope_perc","rq_time_min")]
+rfrq_all_data <- left_join(rf_all_data@data, rq_all_data@data, by = "id")
+rfrq_all_data$dist_rf_e  <- rfrq_all_data$rf_dist_km / rfrq_all_data$e_dist_km   # occasionally just under 1, due to CS snapping centroids
+rfrq_all_data$dist_rq_rf <- rfrq_all_data$rq_dist_km / rfrq_all_data$rf_dist_km
+rfrq_all_data <- rfrq_all_data[,c(1:4,5,8,11,12,6,9,7,10)]
+write_csv(rfrq_all_data, file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rfrq_all_data.csv"))
+#saveRDS(rfrq_all_data,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rfrq_all_data.Rds"))
+

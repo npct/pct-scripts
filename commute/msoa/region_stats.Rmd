@@ -1,0 +1,160 @@
+---
+title: "PCT - local MSOA results"
+author: "Created by the PCT team"
+output: 
+  html_document:
+    fig_caption: yes
+    highlight: pygments
+    theme: null
+    toc: yes
+---
+
+```{r, include=FALSE}
+options(scipen=999)
+knitr::opts_chunk$set(message = FALSE)
+
+# Read-in the data
+root <- "../.."
+od_attributes <- read_csv(file.path(root, path_outputs_regional, purpose, geography, region, "od_attributes.csv"))
+c <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "c.Rds"))
+z <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "z.Rds"))
+l <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "l.Rds"))
+rf <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "rf.Rds"))
+
+# Import data for Fig 1 + 2 maps
+region_shape <- regions_highres[regions_highres$region_name==region,]
+las_in_region <- las[las@data$lad11cd %in% region_lad_lookup$lad11cd, ]
+
+# Generate width, height and aspect for region figures
+region_shape_ne <- spTransform(region_shape, proj_27700)
+region_width <- (region_shape_ne@bbox[1,2] - region_shape_ne@bbox[1,1])/1000
+region_height <- (region_shape_ne@bbox[2,2] - region_shape_ne@bbox[2,1])/1000
+region_aspect <- region_height/region_width
+region_figwidth <- NULL
+if (region_aspect<0.3) {region_figwidth <- 8.5}
+if (region_aspect>=0.3 & region_aspect<0.5) {region_figwidth <- 8}
+if (region_aspect>=0.5 & region_aspect<0.7) {region_figwidth <- 7.5}
+if (region_aspect>=0.7 & region_aspect<0.9) {region_figwidth <- 7}
+if (region_aspect>=0.9 & region_aspect<1.1) {region_figwidth <- 6}
+if (region_aspect>=1.1 & region_aspect<1.5) {region_figwidth <- 5}
+if (region_aspect>=1.5 & region_aspect<1.9) {region_figwidth <- 4.5}
+if (region_aspect>=1.9 & region_aspect<2.3) {region_figwidth <- 3.5}
+if (region_aspect>=2.3) {region_figwidth <- 2.5}
+
+# Prepare data for Fig 3 line graph
+dfscen <- dplyr::select(od_attributes, all, bicycle, contains("slc"), -contains("co2"), rf_dist_km)
+dfscen <- dfscen[!is.na(dfscen$rf_dist_km),]  # Exclude no fixed workplace / Other
+dfsp <- gather(dfscen, key = scenario, value = slc, -rf_dist_km)
+dfsp$scenario <- factor(dfsp$scenario)
+dfsp$scenario <- factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(1, 4, 3, 6, 5, 2)])
+levels(dfsp$scenario)[1:6] <- c("Total no. commuters", "Cyclists in Ebikes", "Cyclists in Go Dutch",  "Cyclists in Government Target", "Cyclists in Gender Equality", "Cyclists in Census 2011")
+
+```
+
+### Key information for `r get_pretty_region_name(region)`, MSOA geography
+
+This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r get_pretty_region_name(region)`. The data were generated on `r region_build_param$build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the 
+<a target="_blank" href="https://www.gnu.org/licenses/agpl-3.0">Affero GPL</a>. The <a target="_blank" href="https://github.com/npct">PCT source code</a> can be modified by others as long as attribution is made to the original.
+
+This version of the PCT uses origin-destination data on travel to work from the 2011 Census. The interface is currently displaying the number of commuters travelling by different modes between Middle Super Output Area zones (MSOAs, average size 3,325 commuters). There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)` recorded in the 2011 Census. All of these commuters are included in the **zones** data that are visualised on the map interface and available for download.
+
+Adding in inter-regional flows, there were `r prettyNum(sum(od_attributes$all), big.mark = ",", scientific = F)` commuters living or working in `r get_pretty_region_name(region)` in the 2011 Census.  All these commuters are included in the **All flows** files on the data download pages.
+
+**Straight lines**, **Fast routes** and **Quieter routes** are both visualised on the map interface and available to download.  These lines and routes contain all `r prettyNum(region_build_param$n_flow, big.mark = ",", scientific = F)` flows between MSOAs that a) start or end in `r get_pretty_region_name(region)`, b) have a fast route distance <20km, and c) contain at least `r region_build_param$minflow_visualise` commuters (by any mode,  in either direction). These `r prettyNum(region_build_param$n_flow, big.mark = ",", scientific = F)` between-zone MSOA flows contain `r prettyNum(region_build_param$n_people, big.mark = ",", scientific = F)` commuters who either live or work in `r get_pretty_region_name(region)`. 
+
+Between-zone MSOA flows exclude **within-MSOA travel**, when the MSOA zone of origin is the same as the zone of destination. Within-MSOA travel is represented by red points on the map when the lines are shown, and accounts for `r prettyNum(sum(c$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)`.  Between-zone flows also exclude those with no fixed place of work.
+ 
+The **Route Network (MSOA)** is built from all between-zone MSOA fast routes that a) start *and* end in `r get_pretty_region_name(region)`, b) have a fast route distance <20km, and c) contain at least `r region_build_param$minflow_rnet` commuters (by any mode, in either direction). It includes `r prettyNum(region_build_param$n_people_rnet, big.mark = ",", scientific = F)` commuters who live and work in `r get_pretty_region_name(region)`. The Lower Super Output Area **Route Network (LSOA)** is built from all between-zone LSOA fast routes that a) start *or* end in `r get_pretty_region_name(region)`, and b) have a fast route distance <20km. For more details please see User Manual C.
+
+See <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a> for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and the methods used to visualise results at the area, line, route and route network level.
+
+<br>
+### The `r get_pretty_region_name(region, the=F)` region
+
+Figure 1 shows a map of `r get_pretty_region_name(region)`, including the regional boundary (thick black border), local authority boundaries (blue lines) and MSOA zones in the region (grey with a black border). The straight green lines represent the top 100 flows in terms of the number of commuters by any mode.
+
+*Figure 1: Map of the `r get_pretty_region_name(region, the=F)` region*
+```{r fig1, fig.align = "left", fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
+par(mar=c(0.2, 0.2, 0.2, 0.2) + 0.1)
+plot(z, col = "lightgrey")
+plot(las_in_region, border = "blue", lwd = 2, add = T)
+plot(regions_highres, lwd = 2, add = T)
+plot(region_shape, lwd = 5, add = T)
+lines(l[tail(order(abs(l@data$all)), 100),], col = "green")
+```
+The left-hand map in Figure 2 shows the proportion of commuters in each zone with a fast route commute distance less than 10km (calculated excluding people with no fixed workplace).  The average proportion was `r round(mean(z$perc_rf_dist_u10km, na.rm = T))`% across zones in `r get_pretty_region_name(region)`, compared with a national average of `r round(mean(z_all$perc_rf_dist_u10km, na.rm = T))`%. The right-hand map shows the average hilliness of the fastest routes used by commuters living in each zone.  The average was `r sprintf("%.1f", mean(z$avslope_perc_u10km, na.rm = T))`% across zones in `r get_pretty_region_name(region)`, compared with a national average of `r sprintf("%.1f",  mean(z_all$avslope_perc_u10km, na.rm = T))`%.
+
+*Figure 2: Map showing a) the proportion of commuters with a fast route commute distance <10km (left) and b) the average hilliness of commute trips <10km (right), in MSOA zones across the study area*
+```{r fig2, fig.width = (region_figwidth*2), fig.asp = (region_aspect/2), fig.align = "left", fig.cap="", echo = FALSE, message=FALSE, warning=FALSE}
+tm_shape(z) +
+  tm_fill(col=c("perc_rf_dist_u10km","avslope_perc_u10km"),
+              n=c(4,4),
+              palette=list("Blues", "Oranges"),
+              border.col = "black",
+              title=c("% commutes\n<10km", "Average\ngradient (%)")) +
+  tm_layout(legend.title.size=1.1, legend.text.size = 1.1, frame = F) +
+  tm_facets(ncol = 2, nrow=1, scale.factor=4)
+
+```
+
+<br>
+### Cycling levels in each scenario for `r get_pretty_region_name(region)`
+
+The proportion of commuters who cycled as their main mode of travel to work baseline (2011 Census) data in `r get_pretty_region_name(region)` was 
+`r round(100 * sum(z$bicycle) / sum(z$all) , 1)`%, compared to the national average of 3.1% in England and Wales as a whole.  The percentage of cycling expected was
+`r round(100 * (sum(z$govtarget_slc) - sum(z$bicycle)) / sum(z$all) , 1)`%, based on the distance and hilliness of commutes in the region using the baseline model for England and Wales.
+
+Table 1 summarises the proportion of commuters walking, driving and using other modes under each scenario in `r get_pretty_region_name(region)`, based on aggregating across all residents in all the MSOA zones.
+
+*Table 1: Commute mode share in the Census 2011 and in scenarios among `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)`* 
+
+| Scenario | % cyclists | % walking | % car drivers | % all other modes |
+| ------------- |:-------------: |:-------------: |:--------------:| :----------------: |
+| Census 2011 | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$bicycle) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (f <- round(100 * sum(z$foot) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$car_driver) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Government Target | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$govtarget_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$govtarget_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$govtarget_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Gender Equity | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$gendereq_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$gendereq_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$gendereq_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Go Dutch | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$dutch_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$dutch_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$dutch_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Ebikes  | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$ebike_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$ebike_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$ebike_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+
+<br>
+
+Figure 3 illustrates the overall number of commuters in cycling to work under each scenario by distance.  Distance for within-zone commutes is estimated as being equal to a third of the distance of the shortest three between-zone commutes from the zone in question (see <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a>).  Commuters with no fixed work place are not included.
+
+*Figure 3: Number of people cycling among `r prettyNum(sum(od_attributes$all), big.mark = ",", scientific = F)` commuters living or working in `r get_pretty_region_name(region)`, by scenario and distance*
+```{r fig3, fig.width = 8, fig.height = 8, fig.align = "left", fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(dfsp) +
+  geom_freqpoly(aes(rf_dist_km, weight = slc,
+    color = scenario), binwidth = 1) +
+  ylab("Number of commuters") +
+  xlab("Route distance (km)") +
+  scale_color_discrete(name = "Scenario") +
+  xlim(c(0,15)) +
+  theme_bw(base_size=14)
+```
+
+<br>
+### Health and carbon impacts in `r get_pretty_region_name(region)`
+
+A modified version of the 2014 <a target="_blank" href="http://www.euro.who.int/en/health-topics/environment-and-health/Transport-and-health/publications/2011/health-economic-assessment-tools-heat-for-walking-and-for-cycling.-methodology-and-user-guide.-economic-assessment-of-transport-infrastructure-and-policies.-2014-update">HEAT tool</a> was used to calculate health impacts, based on the extra physical activity gained through new cycling trips in each scenario, minus the physical activity displaced in any former walking trips that have now been switched to cycling. CO2 impacts are derived from changes in distance driven per scenario.
+
+Table 2 illustrates the health and carbon impacts of the different scenarios in `r get_pretty_region_name(region)`, based on aggregating across all residents in all the MSOA zones.  For each scenario, comparisons are made with a counterfactual in which nobody in the region cycled ('No cyclists'), and with the observed level of cycling in the 2011 Census.
+
+*Table 2: Health and carbon impacts at baseline and in the scenarios among `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)`*
+
+| Scenario | Comparison	| Change in deaths/year  | Value of change (million pounds)  | Change in tonnes CO2e/year |
+| -------- |:----------:|:-----------------: |:----------:| :---------------:|
+| Census 2011 |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$govtarget_sldeath_heat) - sum(z$govtarget_sideath_heat) , 2)))` | `r (sprintf('%.2f', round((sum(z$govtarget_slvalue_heat) - sum(z$govtarget_sivalue_heat)) / 1000000  , 2)))` | `r (round( ( sum(z$govtarget_slco2) - sum(z$govtarget_sico2) ) / 1000))` |
+| Government Target |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$govtarget_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$govtarget_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(z$govtarget_slco2) / 1000))` |
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govtarget_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$govtarget_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(z$govtarget_sico2) / 1000))` |
+| Gender Equity |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$gendereq_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$gendereq_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(z$gendereq_slco2) / 1000))` | 
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$gendereq_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$gendereq_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(z$gendereq_sico2) / 1000))` |
+| Go Dutch |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$dutch_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$dutch_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(z$dutch_slco2) / 1000))` |
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$dutch_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$dutch_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(z$dutch_sico2) / 1000))` |
+| Ebikes |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$ebike_sldeath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$ebike_slvalue_heat) / 1000000  , 2)))` | `r (round( sum(z$ebike_slco2) / 1000))` |
+|  |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$ebike_sideath_heat) , 2)))` | `r (sprintf('%.2f', round(sum(z$ebike_sivalue_heat) / 1000000  , 2)))` | `r (round( sum(z$ebike_sico2) / 1000))` |
+
+<br>
+### References
+
+Lovelace, R., Goodman, A., Aldred, R., Berkoff, N., Abbas, A., Woodcock, J., 2017. The Propensity to Cycle Tool: An open source online system for sustainable transport planning. Journal of Transport and Land Use. 10:1, 505&ndash;528, <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">DOI: 10.5198/jtlu.2016.862</a>
