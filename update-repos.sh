@@ -2,8 +2,6 @@
 
 repos=( 
   "."
-  "../pct-data"
-  "../pct-bigdata" 
   "../pct-shiny"
 )
 
