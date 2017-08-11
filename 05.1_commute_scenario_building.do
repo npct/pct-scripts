@@ -3,7 +3,7 @@ clear matrix
 cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 *cd "C:\Users\annag\Dropbox\npct"
 		
-global geography = "lsoa" // "msoa" or "lsoa"
+global geography = "msoa" // "msoa" or "lsoa"
 
 * create directories by purpose/geography in the path_temp_scenario file [when move this to R, do that in R]
 		
@@ -16,7 +16,7 @@ global geography = "lsoa" // "msoa" or "lsoa"
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\LSOA11_MSOA11_LAD11_EW_LUv2.dta", replace
 		
 		foreach x in msoa lsoa {
-		use  "pct-inputs\02_intermediate\x_temporary_files\scenario_building\LSOA11_MSOA11_LAD11_EW_LUv2.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\LSOA11_MSOA11_LAD11_EW_LUv2.dta", clear
 		rename lso11anm lsoa11nm
 		rename `x'11cd geo_code
 		rename `x'11nm geo_name
@@ -51,7 +51,7 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 			rename allmethods_male_age16plus all_male
 			rename allmethods_female_age16plus all_female
 			rename bicycle_male_age16plus bicycle_male
-			rename bicycle_female_age16plus bicycle_female		   
+			rename bicycle_female_age16plus bicycle_female		 
 			order geo_code_o geo_code_d all from_home light_rail train bus taxi motorbike car_driver car_passenger bicycle foot other /*
 				*/ all_male all_female bicycle_male bicycle_female
 			keep geo_code_o - bicycle_female			
@@ -95,26 +95,25 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 			saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\msoa\t2w_sex.dta", replace
 		
 	** MSOA
-		import delimited "pct-inputs\02_intermediate\x_temporary_files\unzip\wu03bew_msoa_v1.csv", clear
+		import delimited "pct-inputs\02_intermediate\x_temporary_files\unzip\wu03ew_V2.csv", clear
 		* RENAME
-			rename v1 geo_code_o
-			rename v2 geo_code_d
-			rename v3 all
-			rename v4 from_home
-			rename v5 light_rail
-			rename v6 train
-			rename v7 bus
-			rename v8 taxi
-			rename v9 motorbike
-			rename v10 car_driver
-			rename v11 car_passenger
-			rename v12 bicycle
-			rename v13 foot
-			rename v14 other
+			rename areaofresidence geo_code_o
+			rename areaofworkplace geo_code_d
+			rename allcategoriesmethodoftraveltowor all
+			rename workmainlyatorfromhome from_home
+			rename undergroundmetrolightrailtram light_rail
+			rename busminibusorcoach bus
+			rename motorcyclescooterormoped motorbike
+			rename drivingacarorvan car_driver
+			rename passengerinacarorvan car_passenger
+			rename onfoot foot
+			rename othermethodoftraveltowork other
 		* COLLAPSE OTHER (CONSISTENT LSOA-MSOA)
 			gen geo_code_dtemp=substr(geo_code_d,1,1)
-			replace geo_code_d="OutsideEW" if geo_code_dtemp=="S" | geo_code_dtemp=="0" | geo_code_dtemp=="1" | geo_code_dtemp=="2" | geo_code_dtemp=="3" | geo_code_dtemp=="4" | geo_code_dtemp=="5" | geo_code_dtemp=="9" | geo_code_d=="OD0000002" 
-				* Make 'OutsideEW' if S = scotland, 01-59 = foreign countries, 9xx = Northern Ireland, OD0000002 = offshore installation,
+			replace geo_code_d="OutsideEW" if geo_code_dtemp=="S" | geo_code_dtemp=="N" | geo_code_d=="OD0000002" | geo_code_d=="OD0000004"
+				* Make 'OutsideEW' if S = scotland, N = northern ireland, OD0000002 = offshore installation, OD0000004 = otherwise overseas
+			**replace geo_code_d="OutsideEW" if geo_code_dtemp=="S" | geo_code_dtemp=="0" | geo_code_dtemp=="1" | geo_code_dtemp=="2" | geo_code_dtemp=="3" | geo_code_dtemp=="4" | geo_code_dtemp=="5" | geo_code_dtemp=="9" | geo_code_d=="OD0000002" 
+				* previous wu03bew_msoa_v1 safeguarded: Make 'OutsideEW' if S = scotland, 01-59 = foreign countries, 9xx = Northern Ireland, OD0000002 = offshore installation,
 			drop geo_code_dtemp
 			foreach var of varlist all-other {
 			bysort geo_code_o geo_code_d: egen `var'temp=sum(`var')
@@ -240,7 +239,7 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 				* DISTANCE = A THIRD OF THE MEAN DISTANCE OF SHORTEST 3 FLOWS
 				* HILLINESS = MEAN HILLINESS OF SHORTEST 3 FLOWS
 			recode rf_dist_km .=0.79 if (geo_code_o=="E02006781" | geo_code_o=="E01019077") & geo_code_o==geo_code_d 		//ISLES OF SCILLY [msoa/lsoa] - ESTIMATED FROM DISTANCE DISTRIBUTION
-			recode rf_avslope_perc .=0.2 if (geo_code_o=="E02006781" | geo_code_o=="E01019077") & geo_code_o==geo_code_d  //ISLES OF SCILLY [msoa/lsoa] - ESTIMATED FROM CYCLE STREET 
+			recode rf_avslope_perc .=0.2 if (geo_code_o=="E02006781" | geo_code_o=="E01019077") & geo_code_o==geo_code_d //ISLES OF SCILLY [msoa/lsoa] - ESTIMATED FROM CYCLE STREET 
 			replace e_dist_km=0 if flowtype==2
 			drop littlen rf_dist_kmtemp rf_dist_kmtemp2 rf_avslope_perctemp rf_avslope_perctemp2 
 			
@@ -505,7 +504,7 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 		* PERCENT TRIPS AND TRIP HILLINESS
 			recode rf_dist_km min/9.9999=1 10/max=0, gen(rf_u10km_dist)
 			recode rf_u10km_dist .=0 if geo_code_d=="Other"
-				* NB keep as missing if no fixed work place - implicitly assume they have same distribution as everyone else.  This exclusion is comparable to what ONS do ()
+				* NB keep as missing if no fixed work place - implicitly assume they have same distribution as everyone else. This exclusion is comparable to what ONS do ()
 			gen all_u10km_dist=all
 			replace all_u10km_dist=. if rf_u10km_dist==.
 			bysort geo_code_o: egen rf_u10km_dist_numerator=sum(rf_u10km_dist*all_u10km_dist)
@@ -553,7 +552,7 @@ drop temp
 			duplicates drop
 		* CHANGE UNITS
 			foreach x in base_sl govtarget_sl govtarget_si gendereq_sl gendereq_si dutch_sl dutch_si ebike_sl ebike_si{
-			replace `x'value_heat=`x'value_heat/1000000  // convert to millions of pounds
+			replace `x'value_heat=`x'value_heat/1000000 // convert to millions of pounds
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lad_all_attributes_unrounded.csv", replace
@@ -654,7 +653,7 @@ drop temp
 			gen `var'_diff = round(A[1,1]-A[1,2]) // COUNT THE DIFFERENCE BETWEEN NO CYCLISTS ROUNDED VS NOT ROUNDED AMONG THOSE WHERE NOT ROUNDED IS <1.5	
 			sort `var' random
 			gen littlen=_n
-			recode `var' 0=1 if littlen <=`var'_diff  // ROUND SOME 0 TO 1 SO THAT TOTAL NO. <1.5 IS CORRECT
+			recode `var' 0=1 if littlen <=`var'_diff // ROUND SOME 0 TO 1 SO THAT TOTAL NO. <1.5 IS CORRECT
 			drop littlen
 			total `var'_orig `var' 
 			matrix A=r(table)

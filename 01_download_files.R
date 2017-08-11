@@ -87,7 +87,7 @@ download.file(url = "https://github.com/pctbike/pct-inputs/raw/master/01_raw/01_
 
 ## TRAVEL MODE
 #     1. MSOA-flow commute data: url = https://wicid.ukdataservice.ac.uk/cider/wicid/downloads.php ;
-#        save dataset WU03BEW_msoa to 'pct-inputs\01_raw\02_travel_data\commute\msoa\wu03ew_v2.zip'
+#        save dataset WU03EW to 'pct-inputs\01_raw\02_travel_data\commute\msoa\wu03ew_v2.zip'
 #     2. LSOA-flow commute data: url = https://wicid.ukdataservice.ac.uk/cider/wicid/downloads.php [safe-guarded];
 #        commissioned dataset = WM12EW[CT0489]_lsoa ; save to 'pct-inputs\01_raw\02_travel_data\commute\lsoa\WM12EW[CT0489]_lsoa.zip'
 #     3. LSOA-flow SCHOOL data: private data supplied by NPD (request no. DR160129.02)
