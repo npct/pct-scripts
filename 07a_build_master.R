@@ -3,7 +3,7 @@ rm(list = ls())
 source("00_setup_and_funs.R")
 memory.limit(size=1000000)
 
-#set_purpose_and_geography(purpose = "school", geography = "lsoa")  # run separately by geography and purpose
+# SET INPUT PARAMETERS
 purpose <- "commute"
 geography <- "msoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
