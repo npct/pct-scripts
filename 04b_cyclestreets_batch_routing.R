@@ -1,3 +1,6 @@
+#########################
+### PART 2: RUN ROUTES THROUGH CYCLESTREETS
+#########################
 
 # LOAD DATA AND RUN BATCHES.  FOR QUIET LINES, RESTRICT TO THOSE WITH FAST ROUTE UNDER MAX. VISUALSE LENGTH
 lines_cs <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds"))
