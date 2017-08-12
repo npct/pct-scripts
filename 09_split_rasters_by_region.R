@@ -4,24 +4,23 @@ source("00_setup_and_funs.R")
 rasterOptions(datatype = "INT2U", maxmemory = 1e10)
 # Anna Q: should this line also exist at start of 08?? [not sure what INT2U does where...]
 
-# SET INPUT PARAMETERS + LOAD INPUT DATASETS
+# SET INPUT PARAMETERS
 purpose <- "commute"
 geography <- "lsoa"  
 raster_scenarios <- c("bicycle", "govtarget", "gendereq", "dutch", "ebike")
 
-# LOAD REGIONS, AND TRANSFORM TO EASTING/NORTHING SO THAT CAN BUFFER 1KM
+# LOAD REGIONS, AND TRANSFORM TO EASTING/NORTHING PROJECTION SO THAT CAN BUFFER 1KM
 pct_regions <- geojson_read(file.path(path_inputs, "02_intermediate/01_geographies/pct_regions_highres.geojson"), what = "sp")
 regions <- spTransform(pct_regions, proj_27700)
 
-# TEST RASTERS
-r <- raster("census-all.tif")
-bbmini <- extent(r)[c(1, 1, 3, 3)] + c(10000, 20000, 10000, 20000)
-rmini <- crop(r, bbmini)
-mapview::mapview(rmini) # check the data makes sense
-rmini <- crop(r, extent(regions[2,]) + c(-1e3, 1e3, -1e3, 1e3))
-mapview::mapview(rmini) +
-  mapview::mapview(regions[2,])
-writeRaster(rmini, filename = "region1.tiff")
+# TEST IF RASTERS ARE LOADING AND DISPLAYING CORRECTLY
+# r <- raster(file.path(path_rasters_national, purpose, geography, "bicycle_all.tif"))
+# bbmini <- extent(r)[c(1, 1, 3, 3)] + c(10000, 20000, 10000, 20000)
+# rmini <- crop(r, bbmini)
+# mapview::mapview(rmini) # check the data makes sense
+# rmini <- crop(r, extent(regions[2,]) + c(-1e3, 1e3, -1e3, 1e3))
+# mapview::mapview(rmini) +  mapview::mapview(regions[2,])
+
 
 # run for all regions and scenarios
 i <- 1
