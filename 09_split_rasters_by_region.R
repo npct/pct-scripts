@@ -2,7 +2,7 @@
 rm(list = ls())
 source("00_setup_and_funs.R")
 rasterOptions(datatype = "INT2U", maxmemory = 1e10)
-# Anna Q: should this line also exist at start of 08?? [not sure what INT2U does where...]
+# Anna Q test: should this line also exist at start of 08?? [not sure what INT2U does where...]
 
 # SET INPUT PARAMETERS
 purpose <- "commute"
