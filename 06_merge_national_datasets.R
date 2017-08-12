@@ -7,12 +7,8 @@ memory.limit(size = 1000000)
 purpose <- "commute"
 geography <- "msoa"
 
-if(!dir.exists(file.path(path_outputs_national, purpose))) {
-  dir.create(file.path(path_outputs_national, purpose))
-}
-if(!dir.exists(file.path(path_outputs_national, purpose, geography))) {
-  dir.create(file.path(path_outputs_national, purpose, geography))
-}
+if(!dir.exists(file.path(path_outputs_national, purpose))) { dir.create(file.path(path_outputs_national, purpose)) }
+if(!dir.exists(file.path(path_outputs_national, purpose, geography))) { dir.create(file.path(path_outputs_national, purpose, geography)) }
 
 #########################
 ### LOAD SHAPE AND SCENARIO FILES
