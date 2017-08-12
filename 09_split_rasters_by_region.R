@@ -7,11 +7,16 @@ rasterOptions(datatype = "INT2U", maxmemory = 1e10)
 # SET INPUT PARAMETERS
 purpose <- "commute"
 geography <- "lsoa"  
-raster_scenarios <- c("bicycle", "govtarget", "gendereq", "dutch", "ebike")
+scenarios <- c("bicycle", "govtarget", "gendereq", "dutch", "ebike")
+
+if(!dir.exists(file.path(path_rasters_regional, purpose ))) { dir.create(file.path(path_rasters_regional, purpose)) }
+if(!dir.exists(file.path(path_rasters_regional, purpose, geography ))) { dir.create(file.path(path_rasters_regional, purpose, geography)) }
+
 
 # LOAD REGIONS, AND TRANSFORM TO EASTING/NORTHING PROJECTION SO THAT CAN BUFFER 1KM
 pct_regions <- geojson_read(file.path(path_inputs, "02_intermediate/01_geographies/pct_regions_highres.geojson"), what = "sp")
 regions <- spTransform(pct_regions, proj_27700)
+
 
 # TEST IF RASTERS ARE LOADING AND DISPLAYING CORRECTLY
 # r <- raster(file.path(path_rasters_national, purpose, geography, "bicycle_all.tif"))
@@ -22,24 +27,17 @@ regions <- spTransform(pct_regions, proj_27700)
 # mapview::mapview(rmini) +  mapview::mapview(regions[2,])
 
 
-# run for all regions and scenarios
-i <- 1
-s <- raster_scenarios[1]
-dir.create("regional-rasters")
-setwd("regional-rasters/")
-for(s in raster_scenarios[2:5]) {
-  
-  r <- raster(paste0("../regional-rasters-old/", s, "-all.tif"))
-  
-  for(i in 1:nrow(regions)) {
-    
-    dir.create(as.character(regions$region_name[i]))
-    rmini <- crop(r, extent(regions[i,]) + c(-1e3, 1e3, -1e3, 1e3))
-    raster_name <- paste0(as.character(regions$region_name[i]), "/", s, ".tif")
-    if(grepl(raster_name, "ducht")) {
-      raster_name <- gsub(pattern = "ducht", "dutch")
-    }
-    writeRaster(rmini, raster_name)
+# RUN RASTERS FOR ALL REGIONS AND SCENARIOS
+# s <- scenarios[1]
+# k <- 1
+for(s in scenarios[1:5]) {
+  message(paste0("Splitting rasters for ", s, " scenario at ",Sys.time()))
+  r <- raster(file.path(path_rasters_national, purpose, geography, paste0(s, "_all.tif")))
+
+  for(k in 1:length(regions)) {
+    if(!dir.exists(file.path(path_rasters_regional, purpose, geography,as.character(regions$region_name[k])))) { dir.create(file.path(path_rasters_regional, purpose, geography, as.character(regions$region_name[k]))) }
+    rmini <- crop(r, extent(regions[k,]) + c(-1e3, 1e3, -1e3, 1e3))
+    writeRaster(rmini, file.path(path_rasters_regional, purpose, geography, paste0(as.character(regions$region_name[k]), "/", s, ".tif")), overwrite=TRUE) 
+    message(paste0("Region ", k, " saved at ",Sys.time()))
   }
 }
-setwd("..")
