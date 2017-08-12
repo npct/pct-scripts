@@ -8,13 +8,6 @@ purpose <- "commute"
 geography <- "lsoa"  
 raster_scenarios <- c("bicycle", "govtarget", "gendereq", "dutch", "ebike")
 
-# download files
-raster_url = "https://github.com/npct/pct-lsoa/releases/download/1.0/"
-for(i in raster_scenarios) {
-  file_name = paste0(i, "-all.tif")
-  url_dl = paste0(raster_url, file_name)
-  download.file(url_dl, file_name)
-}
 
 # testing
 r = raster("census-all.tif")
