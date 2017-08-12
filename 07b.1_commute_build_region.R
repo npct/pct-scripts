@@ -44,12 +44,12 @@ build_params[build_params$region_name == region, ]$n_people <- sum(l$all)
 if (region_build_param$to_rebuild_rnet=="1") {
 
  # DEFINE SCENARIOS
- scens <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
+ scenarios <- c("govtarget_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
  
  # IDENTIFY WITHIN-REGION FAST ROUTES, SUBSET BY MIN FLOW
  rf_rnet <- rf_all[rf_all$id %in% l_regional$id,]
  rf_rnet <- rf_rnet[rf_rnet$all >= region_build_param$minflow_rnet, ]
- rf_rnet <- rf_rnet[,c("id", "all", "bicycle", scens)]
+ rf_rnet <- rf_rnet[,c("id", "all", "bicycle", scenarios)]
 
  build_params[build_params$region_name == region, ]$n_flow_rnet <- nrow(rf_rnet)
  build_params[build_params$region_name == region, ]$n_people_rnet <- sum(rf_rnet$all)
@@ -67,12 +67,12 @@ if (region_build_param$to_rebuild_rnet=="1") {
  cl <- makeCluster(n_cores)
  registerDoParallel(cl)
  
- rf_rnet_data_list <- foreach(i = scens) %dopar% {
+ rf_rnet_data_list <- foreach(i = scenarios) %dopar% {
   rnet_tmp <- stplanr::overline(rf_rnet, i)
   rnet_tmp@data[i]
  }
  # SAVE SCENARIO RESULTS BACK INTO BASELINE
- for(j in seq_along(scens)){
+ for(j in seq_along(scenarios)){
   rnet@data <- cbind(rnet@data, rf_rnet_data_list[[j]])
  }
  stopCluster(cl = cl)
@@ -87,7 +87,7 @@ if (region_build_param$to_rebuild_rnet=="1") {
  # SET PROJECTION, CREATE ID
  rnet <- spTransform(rnet, proj_4326)
  rnet$local_id <- 1:nrow(rnet)
- rnet <- rnet[,c("local_id", "bicycle", scens,"singlezone")]
+ rnet <- rnet[,c("local_id", "bicycle", scenarios,"singlezone")]
  
  # CHECK AGAINST CODE BOOK AND ROUND SCENARIO VALUES TO 2 DP
  rnet_codebook <- read_csv(file.path(path_codebooks, purpose, "rnet_codebook.csv"))
