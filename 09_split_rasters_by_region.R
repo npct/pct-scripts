@@ -1,7 +1,12 @@
+# SET UP
 rm(list = ls())
 source("00_setup_and_funs.R")
 rasterOptions(datatype = "INT2U", maxmemory = 1e10)
-raster_scenarios = c("census", "gov", "gender", "ducht", "ebikes")
+
+# SET INPUT PARAMETERS
+purpose <- "commute"
+geography <- "lsoa"  
+raster_scenarios <- c("bicycle", "govtarget", "gendereq", "dutch", "ebike")
 
 # download files
 raster_url = "https://github.com/npct/pct-lsoa/releases/download/1.0/"
