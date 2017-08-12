@@ -1,4 +1,4 @@
-#SET UP
+# SET UP
 rm(list = ls())
 source("00_setup_and_funs.R")
 memory.limit(size=1000000)
@@ -21,6 +21,8 @@ stack_size <- 40      # Max no. rasters to stack at once
 if(!dir.exists(file.path(path_temp_raster, purpose))) { dir.create(file.path(path_temp_raster, purpose)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography))) { dir.create(file.path(path_temp_raster, purpose, geography)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name)) }
+if(!dir.exists(file.path(path_rasters_national, purpose ))) { dir.create(file.path(path_rasters_national, purpose)) }
+if(!dir.exists(file.path(path_rasters_national, purpose, geography ))) { dir.create(file.path(path_rasters_national, purpose, geography)) }
 
 #########################
 ### PART 1: BREAK ROUTE FILES INTO CHUNKS
@@ -276,5 +278,28 @@ for(m in 1:nbatch_stack){
 }
 print(paste0("Stacking rasters finished at ",Sys.time()))
 
+#########################
+### PART 5: CREATE NATIONAL RASTERS IN ARC GIS AND SAVE
+#########################
+## ANNA NOTE: NOW NEED TO STITCH THE STACKS TOGETHER IN ARC GIS - MALCOLM TO PROVIDE INSTRUCTIONS IN DUE COURSE ON THIS STAGE
+## FILES WHEN COMPLETE TO BE SAVED TO path_rasters_national, purpose, geography
 
-## ANNA NOTE: NOW HAVE 6 WALES STACKS.  APPEND, OR HOW ELSE TURN TO TILES?
+## FOR NOW, AS A TEMPORARY FIX, WE DOWNLOAD THESE RASTERS FROM THEIR RELEASE (correcting names to be consistent with those used elsewhere, e.g. in rnet / scenarios)
+raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
+
+url_dl <- paste0(raster_url, "census-all.tif")
+download.file(url_dl, file.path(path_rasters_national, purpose, geography, "bicycle_all.tif"))
+url_dl <- paste0(raster_url, "gov-all.tif")
+download.file(url_dl, file.path(path_rasters_national, purpose, geography, "govtarget_all.tif"))
+url_dl <- paste0(raster_url, "gender-all.tif")
+download.file(url_dl, file.path(path_rasters_national, purpose, geography, "gendereq_all.tif"))
+url_dl <- paste0(raster_url, "ducht-all.tif")
+download.file(url_dl, file.path(path_rasters_national, purpose, geography, "dutch_all.tif"))
+url_dl <- paste0(raster_url, "ebikes-all.tif")
+download.file(url_dl, file.path(path_rasters_national, purpose, geography, "ebike_all.tif"))
+
+
+
+
+
+ 
