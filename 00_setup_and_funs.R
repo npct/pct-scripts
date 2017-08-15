@@ -53,8 +53,6 @@ path_temp_scenario <- "../pct-inputs/02_intermediate/x_temporary_files/scenario_
 path_temp_unzip <- "../pct-inputs/02_intermediate/x_temporary_files/unzip"
 path_outputs_national <- "../pct-outputs-national"
 path_outputs_regional <- "../pct-outputs-regional"
-path_rasters_national <- "../pct-rasters-national"
-path_rasters_regional <- "../pct-rasters-regional"
 path_scripts <- "../pct-scripts"
 path_shiny <- "../pct-shiny"
 path_codebooks <- "../pct-shiny/regions_www/www/static/02_codebooks"
