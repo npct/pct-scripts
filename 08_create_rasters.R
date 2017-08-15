@@ -21,8 +21,6 @@ stack_size <- 40      # Max no. rasters to stack at once
 if(!dir.exists(file.path(path_temp_raster, purpose))) { dir.create(file.path(path_temp_raster, purpose)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography))) { dir.create(file.path(path_temp_raster, purpose, geography)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name)) }
-if(!dir.exists(file.path(path_rasters_national, purpose ))) { dir.create(file.path(path_rasters_national, purpose)) }
-if(!dir.exists(file.path(path_rasters_national, purpose, geography ))) { dir.create(file.path(path_rasters_national, purpose, geography)) }
 
 #########################
 ### PART 1: BREAK ROUTE FILES INTO CHUNKS
@@ -288,15 +286,15 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
 
 url_dl <- paste0(raster_url, "census-all.tif")
-download.file(url_dl, file.path(path_rasters_national, purpose, geography, "bicycle_all.tif"), mode="wb")
+download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif"), mode="wb")
 url_dl <- paste0(raster_url, "gov-all.tif")
-download.file(url_dl, file.path(path_rasters_national, purpose, geography, "govtarget_all.tif"), mode="wb")
+download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_govtarget_all.tif"), mode="wb")
 url_dl <- paste0(raster_url, "gender-all.tif")
-download.file(url_dl, file.path(path_rasters_national, purpose, geography, "gendereq_all.tif"), mode="wb")
+download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_gendereq_all.tif"), mode="wb")
 url_dl <- paste0(raster_url, "ducht-all.tif")
-download.file(url_dl, file.path(path_rasters_national, purpose, geography, "dutch_all.tif"), mode="wb")
+download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_dutch_all.tif"), mode="wb")
 url_dl <- paste0(raster_url, "ebikes-all.tif")
-download.file(url_dl, file.path(path_rasters_national, purpose, geography, "ebike_all.tif"), mode="wb")
+download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_ebike_all.tif"), mode="wb")
 
 
 
