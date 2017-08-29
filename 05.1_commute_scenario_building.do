@@ -574,6 +574,8 @@ drop temp
 			order `var'_perc, after(`var')
 			}
 			keep region_name *perc
+			list if bicycle_perc==. 
+			drop if bicycle_perc==. // should be nothing, but temporarily is Wales
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\pct_regions_all_attributes.csv", replace
 
 	*****************
