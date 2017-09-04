@@ -15,11 +15,11 @@ knitr::opts_chunk$set(message = FALSE)
 
 # Read-in the data
 root <- "../.."
-od_attributes <- read_csv(file.path(root, path_outputs_regional, purpose, geography, region, "od_attributes.csv"))
-c <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "c.Rds"))
-z <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "z.Rds"))
-l <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "l.Rds"))
-rf <- readRDS(file.path(root, path_outputs_regional, purpose, geography, region, "rf.Rds"))
+od_attributes <- read_csv(file.path(root, path_outputs_regional_notR, purpose, geography, region, "od_attributes.csv"))
+c <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "c.Rds"))
+z <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "z.Rds"))
+l <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "l.Rds"))
+rf <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "rf.Rds"))
 
 # Import data for Fig 1 + 2 maps
 region_shape <- regions_highres[regions_highres$region_name==region,]

@@ -13,22 +13,22 @@ if(!dir.exists(file.path(path_outputs_national, purpose, geography))) { dir.crea
 ### TEMP BODGE: DOWNLOAD EXISTING SCHOOLS DATA AND RENAME VARIABLES TO WORK IN LATEST VERSION
 #########################
 # region <- "west-yorkshire"
-# z <- readRDS(file.path(path_outputs_regional, purpose, geography, region,  "github_originals/z.Rds"))
+# z <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/z.Rds"))
 # z@data <- dplyr::rename(z@data, geo_name = `geo_label`)
-# saveRDS(z, file.path(path_outputs_regional, purpose, geography, region,  "z.Rds"))
+# saveRDS(z, file.path(path_outputs_regional_R, purpose, geography, region,  "z.Rds"))
 # 
-# rnet <- readRDS(file.path(path_outputs_regional, purpose, geography, region,  "github_originals/rnet.Rds"))
+# rnet <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/rnet.Rds"))
 # rnet$local_id <- 1:nrow(rnet)
-# saveRDS(rnet, file.path(path_outputs_regional, purpose, geography, region,  "rnet.Rds"))
+# saveRDS(rnet, file.path(path_outputs_regional_R, purpose, geography, region,  "rnet.Rds"))
 
 # ## MAKE AND ISLE OF WIGHT TEST VERSION, COPY FROM COMMUTE
 # region <- "isle-of-wight"
-# z <- readRDS(file.path(path_outputs_regional, "commute", geography, region,  "z.Rds"))
+# z <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "z.Rds"))
 # z@data <- dplyr::rename(z@data, car = `car_driver`)
-# saveRDS(z, file.path(path_outputs_regional, purpose, geography, region,  "z.Rds"))
+# saveRDS(z, file.path(path_outputs_regional_R, purpose, geography, region,  "z.Rds"))
 # 
-# rnet <- readRDS(file.path(path_outputs_regional, "commute", geography, region,  "rnet.Rds"))
-# saveRDS(rnet, file.path(path_outputs_regional, purpose, geography, region,  "rnet.Rds"))
+# rnet <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "rnet.Rds"))
+# saveRDS(rnet, file.path(path_outputs_regional_R, purpose, geography, region,  "rnet.Rds"))
 
 
 
