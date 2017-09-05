@@ -30,7 +30,7 @@ for(s in scenarios[1:5]) {
 
   for(k in 1:length(regions)) {
     rmini <- crop(r, extent(regions[k,]) + c(-1e3, 1e3, -1e3, 1e3))
-    writeRaster(rmini, file.path(path_outputs_regional, purpose, geography, paste0(as.character(regions$region_name[k]), "/ras_", s, ".tif")), overwrite=TRUE) 
+    writeRaster(rmini, file.path(path_outputs_regional_notR, purpose, geography, paste0(as.character(regions$region_name[k]), "/ras_", s, ".tif")), overwrite=TRUE) 
     message(paste0("Region ", k, " saved at ",Sys.time()))
   }
 }

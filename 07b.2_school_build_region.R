@@ -1,7 +1,11 @@
 # Create data directory if not there & start time
-if(!dir.exists(file.path(path_outputs_regional, purpose))) { dir.create(file.path(path_outputs_regional, purpose)) }
-if(!dir.exists(file.path(path_outputs_regional, purpose, geography))) { dir.create(file.path(path_outputs_regional, purpose, geography)) }
-if(!dir.exists(file.path(path_outputs_regional, purpose, geography, region))) { dir.create(file.path(path_outputs_regional, purpose, geography, region)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose))) { dir.create(file.path(path_outputs_regional_R, purpose)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose, geography))) { dir.create(file.path(path_outputs_regional_R, purpose, geography)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose, geography, region))) { dir.create(file.path(path_outputs_regional_R, purpose, geography, region)) }
+
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose))) { dir.create(file.path(path_outputs_regional_notR, purpose)) }
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography)) }
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography, region))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography, region)) }
 
 start_time <- Sys.time() # for timing the script
 
@@ -20,5 +24,5 @@ z <- z_all[z_all@data$lad11cd %in% region_lad_lookup$lad11cd, ]
 ###########################
 
 # SAVE OBJECTS
-saveRDS(z, (file.path(path_outputs_regional, purpose, geography, region, "z.Rds")))
-geojson_write(z, file = file.path(path_outputs_regional, purpose, geography, region, "z.geojson"))
+saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
+geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))

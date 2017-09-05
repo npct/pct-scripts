@@ -1,7 +1,11 @@
 # Create data directory if not there & start time
-if(!dir.exists(file.path(path_outputs_regional, purpose))) { dir.create(file.path(path_outputs_regional, purpose)) }
-if(!dir.exists(file.path(path_outputs_regional, purpose, geography))) { dir.create(file.path(path_outputs_regional, purpose, geography)) }
-if(!dir.exists(file.path(path_outputs_regional, purpose, geography, region))) { dir.create(file.path(path_outputs_regional, purpose, geography, region)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose))) { dir.create(file.path(path_outputs_regional_R, purpose)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose, geography))) { dir.create(file.path(path_outputs_regional_R, purpose, geography)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose, geography, region))) { dir.create(file.path(path_outputs_regional_R, purpose, geography, region)) }
+
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose))) { dir.create(file.path(path_outputs_regional_notR, purpose)) }
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography)) }
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography, region))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography, region)) }
 
 start_time <- Sys.time() # for timing the script
 
@@ -101,20 +105,20 @@ if (region_build_param$to_rebuild_rnet=="1") {
 ###########################
 
 # SAVE OBJECTS
-write_csv(od_attributes, file.path(path_outputs_regional, purpose, geography, region, "od_attributes.csv"))
-saveRDS(z, (file.path(path_outputs_regional, purpose, geography, region, "z.Rds")))
-geojson_write(z, file = file.path(path_outputs_regional, purpose, geography, region, "z.geojson"))
-saveRDS(c, (file.path(path_outputs_regional, purpose, geography, region, "c.Rds")))
-geojson_write(c, file = file.path(path_outputs_regional, purpose, geography, region, "c.geojson"))
-saveRDS(l, (file.path(path_outputs_regional, purpose, geography, region, "l.Rds")))
-geojson_write(l, file = file.path(path_outputs_regional, purpose, geography, region, "l.geojson"))
-saveRDS(rf, (file.path(path_outputs_regional, purpose, geography, region, "rf.Rds")))
-geojson_write(rf, file = file.path(path_outputs_regional, purpose, geography, region, "rf.geojson"))
-saveRDS(rq, (file.path(path_outputs_regional, purpose, geography, region, "rq.Rds")))
-geojson_write(rq, file = file.path(path_outputs_regional, purpose, geography, region, "rq.geojson"))
+write_csv(od_attributes, file.path(path_outputs_regional_notR, purpose, geography, region, "od_attributes.csv"))
+saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
+geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
+saveRDS(c, (file.path(path_outputs_regional_R, purpose, geography, region, "c.Rds")))
+geojson_write(c, file = file.path(path_outputs_regional_notR, purpose, geography, region, "c.geojson"))
+saveRDS(l, (file.path(path_outputs_regional_R, purpose, geography, region, "l.Rds")))
+geojson_write(l, file = file.path(path_outputs_regional_notR, purpose, geography, region, "l.geojson"))
+saveRDS(rf, (file.path(path_outputs_regional_R, purpose, geography, region, "rf.Rds")))
+geojson_write(rf, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rf.geojson"))
+saveRDS(rq, (file.path(path_outputs_regional_R, purpose, geography, region, "rq.Rds")))
+geojson_write(rq, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rq.geojson"))
 if (region_build_param$to_rebuild_rnet=="1") {
-  saveRDS(rnet, (file.path(path_outputs_regional, purpose, geography, region, "rnet.Rds")))
-  geojson_write(rnet, file = file.path(path_outputs_regional, purpose, geography, region, "rnet.geojson"))
+  saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")))
+  geojson_write(rnet, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rnet.geojson"))
 }
 
 # SAVE UPDATED OUTPUT PARAMETERS TO CSV, AND RE-CREATE REGION PARAMS SO THEY ARE UPDATED

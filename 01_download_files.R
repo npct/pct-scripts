@@ -28,7 +28,8 @@ if(!dir.exists(file.path(path_temp_scenario))) { dir.create(file.path(path_temp_
 if(!dir.exists(file.path(path_temp_unzip))) { dir.create(file.path(path_temp_unzip)) }
 
 if(!dir.exists(file.path(path_outputs_national))) { dir.create(file.path(path_outputs_national)) }
-if(!dir.exists(file.path(path_outputs_regional))) { dir.create(file.path(path_outputs_regional)) }
+if(!dir.exists(file.path(path_outputs_regional_R))) { dir.create(file.path(path_outputs_regional_R)) }
+if(!dir.exists(file.path(path_outputs_regional_notR))) { dir.create(file.path(path_outputs_regional_notR)) }
 
 
 #########################
