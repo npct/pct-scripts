@@ -106,6 +106,7 @@ if (region_build_param$to_rebuild_rnet=="1") {
 
 # SAVE OBJECTS
 write_csv(od_attributes, file.path(path_outputs_regional_notR, purpose, geography, region, "od_attributes.csv"))
+write_csv(z@data, file.path(path_outputs_regional_notR, purpose, geography, region, "z_attributes.csv"))
 saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
 geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
 saveRDS(c, (file.path(path_outputs_regional_R, purpose, geography, region, "c.Rds")))
