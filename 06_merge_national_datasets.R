@@ -41,16 +41,13 @@ pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geograph
 # OPEN ATTRIBUTE DATA 
 z_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "z_all_attributes.csv"))
 od_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "od_all_attributes.csv"))
-lad_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, "lad_all_attributes.csv"))
+lad_attributes <- read_csv(file.path(path_outputs_national, purpose, "lad_attributes.csv"))
 pct_regions_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, "pct_regions_all_attributes.csv"))
 
 
 # OPEN CODEBOOKS
-z_codebook <- read_csv(file.path(path_codebooks, purpose, "z_codebook.csv"))
 c_codebook <- read_csv(file.path(path_codebooks, purpose, "c_codebook.csv"))
-od_l_rf_codebook <- read_csv(file.path(path_codebooks, purpose, "od_l_rf_codebook.csv"))
 rq_codebook <- read_csv(file.path(path_codebooks, purpose, "rq_codebook.csv"))
-lad_codebook <- read_csv(file.path(path_codebooks, purpose, "lad_codebook.csv"))
 
 
 #########################
@@ -62,7 +59,6 @@ summary({sel_zone <- z_shape$geo_code %in% z_all_attributes$geo_code}) # Check p
 z_shape <- z_shape[sel_zone,]  
 z_shape@data <- data.frame(geo_code = z_shape$geo_code) 
 z_shape@data <- left_join(z_shape@data, z_all_attributes, by="geo_code")
-z_shape@data <- z_shape@data[z_codebook$`Variable name`]
 saveRDS(z_shape, file.path(path_outputs_national, purpose, geography, "z_all.Rds"))
 geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
 
@@ -89,7 +85,6 @@ summary({sel_line2 <- (l_shape$id %in% od_all_attributes$id)}) # Limit to those 
 l_shape <- l_shape[sel_line2,]  
 l_shape@data <- data.frame(id = l_shape$id) 
 l_shape@data <- left_join(l_shape@data, od_all_attributes, by="id")
-l_shape@data <- l_shape@data[od_l_rf_codebook$`Variable name`]
 saveRDS(l_shape, (file.path(path_outputs_national, purpose, geography, "l_all.Rds")))
 
 # MERGE LINE SCENARIO DATA TO FAST ROUTES FILE
@@ -97,7 +92,6 @@ summary({sel_rf <- (rf_shape$id %in% od_all_attributes$id)}) # Limit to those wi
 rf_shape <- rf_shape[sel_rf,]  
 rf_shape@data <- data.frame(id = rf_shape$id) 
 rf_shape@data <- left_join(rf_shape@data, od_all_attributes, by="id")
-rf_shape@data <- rf_shape@data[od_l_rf_codebook$`Variable name`]
 saveRDS(rf_shape, (file.path(path_outputs_national, purpose, geography, "rf_all.Rds")))
 
 # MERGE LINE SCENARIO DATA TO QUIET ROUTES FILE 
@@ -109,10 +103,9 @@ rq_shape@data <- rq_shape@data[rq_codebook$`Variable name`]
 saveRDS(rq_shape, (file.path(path_outputs_national, purpose, geography, "rq_all.Rds")))
 
 # MERGE LA DATA TO LA GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 
-summary({sel_lad <- (lad$lad11cd %in% lad_all_attributes$lad11cd)}) # Should be perfect match
+summary({sel_lad <- (lad$lad11cd %in% lad_attributes$lad11cd)}) # Should be perfect match
 lad <- lad[sel_lad,]  
-lad@data <- left_join(lad@data, lad_all_attributes, by = "lad11cd")
-lad@data <- lad@data[lad_codebook$`Variable name`]
+lad@data <- left_join(lad@data, lad_attributes, by = "lad11cd")
 saveRDS(lad, (file.path(path_outputs_national, purpose, "lad.Rds")))
 geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson"))
 
