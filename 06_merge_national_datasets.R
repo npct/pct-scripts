@@ -41,7 +41,7 @@ pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geograph
 # OPEN ATTRIBUTE DATA 
 z_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "z_all_attributes.csv"))
 od_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "od_all_attributes.csv"))
-lad_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, "lad_all_attributes.csv"))
+lad_attributes <- read_csv(file.path(path_outputs_national, purpose, "lad_attributes.csv"))
 pct_regions_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, "pct_regions_all_attributes.csv"))
 
 
@@ -109,9 +109,9 @@ rq_shape@data <- rq_shape@data[rq_codebook$`Variable name`]
 saveRDS(rq_shape, (file.path(path_outputs_national, purpose, geography, "rq_all.Rds")))
 
 # MERGE LA DATA TO LA GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 
-summary({sel_lad <- (lad$lad11cd %in% lad_all_attributes$lad11cd)}) # Should be perfect match
+summary({sel_lad <- (lad$lad11cd %in% lad_attributes$lad11cd)}) # Should be perfect match
 lad <- lad[sel_lad,]  
-lad@data <- left_join(lad@data, lad_all_attributes, by = "lad11cd")
+lad@data <- left_join(lad@data, lad_attributes, by = "lad11cd")
 lad@data <- lad@data[lad_codebook$`Variable name`]
 saveRDS(lad, (file.path(path_outputs_national, purpose, "lad.Rds")))
 geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson"))

@@ -12,7 +12,7 @@ geography <- "msoa"
 ## OPEN ATTRIBUTE DATA
 z_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, geography, "z_all_attributes_unrounded.csv"))
 od_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, geography, "od_all_attributes_unrounded.csv"))
-lad_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, "lad_all_attributes_unrounded.csv"))
+lad_attributes <- read_csv(file.path(path_temp_scenario, purpose, "lad_all_attributes_unrounded.csv"))
 
 ## APPLY MINIMUM SIZE, ROUND AND SAVE
 z_all_attributes <- as.data.frame(apply(z_all_attributes, c(2), round_df), stringsAsFactors = F)
@@ -21,5 +21,5 @@ write_csv(z_all_attributes,  file.path(path_outputs_national, purpose, geography
 od_all_attributes <- as.data.frame(apply(od_all_attributes, c(2), round_df), stringsAsFactors = F)
 write_csv(od_all_attributes,  file.path(path_outputs_national, purpose, geography, "od_all_attributes.csv"))
 
-lad_all_attributes <- as.data.frame(apply(lad_all_attributes, c(2), round_df), stringsAsFactors = F)
-write_csv(lad_all_attributes,  file.path(path_temp_scenario, purpose, "lad_all_attributes.csv"))
+lad_attributes <- as.data.frame(apply(lad_attributes, c(2), round_df), stringsAsFactors = F)
+write_csv(lad_attributes,  file.path(path_outputs_national, purpose, "lad_attributes.csv"))
