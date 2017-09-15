@@ -83,15 +83,21 @@ round_df <- function(x, dpdigits = 2, sfdigits = 3) {
 
 
 # Region names [NB copy of this also in pct-shiny///pct-shiny-funs - if modify here, modify there too]
-get_pretty_region_name <- function(region_name, the = T){
-  if (the == T) {
-    region_name <- gsub("isle-of-wight", "the-isle-of-wight", region_name, perl=TRUE)
-    region_name <- gsub("north-east", "the-north-east", region_name, perl=TRUE)
-    region_name <- gsub("west-midlands", "the-west-midlands", region_name, perl=TRUE)
-  }
-  region_name <- gsub("(^|-)([[:alpha:]])", " \\U\\2", region_name, perl=TRUE)
+get_pretty_region_name <- function(region_name_in, the = T){
+  regions_thes <- c(
+    "isle-of-wight" = "the Isle of Wight",
+    "north-east" = "the North East",
+    "west-midlands" = "the West Midlands"
+  )
+  region_name <- gsub("(\\b[[:alpha:]])", "\\U\\1", region_name_in, perl=TRUE)
+  region_name <- gsub("-", " ", region_name)
   region_name <- gsub("(Of|And|The) ", "\\L\\1 ", region_name, perl=TRUE)
-  region_name
+  
+  if(the) {
+    ifelse(!is.na(regions_thes[region_name_in]), regions_thes[region_name_in], region_name)
+  } else {
+    region_name
+  }
 }
 
 
