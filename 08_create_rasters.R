@@ -2,6 +2,7 @@
 rm(list = ls())
 source("00_setup_and_funs.R")
 memory.limit(size=1000000)
+rasterOptions(datatype = "INT2U")
 
 ## VARIABLE INPUTS
 purpose <- "commute"
