@@ -33,9 +33,6 @@ reqs <- as.numeric(lapply(pkgs, require, character.only = TRUE))
 if(sum(!reqs) > 0) install.packages(pkgs[!reqs], dependencies = TRUE)
 rm(pkgs, reqs)
 
-## capitalize_region() below requires capitalizeStrings() from the dev branch of BBmisc (need to run after packages to have 'backports' installed)
-## ANNA NOTE: capitalizeStrings() IS NOT USED ANY MORE, MAYBE DONT NEED BBmisc?
-# if(!require(BBmisc)) install_github("berndbischl/BBmisc", dependencies = TRUE)
 
 #################
 # PCT PARAMETERS
