@@ -22,7 +22,9 @@ stack_size <- 40      # Max no. rasters to stack at once
 if(!dir.exists(file.path(path_temp_raster, purpose))) { dir.create(file.path(path_temp_raster, purpose)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography))) { dir.create(file.path(path_temp_raster, purpose, geography)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name)) }
-if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "grids"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "grids")) }
+if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "1_grids")) }
+if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "2_merge"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "2_merge")) }
+if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process")) }
 
 #########################
 ### PART 1: BREAK ROUTE FILES INTO CHUNKS
@@ -43,7 +45,7 @@ c2 <- substr(routes_all@data$id, 11, 11)
 table(c1, c2)
 summary({sel_wales <- ((c1 %in% "W")) | (c2 %in% "W")}) # Limit to those starting or ending in Wales
 routes_all <- routes_all[sel_wales,]  
-saveRDS(routes_all, file.path("../wales_raster_temp.Rds"))
+#saveRDS(routes_all, file.path("../wales_raster_temp.Rds"))
 
 
 #REMOVE UNNEEDED DATA & GENERATE MID-LINE POINTS
@@ -88,7 +90,7 @@ for(i in 1:nbatch_cluster){
   tab_sub <- tab[tab$sum < sum_max,]
   tab_sub <- tab_sub[tab_sub$sum >= sum_min,]
   routes <- routes_all[routes_all$grid %in% tab_sub$grid,]
-  saveRDS(routes,file.path(path_temp_raster, purpose, geography, run_name, paste0(scenario,i,".Rds")))
+  saveRDS(routes,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,i,".Rds")))
 }
 
 #########################
@@ -96,7 +98,7 @@ for(i in 1:nbatch_cluster){
 #########################
 
 #INPUT DATASETS
-routes_cluster <- readRDS(file.path(path_temp_raster, purpose, geography, run_name, paste0(scenario,clusterno,".Rds")))
+routes_cluster <- readRDS(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,clusterno,".Rds")))
 
 # COUNT NUMBER OF GRIDS
 tab <- as.data.frame(table(routes_cluster$grid))
@@ -143,7 +145,7 @@ for(i in tab$grid){
     remove(vx_sub2)
     rsum <- stackApply(rs, 1, sum)
 
-    writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "grids", paste0(scenario,clusterno,"-grd-",i,".tif")), format ="GTiff", overwrite=TRUE)
+    writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,clusterno,"-grd-",i,".tif")), format ="GTiff", overwrite=TRUE)
 
     removeTmpFiles(h = 1)
     remove(rs,rsum)
@@ -171,7 +173,7 @@ for(i in tab$grid){
       rs <- vx_sub2$as.RasterStack()
       remove(vx_sub2)
       rsum <- stackApply(rs, 1, sum)
-      writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "grids", paste0(scenario,clusterno,"-grd-",i,"-",l,".tif")), format ="GTiff", overwrite=TRUE)
+      writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,clusterno,"-grd-",i,"-",l,".tif")), format ="GTiff", overwrite=TRUE)
       removeTmpFiles(h = 1)
       remove(rs,rsum)
       
@@ -186,10 +188,10 @@ print(paste0("Running rasters finished running raster at ",Sys.time()))
 
 common_start <- paste0(scenario,clusterno,"-grd-") # text that appears at the start of every file
 
-files <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "grids"), full.names = T) #,pattern="searchPattern")
+files <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"), full.names = T) #,pattern="searchPattern")
 sapply(files,FUN=function(eachPath){
   #Take off the common start and end
-  crop <- sub(paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/grids/",common_start),"",eachPath)
+  crop <- sub(paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",common_start),"",eachPath)
   crop <- sub(".tif","",crop)
   #Remove any -number where grid was broken into chunks
   split <- unlist(strsplit(crop, "-"))
@@ -206,9 +208,9 @@ sapply(files,FUN=function(eachPath){
   }
   #Rebuild the file name
   if(length(split)==2){
-    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/grids/",common_start,out,"-",split[2],".tif")
+    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",common_start,out,"-",split[2],".tif")
   } else {
-    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/grids/",common_start,out,".tif")
+    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",common_start,out,".tif")
   }
   #Rename the file  
   file.rename(from=eachPath,to=fin)
@@ -219,7 +221,7 @@ print(paste0("Renaming rasters finished at ",Sys.time()))
 ### PART 4: RASTER STACK
 #########################
 rasterOptions(maxmemory = 1e+09)
-master_list <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "grids"), pattern = ".tif$",full.names = TRUE )
+master_list <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"), pattern = ".tif$",full.names = TRUE )
 nbatch_stack <- ceiling(length(master_list)/stack_size)
 
 for(m in 1:nbatch_stack){
@@ -271,7 +273,7 @@ for(m in 1:nbatch_stack){
   #set crs of output
   crs(mos) <-"+init=epsg:27700"
   
-  writeRaster(mos,file.path(path_temp_raster, purpose, geography, run_name, paste0(scenario,clusterno,"-merge-",m,".tif")), format = "GTiff")
+  writeRaster(mos,file.path(path_temp_raster, purpose, geography, run_name, "2_merge", paste0(scenario,clusterno,"-merge-",m,".tif")), format = "GTiff")
   remove(raster.list, mos)
   gc()
   
