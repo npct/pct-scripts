@@ -8,7 +8,7 @@ rasterOptions(datatype = "INT2U")
 purpose <- "commute"
 geography <- "lsoa"  
 run_name <- "wales_1708"   # Name for this batch of routes
-scenario <- "bicycle" # WHICH SCENARIO? (parts 1-4)
+scenario <- "govtarget" # WHICH SCENARIO? (parts 1-4)
 clusterno <- 1        # WHICH LARGE CLUSTER? (parts 2-4)
 
 ## FIXED INPUTS
@@ -23,6 +23,7 @@ if(!dir.exists(file.path(path_temp_raster, purpose))) { dir.create(file.path(pat
 if(!dir.exists(file.path(path_temp_raster, purpose, geography))) { dir.create(file.path(path_temp_raster, purpose, geography)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "1_grids")) }
+if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "2_merge"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "2_merge")) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process")) }
 
@@ -90,7 +91,7 @@ for(i in 1:nbatch_cluster){
   tab_sub <- tab[tab$sum < sum_max,]
   tab_sub <- tab_sub[tab_sub$sum >= sum_min,]
   routes <- routes_all[routes_all$grid %in% tab_sub$grid,]
-  saveRDS(routes,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,i,".Rds")))
+  saveRDS(routes,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario, paste0(scenario,i,".Rds")))
 }
 
 #########################
@@ -98,7 +99,7 @@ for(i in 1:nbatch_cluster){
 #########################
 
 #INPUT DATASETS
-routes_cluster <- readRDS(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,clusterno,".Rds")))
+routes_cluster <- readRDS(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario, paste0(scenario,clusterno,".Rds")))
 
 # COUNT NUMBER OF GRIDS
 tab <- as.data.frame(table(routes_cluster$grid))
@@ -145,7 +146,7 @@ for(i in tab$grid){
     remove(vx_sub2)
     rsum <- stackApply(rs, 1, sum)
 
-    writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,clusterno,"-grd-",i,".tif")), format ="GTiff", overwrite=TRUE)
+    writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario, paste0(scenario,clusterno,"-grd-",i,".tif")), format ="GTiff", overwrite=TRUE)
 
     removeTmpFiles(h = 1)
     remove(rs,rsum)
@@ -173,7 +174,7 @@ for(i in tab$grid){
       rs <- vx_sub2$as.RasterStack()
       remove(vx_sub2)
       rsum <- stackApply(rs, 1, sum)
-      writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", paste0(scenario,clusterno,"-grd-",i,"-",l,".tif")), format ="GTiff", overwrite=TRUE)
+      writeRaster(rsum,file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario, paste0(scenario,clusterno,"-grd-",i,"-",l,".tif")), format ="GTiff", overwrite=TRUE)
       removeTmpFiles(h = 1)
       remove(rs,rsum)
       
@@ -188,10 +189,10 @@ print(paste0("Running rasters finished running raster at ",Sys.time()))
 
 common_start <- paste0(scenario,clusterno,"-grd-") # text that appears at the start of every file
 
-files <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"), full.names = T) #,pattern="searchPattern")
+files <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario), full.names = T) #,pattern="searchPattern")
 sapply(files,FUN=function(eachPath){
   #Take off the common start and end
-  crop <- sub(paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",common_start),"",eachPath)
+  crop <- sub(paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/", scenario, "/", common_start),"",eachPath)
   crop <- sub(".tif","",crop)
   #Remove any -number where grid was broken into chunks
   split <- unlist(strsplit(crop, "-"))
@@ -208,9 +209,9 @@ sapply(files,FUN=function(eachPath){
   }
   #Rebuild the file name
   if(length(split)==2){
-    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",common_start,out,"-",split[2],".tif")
+    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",scenario, "/", common_start,out,"-",split[2],".tif")
   } else {
-    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",common_start,out,".tif")
+    fin <- paste0(path_temp_raster,"/",purpose, "/", geography, "/",run_name, "/1_grids/",scenario, "/", common_start,out,".tif")
   }
   #Rename the file  
   file.rename(from=eachPath,to=fin)
@@ -221,7 +222,7 @@ print(paste0("Renaming rasters finished at ",Sys.time()))
 ### PART 4: RASTER STACK
 #########################
 rasterOptions(maxmemory = 1e+09)
-master_list <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"), pattern = ".tif$",full.names = TRUE )
+master_list <- list.files(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario), pattern = ".tif$",full.names = TRUE )
 nbatch_stack <- ceiling(length(master_list)/stack_size)
 
 for(m in 1:nbatch_stack){
@@ -283,10 +284,13 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 #########################
 ### PART 5: CREATE NATIONAL RASTERS IN ARC GIS AND SAVE
 #########################
-## ANNA NOTE: NOW NEED TO STITCH THE STACKS TOGETHER IN ARC GIS - MALCOLM TO PROVIDE INSTRUCTIONS IN DUE COURSE ON THIS STAGE
-## FILES WHEN COMPLETE TO BE SAVED TO path_rasters_national, purpose, geography
+## SEE INSTRUCTUCTIONS 08b FOR DOING THIS IN ARCMAP + QGIS
 
-## FOR NOW, AS A TEMPORARY FIX, WE DOWNLOAD THESE RASTERS FROM THEIR RELEASE (correcting names to be consistent with those used elsewhere, e.g. in rnet / scenarios)
+
+## FILES WHEN COMPLETE TO BE SAVED TO path_rasters_national, purpose, geography: e.g.  file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif")
+
+
+## AS A TEMPORARY FIX, WE DOWNLOAD THESE RASTERS FROM THEIR RELEASE (correcting names to be consistent with those used elsewhere, e.g. in rnet / scenarios)
 raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
 
 url_dl <- paste0(raster_url, "census-all.tif")
