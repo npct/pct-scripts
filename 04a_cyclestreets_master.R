@@ -38,7 +38,7 @@ if (geography=="msoa" & purpose=="commute") {
   unzip(file.path(path_inputs, "01_raw/02_travel_data/commute/msoa/wu03ew_v2.zip"), exdir = path_temp_unzip) 
   lines <- readr::read_csv(file.path(path_temp_unzip, "wu03ew_v2.csv"), col_names = FALSE)  
   lines <- dplyr::rename(lines, o = X1, d = X2)
-  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/msoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/msoa_cents_mod.geojson"))
   cents_o@data <- dplyr::rename(cents_o@data, geo_code = msoa11cd)
   cents_all <- cents_d <- cents_o
 } else if (geography=="lsoa" & purpose=="commute")  {
@@ -49,7 +49,7 @@ if (geography=="msoa" & purpose=="commute") {
   unzip(file.path(path_inputs, "01_raw/02_travel_data/commute/lsoa/WM12EW[CT0489]_lsoa.zip"), exdir = path_temp_unzip)
   lines <- data.table::fread(file.path(path_temp_unzip, "WM12EW[CT0489]_lsoa.csv"),select=c(1,3))
   lines <- dplyr::rename(lines, o = `Area of usual residence`, d = `Area of Workplace`)
-  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"))
   cents_o@data <- dplyr::rename(cents_o@data, geo_code = `lsoa11cd`)
   cents_all <- cents_d <- cents_o
 } else if (geography=="lsoa" & purpose=="school")  {
@@ -57,9 +57,9 @@ if (geography=="msoa" & purpose=="commute") {
   maxdist_visualise <- 15
   lines <- data.table::fread(file.path(path_inputs, "02_intermediate/02_travel_data/school/lsoa", "flows_2011.csv"),select=c(1,2,4))
   lines <- dplyr::rename(lines, o = `lsoa11cd`, d = `urn`)
-  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  cents_o <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"))
   cents_o@data <- dplyr::rename(cents_o@data, geo_code = `lsoa11cd`)
-  cents_d <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"), layer = "OGRGeoJSON")
+  cents_d <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"))
   cents_d@data <- dplyr::rename(cents_d@data, geo_code = `urn`)
 } else {
 }

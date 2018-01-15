@@ -19,13 +19,13 @@ if(geography == "msoa") {
   unzip(file.path(path_inputs, "01_raw/01_geographies/msoa_boundaries/Middle_Layer_Super_Output_Areas_December_2011_Super_Generalised_Clipped_Boundaries_in_England_and_Wales.zip"), exdir = path_temp_unzip)
   z_shape <- readOGR(file.path(path_temp_unzip, "Middle_Layer_Super_Output_Areas_December_2011_Super_Generalised_Clipped_Boundaries_in_England_and_Wales.shp"))
   z_shape@data <- dplyr::rename(z_shape@data, geo_code = msoa11cd)
-  c_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/msoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  c_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/msoa_cents_mod.geojson"))
   c_shape@data <- dplyr::rename(c_shape@data, geo_code = msoa11cd)
 } else if(geography == "lsoa") {
   unzip(file.path(path_inputs, "01_raw/01_geographies/lsoa_boundaries/Lower_Layer_Super_Output_Areas_December_2011_Super_Generalised_Clipped__Boundaries_in_England_and_Wales.zip"), exdir = path_temp_unzip)
   z_shape <- readOGR(file.path(path_temp_unzip, "Lower_Layer_Super_Output_Areas_December_2011_Super_Generalised_Clipped__Boundaries_in_England_and_Wales.shp"))
   z_shape@data <- dplyr::rename(z_shape@data, geo_code = `lsoa11cd`)
-  c_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"), layer = "OGRGeoJSON")
+  c_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lsoa_cents_mod.geojson"))
   c_shape@data <- dplyr::rename(c_shape@data, geo_code = `lsoa11cd`)
 } else {
 }
@@ -34,8 +34,8 @@ c_shape <- spTransform(c_shape, proj_4326)
 l_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds"))
 rf_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds"))
 rq_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rq_shape.Rds"))
-lad <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lad.geojson"), layer = "OGRGeoJSON")
-pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/pct_regions_lowres.geojson"), layer = "OGRGeoJSON")
+lad <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lad.geojson"))
+pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/pct_regions_lowres.geojson"))
 
 
 # OPEN ATTRIBUTE DATA 
