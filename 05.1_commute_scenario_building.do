@@ -527,10 +527,7 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 			duplicates drop
 			merge 1:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_lookup.dta", nogen		
 			order geo_code geo_name lad11cd lad_name all light_rail- other
-* DROP WALES!
-gen temp=substr(geo_code,1,1)
-drop if temp=="W"
-drop temp
+
 		* SAVE
 			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\z_all_attributes_unrounded.csv", replace
 
@@ -575,7 +572,7 @@ drop temp
 			}
 			keep region_name *perc
 			list if bicycle_perc==. 
-			drop if bicycle_perc==. // should be nothing, but temporarily is Wales
+			drop if bicycle_perc==. // should be nothing
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\pct_regions_all_attributes.csv", replace
 
 	*****************
@@ -620,11 +617,7 @@ drop temp
 			merge 1:1 id using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\rfrq_all_data.dta"
 			drop if _m==2
 			count if _m!=3 & geo_code1!=geo_code2 & geo_code2!="Other" & geo_code2!="OD0000003" & geo_code2!="Under 3" // should be none
-			drop _m
-* DROP WALES!
-gen temp=substr(geo_code1,1,1)
-drop if temp=="W"
-drop temp		
+			drop _m		
 		* SAVE
 			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_attributes_unrounded.csv", replace
 			
