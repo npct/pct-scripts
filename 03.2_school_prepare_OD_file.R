@@ -180,6 +180,6 @@ urn_cents$lsoa11cd <- over(urn_cents, lsoa11)$lsoa11cd
 urn_cents_unmatched <- urn_cents[is.na(urn_cents@data$lsoa11cd),]
 # View(urn_cents_unmatched)
   # look up using https://gridreferencefinder.com/ for postcodes and then http://imd-by-postcode.opendatacommunities.org/ for LSOA
-urn_cents@data$lsoa11cd[urn_cents_unmatched@data$urn==117862] <- "E01013099"
-urn_cents@data$lsoa11cd[urn_cents_unmatched@data$urn==134512] <- "E01008687"
+urn_cents@data$lsoa11cd[urn_cents@data$urn==117862] <- "E01013099"
+urn_cents@data$lsoa11cd[urn_cents@data$urn==134512] <- "E01008687"
 write_csv(urn_cents@data, file.path(path_inputs, "02_intermediate/01_geographies", "lookup_urn_lsoa11.csv"))

@@ -580,13 +580,9 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		
 		* SUBSET BY DISTANCE AND TO SCENARIO VARIABLES
 			keep if flowtype==1
-			merge m:1 urn using "lookup_urn_lsoa11.dta"
-			drop if _m==2 // excluded schools
-			drop _m
-			gen geo_code_d=lsoa11cd
-			order id geo_code_o urn geo_code_d bicycle *_slc
+			order id geo_code_o urn all bicycle *_slc
 			keep id - dutch_slc
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\od_rnet_attributes.csv", replace
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\rnet_all_attributes.csv", replace
 			
 		* RASTER
 			keep id bicycle *_slc	
