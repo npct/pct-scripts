@@ -412,11 +412,11 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 			gen vsl=1855315		// VALUE IN POUNDS
 			
 		* DURATION OF CYCLING/WALKING
-			gen cdur_obs = 60*((cyc_dist_km*cyclecommute_tripspertypicalweek)/cspeed) // TIME CYCLING PER DAY IN MINUTES AMONG NEW CYCLISTS
+			gen cdur_obs = 60*((cyc_dist_km*cyclecommute_tripspertypicalweek)/cspeed) // TIME CYCLING PER WEEK IN MINUTES AMONG NEW CYCLISTS
 			gen cdur_obs_dutch=((1-percentebike_dutch)*cdur_obs)+(percentebike_dutch*cdur_obs*ebikemetreduction*(cspeed/ebikespeed))
 			gen cdur_obs_ebike=((1-percentebike_ebike)*cdur_obs)+(percentebike_ebike*cdur_obs*ebikemetreduction*(cspeed/ebikespeed))
 			
-			gen wdur_obs = 60*((cyc_dist_km*cyclecommute_tripspertypicalweek)/wspeed) // TIME WALKING PER DAY IN MINUTES AMONG THOSE NOW SWITCHING TO CYCLING
+			gen wdur_obs = 60*((cyc_dist_km*cyclecommute_tripspertypicalweek)/wspeed) // TIME WALKING PER WEEK IN MINUTES AMONG THOSE NOW SWITCHING TO CYCLING
 		*	drop cyclecommute_tripspertypicalweek cspeed wspeed ebiketimereduction ebikemetreduction percentebike_dutch percentebike_ebike
 		*	compress 
 
