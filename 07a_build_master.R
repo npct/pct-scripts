@@ -49,6 +49,13 @@ for(k in 1:length(regions_tobuild)){
       region_stats <- readLines(file.path(path_shiny, "regions_www/tabs/region_stats", purpose, geography, region, "region_stats.html"))
       region_stats <- remove_style(region_stats)  # remove style section
       region_stats <- gsub("<table>", "<table class='region_stats_table'>", region_stats)
+      
+      # Change 'Wales region' to 'Wales'
+      if (region == "wales") {
+        region_stats <- gsub("The Wales region", "Wales", region_stats)
+        region_stats <- gsub("the Wales region", "Wales", region_stats)
+      }
+
       write(region_stats, file.path(path_shiny, "regions_www/tabs/region_stats", purpose, geography, region, "region_stats.html"))
     }
 
