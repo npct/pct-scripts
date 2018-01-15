@@ -5,10 +5,10 @@ memory.limit(size=1000000)
 rasterOptions(datatype = "INT2U")
 
 ## VARIABLE INPUTS
-purpose <- "commute"
+purpose <- "school"
 geography <- "lsoa"  
-run_name <- "wales_1708"   # Name for this batch of routes
-scenario <- "govtarget" # WHICH SCENARIO? (parts 1-4)
+run_name <- "school_1801"   # Name for this batch of routes
+scenario <- "dutch_slc" # WHICH SCENARIO? (parts 1-4)
 clusterno <- 1        # WHICH LARGE CLUSTER? (parts 2-4)
 
 ## FIXED INPUTS
@@ -40,20 +40,24 @@ routes_all@data <- data.frame(id = routes_all$id)
 routes_all@data <- left_join(routes_all@data, od_raster_attributes, by="id")
 
 # SUBSET IF DESIRED
+# Random school subset
+# urn <- substr(routes_all@data$id, 11, 19)
+# summary({sel_area <- ((urn %in% "urn136028") | (urn %in% "urn100000"))}) # Limit to those at school 136028
+# routes_all <- routes_all[sel_area,]
+
 # Wales subset
-c1 <- substr(routes_all@data$id, 1, 1)
-c2 <- substr(routes_all@data$id, 11, 11)
-table(c1, c2)
-summary({sel_wales <- ((c1 %in% "W")) | (c2 %in% "W")}) # Limit to those starting or ending in Wales
-routes_all <- routes_all[sel_wales,]  
-#saveRDS(routes_all, file.path("../wales_raster_temp.Rds"))
+# c1 <- substr(routes_all@data$id, 1, 1)
+# c2 <- substr(routes_all@data$id, 11, 11)
+# table(c1, c2)
+# summary({sel_wales <- ((c1 %in% "W")) | (c2 %in% "W")}) # Limit to those starting or ending in Wales
+# routes_all <- routes_all[sel_wales,]  
 
 
 #REMOVE UNNEEDED DATA & GENERATE MID-LINE POINTS
 routes_all@data <- routes_all@data[,c("id",scenario)]  
 names(routes_all) <- c("id","bike")
 summary(!is.na(routes_all$bike))  # CHECK NONE ARE MISSING
-routes_all <- routes_all[routes_all$bike >0,] # ONLY KEEP ROUTES WITH ANY CYCLING
+routes_all <- routes_all[routes_all$bike >0,] # ONLY KEEP ROUTES WITH ANY CYCLING (higher threshold for school?)
 nrow(routes_all)
 routes_all <- spTransform(routes_all, proj_27700) # Need to project it, rather than lat/long, to find midpoint
 points <- SpatialLinesMidPoints(routes_all)
@@ -291,21 +295,21 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 
 
 ## AS A TEMPORARY FIX, WE DOWNLOAD THESE RASTERS FROM THEIR RELEASE (correcting names to be consistent with those used elsewhere, e.g. in rnet / scenarios)
-raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
-
-url_dl <- paste0(raster_url, "census-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "gov-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_govtarget_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "gender-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_gendereq_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "ducht-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_dutch_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "ebikes-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_ebike_all.tif"), mode="wb")
-
-
-
+# raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
+# 
+# url_dl <- paste0(raster_url, "census-all.tif")
+# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif"), mode="wb")
+# url_dl <- paste0(raster_url, "gov-all.tif")
+# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_govtarget_all.tif"), mode="wb")
+# url_dl <- paste0(raster_url, "gender-all.tif")
+# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_gendereq_all.tif"), mode="wb")
+# url_dl <- paste0(raster_url, "ducht-all.tif")
+# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_dutch_all.tif"), mode="wb")
+# url_dl <- paste0(raster_url, "ebikes-all.tif")
+# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_ebike_all.tif"), mode="wb")
+# 
+# 
+# 
 
 
  
