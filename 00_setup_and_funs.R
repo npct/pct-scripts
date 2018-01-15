@@ -116,11 +116,11 @@ init_region <- function(region_type, geography, purpose){
   if (region_type == "pct_regions"){
     assign("pct_regions_lad_lookup", read_csv(file.path(path_inputs, "01_raw/01_geographies/pct_regions/pct_regions_lad_lookup.csv")),  envir = .GlobalEnv)
     assign("build_params", read_csv(file.path(purpose, geography, "build_params_pct_region.csv")), envir = .GlobalEnv)
-    regions_highres <- readOGR(file.path(path_inputs, "02_intermediate/01_geographies", "pct_regions_highres.geojson"), layer = "OGRGeoJSON")
+    regions_highres <- readOGR(file.path(path_inputs, "02_intermediate/01_geographies", "pct_regions_highres.geojson"))
     assign("regions_highres", spTransform(regions_highres, proj_4326), envir = .GlobalEnv)
   }
   # LOAD LAs
-  las <- readOGR(dsn = file.path(path_inputs, "02_intermediate/01_geographies", "lad.geojson"), layer = "OGRGeoJSON")
+  las <- readOGR(dsn = file.path(path_inputs, "02_intermediate/01_geographies", "lad.geojson"))
   assign("las", spTransform(las, proj_4326), envir = .GlobalEnv)
 }
 
@@ -134,5 +134,8 @@ init_outputs_national <- function(purpose, geography){
     assign("l_all", readRDS(file.path(path_outputs_national, purpose, geography, "l_all.Rds")), envir = .GlobalEnv)
     assign("rf_all", readRDS(file.path(path_outputs_national, purpose, geography, "rf_all.Rds")), envir = .GlobalEnv)
     assign("rq_all", readRDS(file.path(path_outputs_national, purpose, geography, "rq_all.Rds")), envir = .GlobalEnv)
+  }
+  if(purpose == "school") {
+    assign("d_all", readRDS(file.path(path_outputs_national, purpose, geography,  "d_all.Rds")), envir = .GlobalEnv)
   }
 }
