@@ -4,8 +4,8 @@ source("00_setup_and_funs.R")
 memory.limit(size=1000000)
 
 # SET INPUT PARAMETERS
-purpose <- "commute"
-geography <- "msoa"  
+purpose <- "school"
+geography <- "lsoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
 init_outputs_national(purpose, geography) # Load national data - need memory size around 13-14k
 
@@ -51,6 +51,8 @@ for(k in 1:length(regions_tobuild)){
       region_stats <- gsub("<table>", "<table class='region_stats_table'>", region_stats)
       write(region_stats, file.path(path_shiny, "regions_www/tabs/region_stats", purpose, geography, region, "region_stats.html"))
     }
+  
+## Add schools region stats
 
   message(paste0("Finished ", region," at ",Sys.time()))
 }
