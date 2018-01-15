@@ -285,27 +285,4 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 ### PART 5: CREATE NATIONAL RASTERS IN ARC GIS AND SAVE
 #########################
 ## SEE INSTRUCTUCTIONS 08b FOR DOING THIS IN ARCMAP + QGIS
-
-
-## FILES WHEN COMPLETE TO BE SAVED TO path_rasters_national, purpose, geography: e.g.  file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif")
-
-
-## AS A TEMPORARY FIX, WE DOWNLOAD THESE RASTERS FROM THEIR RELEASE (correcting names to be consistent with those used elsewhere, e.g. in rnet / scenarios)
-raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
-
-url_dl <- paste0(raster_url, "census-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "gov-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_govtarget_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "gender-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_gendereq_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "ducht-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_dutch_all.tif"), mode="wb")
-url_dl <- paste0(raster_url, "ebikes-all.tif")
-download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_ebike_all.tif"), mode="wb")
-
-
-
-
-
- 
+## FILES WHEN COMPLETE TO BE SAVED IN FINEST-RESOLUTION VERSION (10) TO path_rasters_national, purpose, geography: e.g.  file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif") from 'bicycle-10'
