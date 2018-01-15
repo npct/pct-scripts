@@ -9,7 +9,6 @@ if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography, region)
 
 start_time <- Sys.time() # for timing the script
 
-
 ###########################
 ### SUBSET ZONES & SCHOOLS TO THE REGION
 ###########################
@@ -22,12 +21,17 @@ d <- d_all[d_all@data$lad11cd %in% region_lad_lookup$lad11cd, ]
 ### RUN RNET (UNLESS FLAGGED NOT TO IN BUILD PARAM CSV)
 ###########################
 if (region_build_param$to_rebuild_rnet=="1") {
-  
   # DEFINE SCENARIOS
   scenarios <- c("govtarget_slc","dutch_slc")
-xrestart  
-  # IDENTIFY WITHIN-REGION FAST ROUTES, SUBSET BY MIN FLOW
-  rf_rnet <- rf_all[rf_all$id %in% l_regional$id,]
+
+  # IDENTIFY WITHIN-REGION FAST ROUTES
+  rnet_attributes <- rnet_all_attributes[(rnet_all_attributes$geo_code_o %in% z@data$geo_code) & (rnet_all_attributes$urn %in% d@data$urn), ]
+  summary({sel_rf <- rf_shape@data$id %in% rnet_attributes$id}) 
+  rf_rnet <- rf_shape[sel_rf,]  
+  rf_rnet@data <- data.frame(id = rf_rnet$id) 
+  rf_rnet@data <- left_join(rf_rnet@data, rnet_attributes, by="id")  
+  
+  # SUBSET BY MIN FLOW
   rf_rnet <- rf_rnet[rf_rnet$all >= region_build_param$minflow_rnet, ]
   rf_rnet <- rf_rnet[,c("id", "all", "bicycle", scenarios)]
   
@@ -35,7 +39,7 @@ xrestart
   build_params[build_params$region_name == region, ]$n_people_rnet <- sum(rf_rnet$all)
   
   # REMOVE ZERO FLOWS & SIMPLIFY LINE GEOMETRIES TO SPEED UP BUILD (needs mapshaper installed & available: https://github.com/mbloch/mapshaper/wiki/)
-  rf_rnet <- rf_rnet[(rf_rnet$ebike_slc > 0) | (rf_rnet$gendereq_slc > 0), ]
+  rf_rnet <- rf_rnet[(rf_rnet$dutch_slc > 0), ]
   rf_rnet <- ms_simplify(input = rf_rnet, keep = region_build_param$rnet_keep, method = "dp", keep_shapes = TRUE, snap = TRUE)
   
   # BUILD RNET FOR BASELINE 
@@ -58,16 +62,12 @@ xrestart
   stopCluster(cl = cl)
   
   # DIAGNOSTIC CHECK: REMOVE SEGMENTS WITH NO CYCLISTS (links to: https://github.com/npct/pct-shiny/issues/336/)
-  rnet <- rnet[(rnet$ebike_slc > 0) | (rnet$gendereq_slc > 0),] # remove segments with zero cycling flows
-  
-  # IDENTIFY LINES IN A SINGLE ZONE [ANNA COMMENT - COULD REMOVE THIS VARIABLE, NOT SURE MUCH USED?]
-  rnet$singlezone <- rowSums(gContains(z, rnet, byid = TRUE))
-  rnet@data[rnet$singlezone == 0, grep(pattern = "upto", names(rnet))] = NA 
-  
+  rnet <- rnet[(rnet$dutch_slc > 0),] # remove segments with zero cycling flows
+
   # SET PROJECTION, CREATE ID
   rnet <- spTransform(rnet, proj_4326)
   rnet$local_id <- 1:nrow(rnet)
-  rnet <- rnet[,c("local_id", "bicycle", scenarios,"singlezone")]
+  rnet <- rnet[,c("local_id", "bicycle", scenarios)]
   
   # CHECK AGAINST CODE BOOK AND ROUND SCENARIO VALUES TO 2 DP
   rnet_codebook <- read_csv(file.path(path_codebooks, purpose, "rnet_codebook.csv"))
@@ -84,3 +84,13 @@ saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rd
 geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
 saveRDS(d, (file.path(path_outputs_regional_R, purpose, geography, region, "d.Rds")))
 geojson_write(d, file = file.path(path_outputs_regional_notR, purpose, geography, region, "d.geojson"))
+if (region_build_param$to_rebuild_rnet=="1") {
+  saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")))
+  geojson_write(rnet, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rnet.geojson"))
+}
+
+# SAVE UPDATED OUTPUT PARAMETERS TO CSV, AND RE-CREATE REGION PARAMS SO THEY ARE UPDATED
+build_params[build_params$region_name == region, ]$build_date <- as.character(Sys.Date())
+build_params[build_params$region_name == region, ]$run_min <- round(difftime(Sys.time(), start_time, units="mins"), digits=2)
+write_csv(build_params, file.path(purpose, geography, "build_params_pct_region.csv"))
+assign("region_build_param", subset(build_params, region_name == region), envir = .GlobalEnv)
