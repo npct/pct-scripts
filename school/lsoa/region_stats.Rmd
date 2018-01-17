@@ -46,7 +46,9 @@ if (region_aspect>=2.3) {region_figwidth <- 2.5}
 This document provides information about the data underlying the Propensity to Cycle Tool (PCT) schools layer for `r get_pretty_region_name(region)`. The data were generated on `r region_build_param$build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the 
 <a target="_blank" href="https://www.gnu.org/licenses/agpl-3.0">Affero GPL</a>. The <a target="_blank" href="https://github.com/npct">PCT source code</a> can be modified by others as long as attribution is made to the original.
 
-This layer of the PCT uses origin-destination data on travel to school from the 2011 National School Census (NSC). The interface is currently displaying the number of school children travelling by different modes between Lower Super Output Area zones (LSOAs, average size 360 children). There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` school children living in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **zones** data that are visualised on the map interface and available for download.  There were `r prettyNum(sum(d$all), big.mark = ",", scientific = F)` school children attending school in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **destinations** data that are visualised on the map interface and available for download.  
+This layer of the PCT uses origin-destination data on travel to school from the 2011 National School Census (NSC). The interface is currently displaying the number of children travelling by different modes to school from the Lower Super Output Area (LSOA) where they live (LSOAs have an average size 360 children). 
+
+There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` school children living in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **zones** data that are visualised on the map interface and available for download.  There were `r prettyNum(sum(d$all), big.mark = ",", scientific = F)` school children attending a school in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **destinations** data that are visualised on the map interface and available for download.  
 
 Finally, the **Route Network (LSOA)** is built from all origin-destination fast routes that have have a fast route distance <5km (for primary school children)/<10km (for secondary school children). 
 
@@ -92,7 +94,7 @@ Table 1 summarises the proportion of children cycling, walking, driving and usin
 
 *Table 1: Travel to school mode share in the NSC 2011 and in scenarios among `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` children living in `r get_pretty_region_name(region)`* 
 
-| Scenario | % cyclists | % walking | % driven by car | % all other modes |
+| Scenario | % cycling | % walking | % driven by car | % all other modes |
 | ------------- |:-------------: |:-------------: |:--------------:| :----------------: |
 | NSC 2011 | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$bicycle) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (f <- round(100 * sum(z$foot) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$car) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
 | Government Target | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$govtarget_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$govtarget_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$govtarget_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |

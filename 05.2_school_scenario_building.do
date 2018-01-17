@@ -379,10 +379,10 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen wmmets = 3.3 - 1
 			replace wmmets = 3.6 - 1 if secondary==1
 			
-		* MMET HOURS OF CYCLING/WALKING IN HOURS PER PERSON PER YEAR 
-			gen cdur_year = cycleeduc_tripsperweek * 52.2 *(cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
+		* MMET HOURS OF CYCLING/WALKING IN HOURS PER PERSON PER WEEK 
+			gen cdur_year = cycleeduc_tripsperweek * (cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
 			gen cmmets_year=cmmets * cdur_year
-			gen wdur_year = cycleeduc_tripsperweek * 52.2 * (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
+			gen wdur_year = cycleeduc_tripsperweek * (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
 			gen wmmets_year=wmmets * wdur_year	
 			
 		* CHANGE AT FLOW LEVEL IN OVERALL METS
