@@ -375,16 +375,18 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			replace wmmets = 3.6 - 1 if secondary==1
 			
 		* MMET HOURS OF CYCLING/WALKING IN HOURS PER PERSON PER WEEK 
-			gen cdur_year = cycleeduc_tripsperweek * (cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
-			gen cmmets_year=cmmets * cdur_year
-			gen wdur_year = cycleeduc_tripsperweek * (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
-			gen wmmets_year=wmmets * wdur_year	
+			gen cdur_week = cycleeduc_tripsperweek * (cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
+			gen cmmets_week=cmmets * cdur_week
+			gen wdur_week = cycleeduc_tripsperweek * (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
+			gen wmmets_week=wmmets * wdur_week	
 			
-		* CHANGE AT FLOW LEVEL IN OVERALL METS
+		* CALCULATE CHANGE AT FLOW LEVEL IN *AVERAGE* METS PER WEEK *PER CHILD*
 			foreach x in nocyclists govtarget dutch {
-			gen `x'_sic_mmet=`x'_sic*cmmets_year
-			gen `x'_siw_mmet=`x'_siw*wmmets_year
+			gen `x'_sic_mmet=`x'_sic*cmmets_week
+			gen `x'_siw_mmet=`x'_siw*wmmets_week
 			gen `x'_simmet=`x'_sic_mmet+`x'_siw_mmet
+			replace `x'_simmet = `x'_simmet/all  // DIVIDE BY NO. CHILDREN TO GIVE METS/CHILD - WITHOUT THIS LINE IS OVERALL METS IN THE FLOW
+* remove this line if go for  flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
 			drop `x'_sic_mmet `x'_siw_mmet
 			}
 			gen base_slmmet=-1*nocyclists_simmet	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
@@ -392,9 +394,9 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen `x'_slmmet=`x'_simmet+base_slmmet
 			order `x'_simmet , after(`x'_slmmet)
 			}
-		
+			
 		* DROP INTERMEDIARY VARIABLES
-			drop cspeed wspeed cmmets wmmets cdur_year cmmets_year wdur_year wmmets_year
+			drop cspeed wspeed cmmets wmmets cdur_week cmmets_week wdur_week wmmets_week
 			drop nocyclists_simmet 
 
 	*****************
@@ -426,7 +428,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort geo_code_o: egen a_`var'=sum(`var')
 			}
-			foreach var of varlist govtarget_slmmet- dutch_simmet {
+			foreach var of varlist base_slmmet - dutch_simmet {
 			bysort geo_code_o: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
@@ -476,7 +478,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort urn: egen a_`var'=sum(`var')
 			}
-			foreach var of varlist govtarget_slmmet- dutch_simmet {
+			foreach var of varlist base_slmmet - dutch_simmet {
 			bysort urn: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
