@@ -40,7 +40,7 @@ if(purpose == "school") {
   d_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"))
   d_shape <- spTransform(d_shape, proj_4326)
 }
-lad <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lad.geojson")) # Currently just England, could extent to Wales
+lad <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lad.geojson"))
 pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/pct_regions_lowres.geojson"))
 
 

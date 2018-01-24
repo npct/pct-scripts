@@ -290,7 +290,6 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 #########################
 ## SEE INSTRUCTUCTIONS 08b FOR DOING THIS IN ARCMAP + QGIS
 
-
 ## FILES WHEN COMPLETE TO BE SAVED TO path_rasters_national, purpose, geography: e.g.  file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif")
 
 
@@ -308,8 +307,3 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 # url_dl <- paste0(raster_url, "ebikes-all.tif")
 # download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_ebike_all.tif"), mode="wb")
 # 
-# 
-# 
-
-
- 
