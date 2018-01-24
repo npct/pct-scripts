@@ -13,7 +13,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 	/****************
 	** METHODS TEXT
 	****************
-		** CHILDREN AGE 0-18 IN ENGLAND BY LSAO
+		** CHILDREN AGE 0-18 IN ENGLAND BY LSOA
 			di 12011940 / 32844 // 365 - age 0-18: from PP01UK row 22 https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/2011censuspopulationestimatesbysingleyearofageandsexforlocalauthoritiesintheunitedkingdom
 			di 11336875 / 32844 // 345 - age 2-18
 		** DECISION TO COMBINE EARLY YEARS AND PRIMARY
@@ -29,7 +29,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				ta lea11_phase
 				di 1304/(21523+2415) // add in independent schools
 		** % PRIMARY CHILDREN AGE 2 TO 4
-			use "flows_2011.dta", clear
+			import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\flows_2011.csv", delimiter(comma) varnames(1) clear
 			egen all=rowtotal(bicycle- unknown)
 			bysort urn: egen schoolsize=sum(all)
 			keep urn phase secondary schoolsize age2to3_num
@@ -39,7 +39,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			
 			
 		*/	
-	/****************
+	****************
 	** DEFINE SCHOOL STUDY POPULATION
 	****************
 		use "flows_2011.dta", clear
@@ -58,20 +58,18 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			drop if schoolsize<5 // 1 school - don't even report in write up
 
 		** MAX % SCHOOL BOARDING - OTHERWISE GET AT POTENTIAL/HEALTH IMPACTS WRONG [NB THOSE PUPILS WHO ARE BOARDING ARE PROBABY COMING FAR = CAN ASSUME NO CHANGE]
-			replace boarding_perc=round(boarding_perc)
-			*ta boarding_perc if schoolflag==1 
 			gen school_boarding=(boarding_perc>=50)
 
 		** MAX % SCHOOL WITH UNKNOWN MODE OR LSOA 
 			gen unknownmodelsoa=unknown
 			replace unknownmodelsoa=all if lsoa11cd=="NA"
 			bysort urn: egen numunknownmodelsoa=sum(unknownmodelsoa)
-			gen unknownmodelsoa_perc=round(numunknownmodelsoa*100/schoolsize)
+			gen unknownmodelsoa_perc=numunknownmodelsoa*100/schoolsize
 			*ta unknownmodelsoa_perc if schoolflag==1 
 			gen school_unknown=(unknownmodelsoa_perc>25)
 			
 			/* 
-			** 05.2 EXTRA: FIND SCHOOLS WITH TOO FEW PEOPLE 2011 BUT OK 2011: FEED BACK TO 03.2
+			** 05.2 EXTRA: FIND SCHOOLS WITH TOO FEW PEOPLE 2011 BUT OK 2010: FEED BACK TO 03.2
 				* URNS OF SCHOOLS WITH TOO FEW PEOPLE 2011
 					keep if school_unknown==1
 					keep urn
@@ -84,7 +82,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					gen unknownmodelsoa=unknown
 					replace unknownmodelsoa=total if llsoa_spr10==""
 					bysort urn: egen numunknownmodelsoa=sum(unknownmodelsoa)
-					gen unknownmodelsoa_perc=round(numunknownmodelsoa*100/schoolsize)
+					gen unknownmodelsoa_perc=(numunknownmodelsoa*100/schoolsize)
 					gen school_unknown=(unknownmodelsoa_perc>25)
 					
 					rename urn_spr10 urn
@@ -98,7 +96,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					ta unknownmodelsoa_perc if school_unknown==0
 					keep if school_unknown==0
 					gen replace2011=1
-					keep urn replace2011
+					keep urn replace2011 // paste back into the file below
 					* export delimited using "pct-inputs\01_raw\02_travel_data\school\lsoa\x-manual_extras\0_flowdata_missing2011_present2010.csv", replace
 				*/
 
@@ -120,12 +118,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen unknownlsoa=0
 			replace unknownlsoa=all if lsoa11cd=="NA"
 			total unknownlsoa unknownmode all
-				di 21149/74442.53
-				di 17282/74442.53
-		
-		** % CHILDREN AGE 2-4 IN PRIMARY SCHOOLS
-			import delimited "pct-inputs\01_raw\02_travel_data\school\lsoa\NPD_originals_PRIVATE\Spring_Census_2010.txt", clear 
-		
+				di 21150/74425.31
+				di 16479/74425.31
 
 	****************
 	** IMPUTING UNKNOWN DATA
@@ -142,7 +136,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			expand numpupils
 			drop numpupils
 			
-		** IF LSOA UNKNOWN, RANDOMLY GIVE ANOTHER PUPIL'S LSOA WITH SAME MODE
+		** IF LSOA UNKNOWN, RANDOMLY GIVE ANOTHER PUPIL'S LSOA WITH SAME MODE FROM SAME SCHOOL
 			set seed 20180104
 			set sortseed 2017	// otherwise gsample gives different results because of the preceeding bysort
 			
@@ -223,6 +217,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			rename numpupils4 other
 			duplicates drop
 			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.0.dta", replace
+	
 	****************
 	** GENERATE AND APPLY PROPENSITY EQUATIONS AT FLOW LEVEL
 	****************
@@ -268,11 +263,11 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				gen interact=rf_dist_km*ned_rf_avslope_perc
 				
 				gen pred_base= /*
-					*/ -5.137 + (0.6548 * rf_dist_km) + (0.6677 * rf_dist_kmsqrt) + (-0.2179 * rf_dist_kmsq) + (-0.2724 * ned_rf_avslope_perc) + (-0.06653 * rf_dist_km*ned_rf_avslope_perc)
+					*/ -5.331 + (0.1398 * rf_dist_km) + (1.3065 * rf_dist_kmsqrt) + (-0.1448 * rf_dist_kmsq) + (-0.2769 * ned_rf_avslope_perc) + (-0.06259 * rf_dist_km*ned_rf_avslope_perc)
 				replace pred_base= /*
-					*/ -7.599 + (-2.124 * rf_dist_km) + (6.595 * rf_dist_kmsqrt) + (0.01664 * rf_dist_kmsq) + (-0.3230 * ned_rf_avslope_perc) + (-0.04731 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
+					*/ -7.827 + (-2.359 * rf_dist_km) + (7.048 * rf_dist_kmsqrt) + (0.03198	* rf_dist_kmsq) + (-0.3265 * ned_rf_avslope_perc) + (-0.04561 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
 				replace pred_base=. if flowtype==2
-				
+								
 				gen bdutch = 3.800
 				replace bdutch = 3.156 + (0.8993 * rf_dist_kmsqrt) if secondary==1 
 				
