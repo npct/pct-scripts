@@ -1,5 +1,5 @@
 ---
-title: "PCT - local LSOA results"
+title: "PCT - local LSOA commute results"
 author: "Created by the PCT team"
 output: 
   html_document:
@@ -51,12 +51,12 @@ levels(dfsp$scenario)[1:6] <- c("Total no. commuters", "Cyclists in Ebikes", "Cy
 
 ```
 
-### Key information for `r get_pretty_region_name(region)`, LSOA geography
+### Key information for `r get_pretty_region_name(region)`, commute layer, LSOA geography
 
-This document provides information about the data underlying the Propensity to Cycle Tool (PCT) for `r get_pretty_region_name(region)`. The data were generated on `r region_build_param$build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the 
+This document provides information about the data underlying the Propensity to Cycle Tool (PCT) commuting layer for `r get_pretty_region_name(region)`. The data were generated on `r region_build_param$build_date` and this document was created on `r Sys.Date()`. The PCT is an open source tool for sustainable transport planning, released under the conditions of the 
 <a target="_blank" href="https://www.gnu.org/licenses/agpl-3.0">Affero GPL</a>. The <a target="_blank" href="https://github.com/npct">PCT source code</a> can be modified by others as long as attribution is made to the original.
 
-This version of the PCT uses origin-destination data on travel to work from the 2011 Census. The interface is currently displaying the number of commuters travelling by different modes between Lower Super Output Area zones (LSOAs, average size 690 commuters). There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)` recorded in the 2011 Census. All of these commuters are included in the **zones** data that are visualised on the map interface and available for download.  
+This layer of the PCT uses origin-destination data on travel to work from the 2011 Census. The interface is currently displaying the number of commuters travelling by different modes between Lower Super Output Area zones (LSOAs, average size 690 commuters). There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)` recorded in the 2011 Census. All of these commuters are included in the **zones** data that are visualised on the map interface and available for download.  
 
 Adding in inter-regional flows, there were `r prettyNum(sum(od_attributes$all), big.mark = ",", scientific = F)` commuters living or working in `r get_pretty_region_name(region)` in the 2011 Census, and commuting in a flow containing at least 3 commuters (in either direction).  These commuters are included in the **All flows** files on the data download pages. Flows containing fewer than 3 commuters are excluded from the visualisation and download files for data protection reasons.
 
@@ -64,7 +64,7 @@ Adding in inter-regional flows, there were `r prettyNum(sum(od_attributes$all), 
 
 Between-zone LSOA flows exclude **within-LSOA travel**, when the LSOA zone of origin is the same as the zone of destination. Within-LSOA travel is represented by red points on the map when the lines are shown, and accounts for `r prettyNum(sum(c$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)`.  Between-zone flows also exclude those with no fixed place of work.
  
-The **Route Network (LSOA)** is built from all between-zone LSOA fast routes that a) start *or* end in `r get_pretty_region_name(region)`, and b) have a fast route distance <20km. For more details please see User Manual C.
+The **Route Network (LSOA)** is built from all between-zone LSOA fast routes (including any that start *or* end in `r get_pretty_region_name(region)`) that have a fast route distance <20km. For more details please see User Manual C.
 
 See <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a> for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and the methods used to visualise results at the area, line, route and route network level.
 
@@ -100,11 +100,11 @@ tm_shape(z) +
 <br>
 ### Cycling levels in each scenario for `r get_pretty_region_name(region)`
 
-The proportion of commuters who cycled as their main mode of travel to work baseline (2011 Census) data in `r get_pretty_region_name(region)` was 
+At baseline (2011 Census), the proportion of commuters who cycled to work in `r get_pretty_region_name(region)` was 
 `r round(100 * sum(z$bicycle) / sum(z$all) , 1)`%, compared to the national average of 3.1% in England and Wales as a whole.  The percentage of cycling expected was
 `r round(100 * (sum(z$govtarget_slc) - sum(z$bicycle)) / sum(z$all) , 1)`%, based on the distance and hilliness of commutes in the region using the baseline model for England and Wales.
 
-Table 1 summarises the proportion of commuters walking, driving and using other modes under each scenario in `r get_pretty_region_name(region)`, based on aggregating across all residents in all the LSOA zones.
+Table 1 summarises the proportion of commuters cycling, walking, driving and using other modes under each scenario in `r get_pretty_region_name(region)`, based on aggregating across all residents in all the LSOA zones.
 
 *Table 1: Commute mode share in the Census 2011 and in scenarios among `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)`* 
 
@@ -118,7 +118,7 @@ Table 1 summarises the proportion of commuters walking, driving and using other 
 
 <br>
 
-Figure 3 illustrates the overall number of commuters in cycling to work under each scenario by distance.  Distance for within-zone commutes is estimated as being equal to a third of the distance of the shortest three between-zone commutes from the zone in question (see <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a>).  Commuters with no fixed work place are not included.
+Figure 3 illustrates the overall number of commuters in `r get_pretty_region_name(region)` cycling to work under each scenario by distance.  Distance for within-zone commutes is estimated as being equal to a third of the distance of the shortest three between-zone commutes from the zone in question (see <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a>).  Commuters with no fixed work place are not included.
 
 *Figure 3: Number of people cycling among `r prettyNum(sum(od_attributes$all), big.mark = ",", scientific = F)` commuters living or working in `r get_pretty_region_name(region)`, by scenario and distance*
 ```{r fig3, fig.width = 8, fig.height = 8, fig.align = "left", fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}

@@ -135,4 +135,9 @@ init_outputs_national <- function(purpose, geography){
     assign("rf_all", readRDS(file.path(path_outputs_national, purpose, geography, "rf_all.Rds")), envir = .GlobalEnv)
     assign("rq_all", readRDS(file.path(path_outputs_national, purpose, geography, "rq_all.Rds")), envir = .GlobalEnv)
   }
+  if(purpose == "school") {
+    assign("d_all", readRDS(file.path(path_outputs_national, purpose, geography,  "d_all.Rds")), envir = .GlobalEnv)
+    assign("rf_shape", readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds")), envir = .GlobalEnv)
+    assign("rnet_all_attributes", read_csv(file.path(path_temp_scenario, purpose, geography, "rnet_all_attributes.csv")), envir = .GlobalEnv)
+  }
 }

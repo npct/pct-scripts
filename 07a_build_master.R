@@ -4,8 +4,8 @@ source("00_setup_and_funs.R")
 memory.limit(size=1000000)
 
 # SET INPUT PARAMETERS
-purpose <- "commute"
-geography <- "msoa"  
+purpose <- "school"
+geography <- "lsoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
 init_outputs_national(purpose, geography) # Load national data - need memory size around 13-14k
 
@@ -17,6 +17,7 @@ init_outputs_national(purpose, geography) # Load national data - need memory siz
 regions_tobuild <- as.character(build_params$region_name[build_params$to_rebuild==1])
 
 for(k in 1:length(regions_tobuild)){
+
   # SUBSET TO THE SELECTED REGION
   region <- regions_tobuild[k]
   region_build_param <- build_params[build_params$region_name == region,]
@@ -32,7 +33,6 @@ for(k in 1:length(regions_tobuild)){
   }
   
   # WRITE REGION STATS FILE
-    if (purpose == "commute") {
       # Create region stats directory if not there
       if(!dir.exists(file.path(path_shiny, "regions_www/tabs/region_stats", purpose))) { dir.create(file.path(path_shiny, "regions_www/tabs/region_stats", purpose)) }
       if(!dir.exists(file.path(path_shiny, "regions_www/tabs/region_stats", purpose, geography))) { dir.create(file.path(path_shiny, "regions_www/tabs/region_stats", purpose, geography)) }
@@ -57,7 +57,6 @@ for(k in 1:length(regions_tobuild)){
       }
 
       write(region_stats, file.path(path_shiny, "regions_www/tabs/region_stats", purpose, geography, region, "region_stats.html"))
-    }
 
   message(paste0("Finished ", region," at ",Sys.time()))
 }
