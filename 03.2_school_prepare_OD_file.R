@@ -16,7 +16,7 @@ for (i in (10:11) ) {
   sf <- sf[,c(1, 3:4, 6:10)]
   names(sf) <- sub(paste0("_SPR",i), "", names(sf))
   names(sf) <- tolower(names(sf))
-  sf <- dplyr::rename(sf, lsoa01cd = `llsoa`, bicycle = `cycle`, foot = `walk`)
+  sf <- dplyr::rename(sf, lsoa01cd = llsoa, bicycle = cycle, foot = walk)
   assign(paste0("sf",i), data.frame(sf))
 }
 
