@@ -23,7 +23,9 @@ d_codebook <- read_csv(file.path(path_codebooks, purpose, "d_codebook.csv"))
 lad_codebook <- read_csv(file.path(path_codebooks, purpose, "lad_codebook.csv"))
 
 ## APPLY MINIMUM SIZE + ROUND, SUBSET TO CODEBOOK VARIABLES, SAVE
+z_all_attributes <- z_all_attributes[order(z_all_attributes$geo_name),] # A bodge: sort so as not to have at the top an LSOA that has 0 cars in, as this messes up rounding.  Correct 2 lines later
 z_all_attributes <- as.data.frame(apply(z_all_attributes, c(2), round_df), stringsAsFactors = F)
+z_all_attributes <- z_all_attributes[order(z_all_attributes$geo_code),] 
 z_all_attributes <- z_all_attributes[z_codebook$`Variable name`]
 write_csv(z_all_attributes,  file.path(path_outputs_national, purpose, geography, "z_all_attributes.csv"))
 
