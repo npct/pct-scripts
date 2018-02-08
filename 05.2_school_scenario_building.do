@@ -55,7 +55,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				* N=5: v. small primary
 				* N=6, spires school: small special school
 				* N=6, Holy Island: v. small primary in Lindisfarm Island
-			drop if schoolsize<5 // 1 school - don't even report in write up
+			*drop if schoolsize<5 // 1 school - don't even report in write up
 
 		** MAX % SCHOOL BOARDING - OTHERWISE GET AT POTENTIAL/HEALTH IMPACTS WRONG [NB THOSE PUPILS WHO ARE BOARDING ARE PROBABY COMING FAR = CAN ASSUME NO CHANGE]
 			gen school_boarding=(boarding_perc>=50)
@@ -118,8 +118,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen unknownlsoa=0
 			replace unknownlsoa=all if lsoa11cd=="NA"
 			total unknownlsoa unknownmode all
-				di 21150/74425.31
-				di 16479/74425.31
+				di 21150/74425.32
+				di 16479/74425.32
 
 	****************
 	** IMPUTING UNKNOWN DATA
@@ -466,7 +466,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			recode `var' .=0 if _m==2
 			}
 			drop country _m
-		* SAVE
+		* SAVE FULL VERSION
 			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_unrounded.csv", replace
 
 		
@@ -516,10 +516,36 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			drop _m
 			gen lsoa11nm = geo_name
 			order urn schoolname phase secondary lsoa11cd lsoa11nm lad11cd lad_name
-			drop geo_code geo_name	
-		* SAVE
+			drop geo_code geo_name
+		* SAVE FULL VERSION
 			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\d_all_attributes_unrounded.csv", replace
 
+			
+	*****************
+	** SAVE SDC-COMPLIANT PUBLIC VERSION FOR SCHOOL AND ZONE
+	*****************
+		foreach layer in z d {
+			import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_unrounded.csv", clear
+			* SUPPRESS SMALL CELLS
+				gen zmax=2 // 'local results' = suppress if <=2, 0 allowed
+				gen dmax=5 // 'school results' = suppress if <=5, 0 allowed
+				replace all=. if (all>0 & all<=`layer'max) // NB if size of zone is 2 & those were different modes, could work that the true no. was all=2 out...but actually only 1 zone has all=2 [E01033656] and it has just 1 mode
+				gen sdcflag_c=(bicycle>0 & bicycle<=`layer'max)
+				replace bicycle=. if sdcflag_c==1
+				gen sdcflag_w=(foot>0 & foot<=`layer'max)
+				replace foot=. if sdcflag_w==1
+				gen sdcflag_d=(car>0 & car<=`layer'max)
+				replace car=. if sdcflag_d==1
+				foreach y in c w d {
+				foreach x in govtarget dutch {
+				replace `x'_sl`y'=. if sdcflag_`y'==1
+				}
+				drop sdcflag_`y'
+				}
+				drop zmax dmax
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_public_unrounded.csv", replace
+		}
+			
 	*****************
 	** AGGREGATE TO LA & PCT REGION LEVEL BY WHERE CHILDREN LIVE
 	*****************
