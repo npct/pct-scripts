@@ -78,7 +78,9 @@ z_shape <- z_shape[sel_zone,]
 z_shape@data <- data.frame(geo_code = z_shape$geo_code) 
 z_shape@data <- left_join(z_shape@data, z_all_attributes, by="geo_code")
 saveRDS(z_shape, file.path(path_outputs_national, purpose, geography, "z_all.Rds"))
-geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
+if(purpose == "commute") {
+  geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
+}
 
 if(purpose == "commute") {
 # MERGE OD SCENARIO DATA TO CENTS FILE [commute, not schools]
@@ -129,7 +131,6 @@ if(purpose == "school") {
   d_shape@data <- data.frame(urn = d_shape$urn) 
   d_shape@data <- left_join(d_shape@data, d_all_attributes, by="urn")
   saveRDS(d_shape, file.path(path_outputs_national, purpose, geography, "d_all.Rds"))
-  geojson_write(d_shape, file = file.path(path_outputs_national, purpose, geography, "d_all.geojson"))
 }
 
 # CREATE PUBLIC-FACING VERSIONS OF DATASETS
@@ -154,7 +155,9 @@ summary({sel_lad <- (lad$lad11cd %in% lad_attributes$lad11cd)}) # Currently rest
 lad <- lad[sel_lad,]  
 lad@data <- left_join(lad@data, lad_attributes, by = "lad11cd")
 saveRDS(lad, (file.path(path_outputs_national, purpose, "lad.Rds")))
-geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson"))
+if(purpose == "commute") {
+  geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson"))
+}
 if(purpose == "school") {
   saveRDS(lad, (file.path(path_outputs_national, purpose_public, "lad.Rds")))
   geojson_write(lad, file = file.path(path_outputs_national, purpose_public, "lad.geojson"))

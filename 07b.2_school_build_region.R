@@ -99,17 +99,13 @@ if (region_build_param$to_rebuild_rnet=="1") {
 ###########################
 
 # SAVE OBJECTS
-write_csv(z@data, file.path(path_outputs_regional_notR, purpose, geography, region, "z_attributes.csv"))
 saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
-geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
 
 write_csv(z_public@data, file.path(path_outputs_regional_notR, purpose_public, geography, region, "z_attributes.csv"))
 saveRDS(z_public, (file.path(path_outputs_regional_R, purpose_public, geography, region, "z.Rds")))
 geojson_write(z_public, file = file.path(path_outputs_regional_notR, purpose_public, geography, region, "z.geojson"))
 
-write_csv(d@data, file.path(path_outputs_regional_notR, purpose, geography, region, "d_attributes.csv"))
 saveRDS(d, (file.path(path_outputs_regional_R, purpose, geography, region, "d.Rds")))
-geojson_write(d, file = file.path(path_outputs_regional_notR, purpose, geography, region, "d.geojson"))
 
 write_csv(d_public@data, file.path(path_outputs_regional_notR, purpose_public, geography, region, "d_attributes.csv"))
 saveRDS(d_public, (file.path(path_outputs_regional_R, purpose_public, geography, region, "d.Rds")))
@@ -117,7 +113,6 @@ geojson_write(d_public, file = file.path(path_outputs_regional_notR, purpose_pub
 
 if (region_build_param$to_rebuild_rnet=="1") {
   saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")))
-  geojson_write(rnet, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rnet.geojson"))
   saveRDS(rnet_public, (file.path(path_outputs_regional_R, purpose_public, geography, region, "rnet.Rds")))
   geojson_write(rnet_public, file = file.path(path_outputs_regional_notR, purpose_public, geography, region, "rnet.geojson"))
 }
