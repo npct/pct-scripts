@@ -7,8 +7,8 @@ rasterOptions(datatype = "INT2U")
 ## VARIABLE INPUTS
 purpose <- "school"
 geography <- "lsoa"  
-run_name <- "school_1801"   # Name for this batch of routes
-scenario <- "dutch_slc" # WHICH SCENARIO? (parts 1-4)
+run_name <- "school_1802"   # Name for this batch of routes
+scenario <- "bicycle" # WHICH SCENARIO? (parts 1-4)
 clusterno <- 1        # WHICH LARGE CLUSTER? (parts 2-4)
 
 ## FIXED INPUTS
@@ -99,7 +99,7 @@ for(i in 1:nbatch_cluster){
 }
 
 #########################
-### PART 2 RUN RASTER CLUSTER (SEPARATELY BY CLUSTER NUMBER)
+### PART 2 RUN RASTER CLUSTER (SEPARATELY BY CLUSTER NUMBER: possibly easiest to run 2 + 3 for each cluster in turn, then tackle the larger part 4 for each cluster...)
 #########################
 
 #INPUT DATASETS
@@ -292,18 +292,3 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 
 ## FILES WHEN COMPLETE TO BE SAVED TO path_rasters_national, purpose, geography: e.g.  file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif")
 
-
-## AS A TEMPORARY FIX, WE DOWNLOAD THESE RASTERS FROM THEIR RELEASE (correcting names to be consistent with those used elsewhere, e.g. in rnet / scenarios)
-# raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
-# 
-# url_dl <- paste0(raster_url, "census-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "gov-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_govtarget_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "gender-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_gendereq_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "ducht-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_dutch_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "ebikes-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_ebike_all.tif"), mode="wb")
-# 
