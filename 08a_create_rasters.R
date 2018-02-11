@@ -25,6 +25,7 @@ if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name))) { dir
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "1_grids")) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "2_merge"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "2_merge")) }
+if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "2_merge", scenario))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "2_merge", scenario)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process")) }
 
 #########################
@@ -112,6 +113,7 @@ tab$grid <- as.integer(as.character(tab$grid))
 tab$count <- as.integer(tab$count)
 tab <- tab[order(tab$count),]
 print(paste0("In cluster ",clusterno," there are ",nrow(tab), " grids to do"))
+summary(tab)
 # Special subsetting for restarting after running out of memory
 #tab <- tab[tab$count > XXXXX,]
 #routes_cluster <- routes_cluster[routes_cluster$grid %in% tab$grid,]
@@ -278,7 +280,7 @@ for(m in 1:nbatch_stack){
   #set crs of output
   crs(mos) <-"+init=epsg:27700"
   
-  writeRaster(mos,file.path(path_temp_raster, purpose, geography, run_name, "2_merge", paste0(scenario,clusterno,"-merge-",m,".tif")), format = "GTiff")
+  writeRaster(mos,file.path(path_temp_raster, purpose, geography, run_name, "2_merge", scenario, paste0(scenario,clusterno,"-merge-",m,".tif")), format = "GTiff")
   remove(raster.list, mos)
   gc()
   
