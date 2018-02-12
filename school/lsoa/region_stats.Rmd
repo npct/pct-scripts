@@ -15,8 +15,8 @@ knitr::opts_chunk$set(message = FALSE)
 
 # Read-in the data
 root <- "../.."
-d <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "d.Rds"))
-z <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "z.Rds"))
+d <- readRDS(file.path(root, path_outputs_regional_R, purpose_private, geography, region, "d.Rds"))
+z <- readRDS(file.path(root, path_outputs_regional_R, purpose_private, geography, region, "z.Rds"))
 
 # Import data for Fig 1 + 2 maps
 region_shape <- regions_highres[regions_highres$region_name==region,]

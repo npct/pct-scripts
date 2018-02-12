@@ -2,14 +2,15 @@ clear
 clear matrix
 cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 
-** FOR STATA!! NOT NEEDED R!!
-*import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\flows_2011.csv", delimiter(comma) varnames(1) clear
-*save "flows_2011.dta", replace
-*import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\rfrq_all_data.csv", varnames(1) clear 
-*save "rfrq_all_data.dta", replace
-*import delimited "pct-inputs\02_intermediate\01_geographies\lookup_urn_lsoa11.csv", varnames(1) clear 
-*save "lookup_urn_lsoa11.dta", replace
-
+	/** SAVE CSV FILES IN STATA FORMAT
+		import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\flows_2011.csv", delimiter(comma) varnames(1) clear
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\flows_2011.dta", replace
+		import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\rfrq_all_data.csv", varnames(1) clear 
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\rfrq_all_data.dta", replace
+		import delimited "pct-inputs\02_intermediate\01_geographies\lookup_urn_lsoa11.csv", varnames(1) clear 
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\lookup_urn_lsoa11.dta", replace
+		*/
+		
 	/****************
 	** METHODS TEXT
 	****************
@@ -42,7 +43,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 	****************
 	** DEFINE SCHOOL STUDY POPULATION
 	****************
-		use "flows_2011.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\flows_2011.dta", clear
 		** PREPARATION CLEANING VARS
 			egen all=rowtotal(bicycle- unknown)
 			bysort urn: egen schoolsize=sum(all)
@@ -229,7 +230,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			order all, before(bicycle)
 		
 		* MERGE IN CYCLE STREETS VARIABLES & GEN FLOWTYPE
-			merge 1:1 id using "rfrq_all_data.dta"
+			merge 1:1 id using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\rfrq_all_data.dta"
 				drop if _m==2 // _m=2 are schools excluded from analysis. _m=1 are schools too far from centroids
 				recode _m 1=2 3=1, gen (flowtype)
 				recode flowtype 1=2 if secondary==0 & rf_dist_km>=5
@@ -507,7 +508,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			duplicates drop
 			
 		* MERGE IN GEOGRAPHY
-			merge 1:1 urn using "lookup_urn_lsoa11.dta"
+			merge 1:1 urn using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\lookup_urn_lsoa11.dta"
 			drop if _m==2 // excluded schools
 			drop _m
 			gen geo_code=lsoa11cd
@@ -522,28 +523,49 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 
 			
 	*****************
-	** SAVE SDC-COMPLIANT PUBLIC VERSION FOR SCHOOL AND ZONE
+	** SAVE SDC-COMPLIANT PUBLIC VERSION FOR SCHOOL AND ZONE, PLUS VERSION SERVER  CAN MANIPULATE
 	*****************
 		foreach layer in z d {
 			import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_unrounded.csv", clear
-			* SUPPRESS SMALL CELLS
+			* SET SMALL CELL LIMITS
 				gen zmax=2 // 'local results' = suppress if <=2, 0 allowed
 				gen dmax=5 // 'school results' = suppress if <=5, 0 allowed
-				replace all=. if (all>0 & all<=`layer'max) // NB if size of zone is 2 & those were different modes, could work that the true no. was all=2 out...but actually only 1 zone has all=2 [E01033656] and it has just 1 mode
+			* AVERAGE SMALL CELL VALUES, FOR IMPUTING...ALL ARE CLOSE TO 1.5 FOR z, SO JUST USE THAT
+				foreach x in all bicycle foot car {
+				sum `x' if (`x'>0 & `x'<=`layer'max)
+				}
+				gen zimpute=1.5 // NB all ARE CLOSE TO 1.5 FOR z, SO JUST USE THAT
+				gen dimpute=3
+			* IDENTIFY SMALL CELLS
 				gen sdcflag_c=(bicycle>0 & bicycle<=`layer'max)
-				replace bicycle=. if sdcflag_c==1
 				gen sdcflag_w=(foot>0 & foot<=`layer'max)
+				gen sdcflag_d=(car>0 & car<=`layer'max)		
+			* IMPUTE SMALL CELLS FOR SERVER VERSION
+				replace all=`layer'impute if (all>0 & all<=`layer'max)
+				replace bicycle=`layer'impute if sdcflag_c==1
+				replace foot=`layer'impute if sdcflag_w==1
+				replace car=`layer'impute if sdcflag_d==1
+				foreach y in c w d {
+				foreach x in govtarget dutch {
+				replace `x'_sl`y'=`x'_si`y'+`layer'impute if sdcflag_`y'==1
+				}
+				}
+				preserve
+				drop zmax dmax sdcflag*
+				export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_server_unrounded.csv", replace
+				restore
+			* SUPPRESS SMALL CELLS FOR PUBLIC VERSION
+				replace all=. if (all>0 & all<=`layer'max) // NB if size of zone is 2 & those were different modes, could work that the true no. was all=2 out...but actually only 1 zone has all=2 [E01033656] and it has just 1 mode
+				replace bicycle=. if sdcflag_c==1
 				replace foot=. if sdcflag_w==1
-				gen sdcflag_d=(car>0 & car<=`layer'max)
 				replace car=. if sdcflag_d==1
 				foreach y in c w d {
 				foreach x in govtarget dutch {
 				replace `x'_sl`y'=. if sdcflag_`y'==1
 				}
-				drop sdcflag_`y'
 				}
-				drop zmax dmax
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_public_unrounded.csv", replace
+				drop zmax dmax sdcflag*
+				export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_download_unrounded.csv", replace
 		}
 			
 	*****************
