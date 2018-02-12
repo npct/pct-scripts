@@ -360,8 +360,19 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 ** [?? OR ACTIVE TRAVEL MINUTES, ASSUMING ALL CYCLING AND ?40% WALKING ACTIVE? ALSO THINK CURRENTLY POSSIBLY OVERESTIMATE WALK REL TO CYCLE? DISCUSS WITH JW]
 	*****************
 		* INPUT PARAMETERS FROM NTS
-			gen cycleeduc_tripsperweek = 2.1						// primary school
-			replace cycleeduc_tripsperweek = 4.5 if secondary==1	// secondary school	
+			gen cycleeduc_cycletripsperweek = 2.1						// primary school: cycle trips/week if usual main mode cycling
+			gen cycleeduc_walktripsperweek = 2.4						// walk trips if cycle usual main mode
+			replace cycleeduc_cycletripsperweek = 4.5 if secondary==1	// secondary school	
+			replace cycleeduc_walktripsperweek = 1.2 if secondary==1		
+			gen walkeduc_cycletripsperweek = 0.04						
+			gen walkeduc_walktripsperweek = 5.2						
+			replace walkeduc_cycletripsperweek = 0.07 if secondary==1	
+			replace walkeduc_walktripsperweek = 5.1 if secondary==1	
+			gen carothereduc_cycletripsperweek = 0.02						
+			gen carothereduc_walktripsperweek = 0.55						
+			replace carothereduc_cycletripsperweek = 0.04 if secondary==1	
+			replace carothereduc_walktripsperweek = 0.38 if secondary==1	
+			
 			gen cspeed = 6.1	
 			replace cspeed = 9.4 if secondary==1	
 			gen wspeed = 3.8
@@ -375,14 +386,22 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen wmmets = 3.3 - 1
 			replace wmmets = 3.6 - 1 if secondary==1
 			
-		* MMET HOURS OF CYCLING/WALKING IN HOURS PER PERSON PER WEEK 
-			gen cdur_week = cycleeduc_tripsperweek * (cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
-			gen cmmets_week=cmmets * cdur_week
-			gen wdur_week = cycleeduc_tripsperweek * (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
-			gen wmmets_week=wmmets * wdur_week	
+		* MMET HOURS OF CYCLING/WALKING IN HOURS PER PERSON PER WEEK , AMONG THOSE SWITCHED TO CYCLING
+			gen cdur_trip = (cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
+			gen cmmets_week=cmmets * cycleeduc_cycletripsperweek * cdur_trip
+			gen wdur_trip = (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
+			gen wmmets_week=wmmets * cycleeduc_cycletripsperweek * wdur_trip	
 					
+		* CALCULATE BASELINE AMOUNT OF AT IN FLOW [need to add in for car/other]
+			gen baseline_at_mmet= /*
+				*/ (bicycle * cmmets * cycleeduc_cycletripsperweek * cdur_trip) + /*
+				*/ (bicycle * wmmets * cycleeduc_walktripsperweek * wdur_trip) + /*
+				*/ (foot * cmmets * walkeduc_cycletripsperweek * cdur_trip) + /*
+				*/ (foot * wmmets * walkeduc_walktripsperweek * wdur_trip)  + /*
+				*/ ((car+other) * cmmets * carothereduc_cycletripsperweek * cdur_trip) + /*
+				*/ ((car+other) * wmmets * carothereduc_walktripsperweek * wdur_trip)
+
 		* CALCULATE CHANGE AT FLOW LEVEL IN METS PER WEEK
-			gen baseline_at_mmet=(bicycle*cmmets_week)+(foot*wmmets_week)
 			foreach x in nocyclists govtarget dutch {
 			gen `x'_sic_mmet=`x'_sic*cmmets_week
 			gen `x'_siw_mmet=`x'_siw*wmmets_week
@@ -399,6 +418,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		* CHANGE FROM TOTAL METS TO *AVERAGE* METS PER *CHILD*
 * remove this part if go for  flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
 			replace baseline_at_mmet=baseline_at_mmet/all
+			replace base_slmmet=base_slmmet/all
 			foreach x in govtarget dutch {
 			foreach y in slmmet simmet {
 			replace `x'_`y' = `x'_`y'/all
@@ -406,7 +426,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			}
 			
 		* DROP INTERMEDIARY VARIABLES
-			drop cspeed wspeed cmmets wmmets cdur_week cmmets_week wdur_week wmmets_week
+			drop cspeed wspeed cmmets wmmets cdur_trip cmmets_week wdur_trip wmmets_week
 			drop nocyclists_simmet 
 
 	*****************
@@ -418,14 +438,14 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		gen co2kg_km=0.186
 		
 		foreach x in nocyclists govtarget dutch {
-		gen long `x'_sico2=`x'_sid * cyc_dist_km * cycleeduc_tripsperweek * cardrivertrips_perchildcaruser * 52.2 * co2kg_km 	// NO DRIVERS CHANGED * DIST * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP * CO2 EMISSIONS FACOTR
+		gen long `x'_sico2=`x'_sid * cyc_dist_km * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * co2kg_km 	// NO DRIVERS CHANGED * DIST * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP * CO2 EMISSIONS FACOTR
 		}
 		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 		foreach x in govtarget dutch {
 		gen long `x'_slco2=`x'_sico2+base_slco2
 		order `x'_sico2 , after(`x'_slco2)
 		}
-		drop nocyclists* cycleeduc_tripsperweek cardrivertrips_perchildcaruser co2kg_km cyc_dist_km
+		drop nocyclists* cycleeduc_cycletripsperweek- carothereduc_walktripsperweek cardrivertrips_perchildcaruser co2kg_km cyc_dist_km
 		
 		compress
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", replace
