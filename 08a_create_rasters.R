@@ -46,14 +46,6 @@ routes_all@data <- left_join(routes_all@data, od_raster_attributes, by="id")
 # summary({sel_area <- ((urn %in% "urn136028") | (urn %in% "urn100000"))}) # Limit to those at school 136028
 # routes_all <- routes_all[sel_area,]
 
-# Wales subset
-# c1 <- substr(routes_all@data$id, 1, 1)
-# c2 <- substr(routes_all@data$id, 11, 11)
-# table(c1, c2)
-# summary({sel_wales <- ((c1 %in% "W")) | (c2 %in% "W")}) # Limit to those starting or ending in Wales
-# routes_all <- routes_all[sel_wales,]  
-
-
 #REMOVE UNNEEDED DATA & GENERATE MID-LINE POINTS
 routes_all@data <- routes_all@data[,c("id",scenario)]  
 names(routes_all) <- c("id","bike")
