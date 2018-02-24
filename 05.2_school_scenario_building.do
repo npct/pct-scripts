@@ -110,7 +110,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			total schoolflag all if studypop==1 & secondary==0
 			total schoolflag all if studypop==1 & secondary==1
 			tab studypop secondary [fw=all], col
-				* di (100-7.1)*.988 // 92% of all pupils, inc secondary			
+				di (100-7.1)*.988 // 92% of all pupils, inc private			
 			drop school_boarding numunknownmodelsoa- school_unknown
 			drop if studypop==0
 
@@ -269,8 +269,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					*/ -7.827 + (-2.359 * rf_dist_km) + (7.048 * rf_dist_kmsqrt) + (0.03198	* rf_dist_kmsq) + (-0.3265 * ned_rf_avslope_perc) + (-0.04561 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
 				replace pred_base=. if flowtype==2
 								
-				gen bdutch = 3.800
-				replace bdutch = 3.156 + (0.8993 * rf_dist_kmsqrt) if secondary==1 
+				gen bdutch = 3.690
+				replace bdutch = 3.941 + (0.2645 * rf_dist_kmsqrt) if secondary==1 
 				
 				gen pred_dutch= pred_base + bdutch
 				foreach x in base dutch {
@@ -283,7 +283,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					gen rf_dist_kmcat=floor(rf_dist_km*2)/2
 					recode rf_dist_kmcat 12/max=12
 					gen rf_avslope_perccat=floor(rf_avslope_perc*4)/4
-					recode rf_avslope_perccat 5/max=5
+					recode rf_avslope_perccat 0=0.25 5/max=5
 					table rf_dist_kmcat if secondary==0 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					table rf_avslope_perccat if secondary==0 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					table rf_dist_kmcat if secondary==1 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
@@ -360,22 +360,22 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 ** [?? OR ACTIVE TRAVEL MINUTES, ASSUMING ALL CYCLING AND ?40% WALKING ACTIVE? ALSO THINK CURRENTLY POSSIBLY OVERESTIMATE WALK REL TO CYCLE? DISCUSS WITH JW]
 	*****************
 		* INPUT PARAMETERS FROM NTS
-			gen cycleeduc_cycletripsperweek = 2.1						// primary school: cycle trips/week if usual main mode cycling
-			gen cycleeduc_walktripsperweek = 2.4						// walk trips if cycle usual main mode
-			replace cycleeduc_cycletripsperweek = 4.5 if secondary==1	// secondary school	
-			replace cycleeduc_walktripsperweek = 1.2 if secondary==1		
+			gen cycleeduc_cycletripsperweek = 2.4						// primary school: cycle trips/week if usual main mode cycling
+			replace cycleeduc_cycletripsperweek = 4.9 if secondary==1	// secondary school	
+			gen cycleeduc_walktripsperweek = 2.8						// walk trips if cycle usual main mode
+			replace cycleeduc_walktripsperweek = 1.3 if secondary==1		
 			gen walkeduc_cycletripsperweek = 0.04						
-			gen walkeduc_walktripsperweek = 5.2						
 			replace walkeduc_cycletripsperweek = 0.07 if secondary==1	
-			replace walkeduc_walktripsperweek = 5.1 if secondary==1	
+			gen walkeduc_walktripsperweek = 5.2						
+			replace walkeduc_walktripsperweek = 5.3 if secondary==1	
 			gen carothereduc_cycletripsperweek = 0.02						
-			gen carothereduc_walktripsperweek = 0.55						
-			replace carothereduc_cycletripsperweek = 0.04 if secondary==1	
-			replace carothereduc_walktripsperweek = 0.38 if secondary==1	
+			replace carothereduc_cycletripsperweek = 0.03 if secondary==1	
+			gen carothereduc_walktripsperweek = 0.53						
+			replace carothereduc_walktripsperweek = 0.37 if secondary==1	
 			
-			gen cspeed = 6.1	
-			replace cspeed = 9.4 if secondary==1	
-			gen wspeed = 3.8
+			gen cspeed = 6.4	
+			replace cspeed = 9.3 if secondary==1	
+			gen wspeed = 3.7
 			replace wspeed = 4.0 if secondary==1
 			
 		* INPUT PARAMETERS ON METS
@@ -435,8 +435,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		* Calculate the average number of education escort car driver trips per child education trips by car.
 		* NB this ranges up to a maximum of 2: if an adult drives a single child to school and back then they are making two car trips for each one trip made by the child. But if e.g. they drive the charter school and then go on to work, only the first trip is counted. And if there are several children in the household driven at the same time, the number of adult trips per child is reduced
 		gen cardrivertrips_perchildcaruser=1.2
-		gen co2kg_km=0.186
-		
+		gen co2kg_km=0.182
+				
 		foreach x in nocyclists govtarget dutch {
 		gen long `x'_sico2=`x'_sid * cyc_dist_km * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * co2kg_km 	// NO DRIVERS CHANGED * DIST * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP * CO2 EMISSIONS FACOTR
 		}
@@ -445,11 +445,11 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		gen long `x'_slco2=`x'_sico2+base_slco2
 		order `x'_sico2 , after(`x'_slco2)
 		}
-		drop nocyclists* cycleeduc_cycletripsperweek- carothereduc_walktripsperweek cardrivertrips_perchildcaruser co2kg_km cyc_dist_km
+		drop nocyclists* cycleeduc_cycletripsperweek- carothereduc_walktripsperweek cardrivertrips_perchildcaruser co2kg_km 
 		
 		compress
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", replace
-
+x
 	*****************
 	** AGGREGATE TO ZONE LEVEL
 	*****************
@@ -497,7 +497,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			}
 			drop country _m
 		* SAVE FULL VERSION
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_unrounded.csv", replace
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_private_unrounded.csv", replace
 
 		
 	*****************
@@ -548,14 +548,14 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			order urn schoolname phase secondary lsoa11cd lsoa11nm lad11cd lad_name
 			drop geo_code geo_name
 		* SAVE FULL VERSION
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\d_all_attributes_unrounded.csv", replace
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\d_all_attributes_private_unrounded.csv", replace
 
 			
 	*****************
-	** SAVE SDC-COMPLIANT PUBLIC VERSION FOR SCHOOL AND ZONE, PLUS VERSION SERVER  CAN MANIPULATE
+	** SAVE SDC-COMPLIANT PUBLIC VERSION FOR SCHOOL AND ZONE
 	*****************
 		foreach layer in z d {
-			import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_unrounded.csv", clear
+			import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_private_unrounded.csv", clear
 			* SET SMALL CELL LIMITS
 				gen zmax=2 // 'local results' = suppress if <=2, 0 allowed
 				gen dmax=5 // 'school results' = suppress if <=5, 0 allowed
@@ -569,20 +569,6 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				gen sdcflag_c=(bicycle>0 & bicycle<=`layer'max)
 				gen sdcflag_w=(foot>0 & foot<=`layer'max)
 				gen sdcflag_d=(car>0 & car<=`layer'max)		
-			* IMPUTE SMALL CELLS FOR SERVER VERSION
-				replace all=`layer'impute if (all>0 & all<=`layer'max)
-				replace bicycle=`layer'impute if sdcflag_c==1
-				replace foot=`layer'impute if sdcflag_w==1
-				replace car=`layer'impute if sdcflag_d==1
-				foreach y in c w d {
-				foreach x in govtarget dutch {
-				replace `x'_sl`y'=`x'_si`y'+`layer'impute if sdcflag_`y'==1
-				}
-				}
-				preserve
-				drop zmax dmax sdcflag*
-				export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_server_unrounded.csv", replace
-				restore
 			* SUPPRESS SMALL CELLS FOR PUBLIC VERSION
 				replace all=. if (all>0 & all<=`layer'max) // NB if size of zone is 2 & those were different modes, could work that the true no. was all=2 out...but actually only 1 zone has all=2 [E01033656] and it has just 1 mode
 				replace bicycle=. if sdcflag_c==1
@@ -594,14 +580,14 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				}
 				}
 				drop zmax dmax sdcflag*
-				export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_download_unrounded.csv", replace
+				export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_unrounded.csv", replace
 		}
 			
 	*****************
 	** AGGREGATE TO LA & PCT REGION LEVEL BY WHERE CHILDREN LIVE
 	*****************
 	** LA
-		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_unrounded.csv", clear
+		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_private_unrounded.csv", clear
 		* AGGREGATE
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort lad11cd: egen a_`var'=sum(`var')

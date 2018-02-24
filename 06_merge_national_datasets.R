@@ -5,7 +5,6 @@ memory.limit(size = 1000000)
 
 # SET INPUT PARAMETERS
 purpose <- "school"
-purpose_download <- paste0(purpose, "_download")
 purpose_private <- paste0(purpose, "_private")
 geography <- "lsoa"
 
@@ -29,7 +28,6 @@ if(geography == "msoa") {
 } else {
 }
 z_shape <- spTransform(z_shape, proj_4326)
-z_shape_download <- z_shape
 z_shape_private <- z_shape
 
 if(purpose == "commute") {
@@ -41,7 +39,6 @@ if(purpose == "commute") {
 if(purpose == "school") {
   d_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"))
   d_shape <- spTransform(d_shape, proj_4326)
-  d_shape_download <- d_shape
   d_shape_private <- d_shape
 }
 lad <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lad.geojson"))
@@ -51,10 +48,8 @@ pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geograph
 # OPEN ATTRIBUTE DATA 
 z_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "z_all_attributes.csv"))
 if(purpose == "school") {
-  z_all_attributes_download <- read_csv(file.path(path_outputs_national, purpose_download, geography, "z_all_attributes.csv"))
   z_all_attributes_private <- read_csv(file.path(path_outputs_national, purpose_private, geography, "z_all_attributes.csv"))
   d_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "d_all_attributes.csv"))
-  d_all_attributes_download <- read_csv(file.path(path_outputs_national, purpose_download, geography, "d_all_attributes.csv"))
   d_all_attributes_private <- read_csv(file.path(path_outputs_national, purpose_private, geography, "d_all_attributes.csv"))
 }
 if(purpose == "commute") {
@@ -83,9 +78,8 @@ z_shape <- z_shape[sel_zone,]
 z_shape@data <- data.frame(geo_code = z_shape$geo_code) 
 z_shape@data <- left_join(z_shape@data, z_all_attributes, by="geo_code")
 saveRDS(z_shape, file.path(path_outputs_national, purpose, geography, "z_all.Rds"))
-if(purpose == "commute") {
-  geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
-}
+geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
+
 
 if(purpose == "commute") {
 # MERGE OD SCENARIO DATA TO CENTS FILE [commute, not schools]
@@ -136,29 +130,16 @@ if(purpose == "school") {
   d_shape@data <- data.frame(urn = d_shape$urn) 
   d_shape@data <- left_join(d_shape@data, d_all_attributes, by="urn")
   saveRDS(d_shape, file.path(path_outputs_national, purpose, geography, "d_all.Rds"))
+  geojson_write(d_shape, file = file.path(path_outputs_national, purpose, geography, "d_all.geojson"))
 }
 
-# CREATE PRIVATE AND PUBLIC-FACING VERSIONS OF DATASETS
+# CREATE PRIVATE VERSIONS OF DATASETS
 if(purpose == "school") {
-  summary({sel_zone <- z_shape_download$geo_code %in% z_all_attributes_download$geo_code}) # Check perfect match commute, 1909 false school = LSOA's in Wales
-  z_shape_download <- z_shape_download[sel_zone,]  
-  z_shape_download@data <- data.frame(geo_code = z_shape_download$geo_code) 
-  z_shape_download@data <- left_join(z_shape_download@data, z_all_attributes_download, by="geo_code")
-  saveRDS(z_shape_download, file.path(path_outputs_national, purpose_download, geography, "z_all.Rds"))
-  geojson_write(z_shape_download, file = file.path(path_outputs_national, purpose_download, geography, "z_all.geojson"))
-
   summary({sel_zone <- z_shape_private$geo_code %in% z_all_attributes_private$geo_code}) # Check perfect match commute, 1909 false school = LSOA's in Wales
   z_shape_private <- z_shape_private[sel_zone,]  
   z_shape_private@data <- data.frame(geo_code = z_shape_private$geo_code) 
   z_shape_private@data <- left_join(z_shape_private@data, z_all_attributes_private, by="geo_code")
   saveRDS(z_shape_private, file.path(path_outputs_national, purpose_private, geography, "z_all.Rds"))
-
-  summary({sel_zone <- d_shape_download$urn %in% d_all_attributes_download$urn}) # 205 false = schools excluded from study pop. 
-  d_shape_download <- d_shape_download[sel_zone,]  
-  d_shape_download@data <- data.frame(urn = d_shape_download$urn) 
-  d_shape_download@data <- left_join(d_shape_download@data, d_all_attributes_download, by="urn")
-  saveRDS(d_shape_download, file.path(path_outputs_national, purpose_download, geography, "d_all.Rds"))
-  geojson_write(d_shape_download, file = file.path(path_outputs_national, purpose_download, geography, "d_all.geojson"))
 
   summary({sel_zone <- d_shape_private$urn %in% d_all_attributes_private$urn}) # 205 false = schools excluded from study pop. 
   d_shape_private <- d_shape_private[sel_zone,]  
@@ -172,13 +153,7 @@ summary({sel_lad <- (lad$lad11cd %in% lad_attributes$lad11cd)}) # Currently rest
 lad <- lad[sel_lad,]  
 lad@data <- left_join(lad@data, lad_attributes, by = "lad11cd")
 saveRDS(lad, (file.path(path_outputs_national, purpose, "lad.Rds")))
-if(purpose == "commute") {
-  geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson"))
-}
-if(purpose == "school") {
-  saveRDS(lad, (file.path(path_outputs_national, purpose_download, "lad.Rds")))
-  geojson_write(lad, file = file.path(path_outputs_national, purpose_download, "lad.geojson"))
-}
+geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson"))
 
 # MERGE REGION DATA TO REGION GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 
 ## [NB IN FUTURE NEED TO FIX THIS TO HAVE MORE RATIONAL NAMING ?& FILE LOCATIONS FOR COMMUTE/SCHOOL

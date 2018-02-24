@@ -5,7 +5,6 @@ memory.limit(size=1000000)
 
 # SET INPUT PARAMETERS
 purpose <- "school"
-purpose_download <- paste0(purpose, "_download")
 purpose_private <- paste0(purpose, "_private")
 geography <- "lsoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities

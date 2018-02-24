@@ -3,13 +3,9 @@ if(!dir.exists(file.path(path_outputs_regional_R, purpose))) { dir.create(file.p
 if(!dir.exists(file.path(path_outputs_regional_R, purpose, geography))) { dir.create(file.path(path_outputs_regional_R, purpose, geography)) }
 if(!dir.exists(file.path(path_outputs_regional_R, purpose, geography, region))) { dir.create(file.path(path_outputs_regional_R, purpose, geography, region)) }
 
-if(!dir.exists(file.path(path_outputs_regional_R, purpose_download))) { dir.create(file.path(path_outputs_regional_R, purpose_download)) }
-if(!dir.exists(file.path(path_outputs_regional_R, purpose_download, geography))) { dir.create(file.path(path_outputs_regional_R, purpose_download, geography)) }
-if(!dir.exists(file.path(path_outputs_regional_R, purpose_download, geography, region))) { dir.create(file.path(path_outputs_regional_R, purpose_download, geography, region)) }
-
-if(!dir.exists(file.path(path_outputs_regional_notR, purpose_download))) { dir.create(file.path(path_outputs_regional_notR, purpose_download)) }
-if(!dir.exists(file.path(path_outputs_regional_notR, purpose_download, geography))) { dir.create(file.path(path_outputs_regional_notR, purpose_download, geography)) }
-if(!dir.exists(file.path(path_outputs_regional_notR, purpose_download, geography, region))) { dir.create(file.path(path_outputs_regional_notR, purpose_download, geography, region)) }
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose))) { dir.create(file.path(path_outputs_regional_notR, purpose)) }
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography)) }
+if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography, region))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography, region)) }
 
 if(!dir.exists(file.path(path_outputs_regional_R, purpose_private))) { dir.create(file.path(path_outputs_regional_R, purpose_private)) }
 if(!dir.exists(file.path(path_outputs_regional_R, purpose_private, geography))) { dir.create(file.path(path_outputs_regional_R, purpose_private, geography)) }
@@ -23,11 +19,9 @@ start_time <- Sys.time() # for timing the script
 
 # Within-region zone + school
 z <- z_all[z_all@data$lad11cd %in% region_lad_lookup$lad11cd, ]
-z_download <- z_all_download[z_all_download@data$lad11cd %in% region_lad_lookup$lad11cd, ]
 z_private <- z_all_private[z_all_private@data$lad11cd %in% region_lad_lookup$lad11cd, ]
 
 d <- d_all[d_all@data$lad11cd %in% region_lad_lookup$lad11cd, ]
-d_download <- d_all_download[d_all_download@data$lad11cd %in% region_lad_lookup$lad11cd, ]
 d_private <- d_all_private[d_all_private@data$lad11cd %in% region_lad_lookup$lad11cd, ]
 
 ###########################
@@ -90,15 +84,10 @@ if (region_build_param$to_rebuild_rnet=="1") {
   # FOR SDC CONTROLS, SET AS MISSING VALUES WHERE BICYCLE 1 OR 2, AND SCENARIO VALUE <=2
   rnet_private <- rnet
   
-  rnet_download <- rnet
-  rnet_download@data$bicycle[rnet_download@data$bicycle>0 & rnet_download@data$bicycle<=2] <- NA
+  rnet <- rnet
+  rnet@data$bicycle[rnet@data$bicycle>0 & rnet@data$bicycle<=2] <- NA
   for(i in scenarios){
-    rnet_download@data[[i]][is.na(rnet_download@data$bicycle) & rnet_download@data[[i]]<=2] <- NA
-  }
-  
-  rnet@data$bicycle[rnet@data$bicycle>0 & rnet@data$bicycle<=2] <- 1.5
-  for(i in scenarios){
-    rnet@data[[i]][rnet@data$bicycle>0 & rnet@data$bicycle<=2 & rnet@data[[i]]<=2] <- 1.5
+    rnet@data[[i]][is.na(rnet@data$bicycle) & rnet@data[[i]]<=2] <- NA
   }
   
 }
@@ -108,28 +97,23 @@ if (region_build_param$to_rebuild_rnet=="1") {
 ###########################
 
 # SAVE OBJECTS
+write_csv(z@data, file.path(path_outputs_regional_notR, purpose, geography, region, "z_attributes.csv"))
 saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
-
-write_csv(z_download@data, file.path(path_outputs_regional_notR, purpose_download, geography, region, "z_attributes.csv"))
-saveRDS(z_download, (file.path(path_outputs_regional_R, purpose_download, geography, region, "z.Rds")))
-geojson_write(z_download, file = file.path(path_outputs_regional_notR, purpose_download, geography, region, "z.geojson"))
+geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
 
 saveRDS(z_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "z.Rds")))
 
 
+write_csv(d@data, file.path(path_outputs_regional_notR, purpose, geography, region, "d_attributes.csv"))
 saveRDS(d, (file.path(path_outputs_regional_R, purpose, geography, region, "d.Rds")))
-
-write_csv(d_download@data, file.path(path_outputs_regional_notR, purpose_download, geography, region, "d_attributes.csv"))
-saveRDS(d_download, (file.path(path_outputs_regional_R, purpose_download, geography, region, "d.Rds")))
-geojson_write(d_download, file = file.path(path_outputs_regional_notR, purpose_download, geography, region, "d.geojson"))
+geojson_write(d, file = file.path(path_outputs_regional_notR, purpose, geography, region, "d.geojson"))
 
 saveRDS(d_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "d.Rds")))
 
 
 if (region_build_param$to_rebuild_rnet=="1") {
   saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")))
-  saveRDS(rnet_download, (file.path(path_outputs_regional_R, purpose_download, geography, region, "rnet.Rds")))
-  geojson_write(rnet_download, file = file.path(path_outputs_regional_notR, purpose_download, geography, region, "rnet.geojson"))
+  geojson_write(rnet, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rnet.geojson"))
   saveRDS(rnet_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "rnet.Rds")))
 }
 
