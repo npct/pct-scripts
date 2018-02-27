@@ -7,8 +7,8 @@ rasterOptions(datatype = "INT2U")
 ## VARIABLE INPUTS
 purpose <- "school"
 geography <- "lsoa"  
-run_name <- "school_1801"   # Name for this batch of routes
-scenario <- "dutch_slc" # WHICH SCENARIO? (parts 1-4)
+run_name <- "school_1802"   # Name for this batch of routes
+scenario <- "bicycle" # WHICH SCENARIO? (parts 1-4)
 clusterno <- 1        # WHICH LARGE CLUSTER? (parts 2-4)
 
 ## FIXED INPUTS
@@ -25,6 +25,7 @@ if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name))) { dir
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "1_grids"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "1_grids")) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "1_grids", scenario)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "2_merge"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "2_merge")) }
+if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "2_merge", scenario))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "2_merge", scenario)) }
 if(!dir.exists(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process"))) { dir.create(file.path(path_temp_raster, purpose, geography, run_name, "3_post-process")) }
 
 #########################
@@ -44,14 +45,6 @@ routes_all@data <- left_join(routes_all@data, od_raster_attributes, by="id")
 # urn <- substr(routes_all@data$id, 11, 19)
 # summary({sel_area <- ((urn %in% "urn136028") | (urn %in% "urn100000"))}) # Limit to those at school 136028
 # routes_all <- routes_all[sel_area,]
-
-# Wales subset
-# c1 <- substr(routes_all@data$id, 1, 1)
-# c2 <- substr(routes_all@data$id, 11, 11)
-# table(c1, c2)
-# summary({sel_wales <- ((c1 %in% "W")) | (c2 %in% "W")}) # Limit to those starting or ending in Wales
-# routes_all <- routes_all[sel_wales,]  
-
 
 #REMOVE UNNEEDED DATA & GENERATE MID-LINE POINTS
 routes_all@data <- routes_all@data[,c("id",scenario)]  
@@ -99,7 +92,7 @@ for(i in 1:nbatch_cluster){
 }
 
 #########################
-### PART 2 RUN RASTER CLUSTER (SEPARATELY BY CLUSTER NUMBER)
+### PART 2 RUN RASTER CLUSTER (SEPARATELY BY CLUSTER NUMBER: possibly easiest to run 2 + 3 for each cluster in turn, then tackle the larger part 4 for each cluster...)
 #########################
 
 #INPUT DATASETS
@@ -112,6 +105,7 @@ tab$grid <- as.integer(as.character(tab$grid))
 tab$count <- as.integer(tab$count)
 tab <- tab[order(tab$count),]
 print(paste0("In cluster ",clusterno," there are ",nrow(tab), " grids to do"))
+summary(tab)
 # Special subsetting for restarting after running out of memory
 #tab <- tab[tab$count > XXXXX,]
 #routes_cluster <- routes_cluster[routes_cluster$grid %in% tab$grid,]
@@ -278,7 +272,7 @@ for(m in 1:nbatch_stack){
   #set crs of output
   crs(mos) <-"+init=epsg:27700"
   
-  writeRaster(mos,file.path(path_temp_raster, purpose, geography, run_name, "2_merge", paste0(scenario,clusterno,"-merge-",m,".tif")), format = "GTiff")
+  writeRaster(mos,file.path(path_temp_raster, purpose, geography, run_name, "2_merge", scenario, paste0(scenario,clusterno,"-merge-",m,".tif")), format = "GTiff")
   remove(raster.list, mos)
   gc()
   
@@ -292,18 +286,3 @@ print(paste0("Stacking rasters finished at ",Sys.time()))
 
 ## FILES WHEN COMPLETE TO BE SAVED TO path_rasters_national, purpose, geography: e.g.  file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif")
 
-
-## AS A TEMPORARY FIX, WE DOWNLOAD THESE RASTERS FROM THEIR RELEASE (correcting names to be consistent with those used elsewhere, e.g. in rnet / scenarios)
-# raster_url <- "https://github.com/npct/pct-lsoa/releases/download/1.0/"
-# 
-# url_dl <- paste0(raster_url, "census-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_bicycle_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "gov-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_govtarget_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "gender-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_gendereq_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "ducht-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_dutch_all.tif"), mode="wb")
-# url_dl <- paste0(raster_url, "ebikes-all.tif")
-# download.file(url_dl, file.path(path_outputs_national, purpose, geography, "ras_ebike_all.tif"), mode="wb")
-# 

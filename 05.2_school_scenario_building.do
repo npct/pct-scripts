@@ -2,14 +2,15 @@ clear
 clear matrix
 cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 
-** FOR STATA!! NOT NEEDED R!!
-*import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\flows_2011.csv", delimiter(comma) varnames(1) clear
-*save "flows_2011.dta", replace
-*import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\rfrq_all_data.csv", varnames(1) clear 
-*save "rfrq_all_data.dta", replace
-*import delimited "pct-inputs\02_intermediate\01_geographies\lookup_urn_lsoa11.csv", varnames(1) clear 
-*save "lookup_urn_lsoa11.dta", replace
-
+	/** SAVE CSV FILES IN STATA FORMAT
+		import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\flows_2011.csv", delimiter(comma) varnames(1) clear
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\flows_2011.dta", replace
+		import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\rfrq_all_data.csv", varnames(1) clear 
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\rfrq_all_data.dta", replace
+		import delimited "pct-inputs\02_intermediate\01_geographies\lookup_urn_lsoa11.csv", varnames(1) clear 
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\lookup_urn_lsoa11.dta", replace
+		*/
+		
 	/****************
 	** METHODS TEXT
 	****************
@@ -39,10 +40,10 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			
 			
 		*/	
-	****************
+	/****************
 	** DEFINE SCHOOL STUDY POPULATION
 	****************
-		use "flows_2011.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\flows_2011.dta", clear
 		** PREPARATION CLEANING VARS
 			egen all=rowtotal(bicycle- unknown)
 			bysort urn: egen schoolsize=sum(all)
@@ -55,7 +56,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				* N=5: v. small primary
 				* N=6, spires school: small special school
 				* N=6, Holy Island: v. small primary in Lindisfarm Island
-			drop if schoolsize<5 // 1 school - don't even report in write up
+			*drop if schoolsize<5 // 1 school - don't even report in write up
 
 		** MAX % SCHOOL BOARDING - OTHERWISE GET AT POTENTIAL/HEALTH IMPACTS WRONG [NB THOSE PUPILS WHO ARE BOARDING ARE PROBABY COMING FAR = CAN ASSUME NO CHANGE]
 			gen school_boarding=(boarding_perc>=50)
@@ -109,7 +110,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			total schoolflag all if studypop==1 & secondary==0
 			total schoolflag all if studypop==1 & secondary==1
 			tab studypop secondary [fw=all], col
-				* di (100-7.1)*.988 // 92% of all pupils, inc secondary			
+				di (100-7.1)*.988 // 92% of all pupils, inc private			
 			drop school_boarding numunknownmodelsoa- school_unknown
 			drop if studypop==0
 
@@ -118,8 +119,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen unknownlsoa=0
 			replace unknownlsoa=all if lsoa11cd=="NA"
 			total unknownlsoa unknownmode all
-				di 21150/74425.31
-				di 16479/74425.31
+				di 21150/74425.32
+				di 16479/74425.32
 
 	****************
 	** IMPUTING UNKNOWN DATA
@@ -229,7 +230,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			order all, before(bicycle)
 		
 		* MERGE IN CYCLE STREETS VARIABLES & GEN FLOWTYPE
-			merge 1:1 id using "rfrq_all_data.dta"
+			merge 1:1 id using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\rfrq_all_data.dta"
 				drop if _m==2 // _m=2 are schools excluded from analysis. _m=1 are schools too far from centroids
 				recode _m 1=2 3=1, gen (flowtype)
 				recode flowtype 1=2 if secondary==0 & rf_dist_km>=5
@@ -263,13 +264,13 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				gen interact=rf_dist_km*ned_rf_avslope_perc
 				
 				gen pred_base= /*
-					*/ -5.331 + (0.1398 * rf_dist_km) + (1.3065 * rf_dist_kmsqrt) + (-0.1448 * rf_dist_kmsq) + (-0.2769 * ned_rf_avslope_perc) + (-0.06259 * rf_dist_km*ned_rf_avslope_perc)
+					*/ -5.327 + (0.1516 * rf_dist_km) + (1.291 * rf_dist_kmsqrt) + (-0.1463 * rf_dist_kmsq) + (-0.2766 * ned_rf_avslope_perc) + (-0.06263 * rf_dist_km*ned_rf_avslope_perc)
 				replace pred_base= /*
-					*/ -7.827 + (-2.359 * rf_dist_km) + (7.048 * rf_dist_kmsqrt) + (0.03198	* rf_dist_kmsq) + (-0.3265 * ned_rf_avslope_perc) + (-0.04561 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
+					*/ -7.821 + (-2.354 * rf_dist_km) + (7.038 * rf_dist_kmsqrt) + (0.03170	* rf_dist_kmsq) + (-0.3268 * ned_rf_avslope_perc) + (-0.04546 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
 				replace pred_base=. if flowtype==2
 								
-				gen bdutch = 3.800
-				replace bdutch = 3.156 + (0.8993 * rf_dist_kmsqrt) if secondary==1 
+				gen bdutch = 3.690
+				replace bdutch = 3.941 + (0.2645 * rf_dist_kmsqrt) if secondary==1 
 				
 				gen pred_dutch= pred_base + bdutch
 				foreach x in base dutch {
@@ -282,15 +283,29 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					gen rf_dist_kmcat=floor(rf_dist_km*2)/2
 					recode rf_dist_kmcat 12/max=12
 					gen rf_avslope_perccat=floor(rf_avslope_perc*4)/4
-					recode rf_avslope_perccat 5/max=5
+					recode rf_avslope_perccat 0=0.25 5/max=5
 					table rf_dist_kmcat if secondary==0 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					table rf_avslope_perccat if secondary==0 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					table rf_dist_kmcat if secondary==1 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					table rf_avslope_perccat if secondary==1 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					drop pcycle		
 								
-				** NUMBER FOR TEXT: DUTCH RAW AVERAGE TRIPS 2KM
+				** NUMBER FOR APPENDIX TEXT: DUTCH RAW AVERAGE TRIPS 2KM
 					table secondary if flowtype==1 & rf_dist_km>=2 & rf_dist_km<3 [fw=all], c(mean pred_dutch)
+				
+				** NUMBER FOR TEXT: AVERAGE DISTANCES
+					recode rf_dist_km .=35, gen(rf_dist_kmlimit)
+					sum rf_dist_kmlimit if secondary==0 [fw=all], det
+					sum rf_dist_kmlimit if secondary==1 [fw=all], det
+					ta flowtype [fw=bicycle]
+					ta flowtype [fw=foot]
+					ta flowtype [fw=car]
+					ta flowtype [fw=other]
+					total rf_dist_kmlimit  [fw=car]
+					total rf_dist_kmlimit if flowtype==2  [fw=car]
+					
+				
+				
 				*/
 					
 	****************
@@ -359,10 +374,21 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 ** [?? OR ACTIVE TRAVEL MINUTES, ASSUMING ALL CYCLING AND ?40% WALKING ACTIVE? ALSO THINK CURRENTLY POSSIBLY OVERESTIMATE WALK REL TO CYCLE? DISCUSS WITH JW]
 	*****************
 		* INPUT PARAMETERS FROM NTS
-			gen cycleeduc_tripsperweek = 2.1						// primary school
-			replace cycleeduc_tripsperweek = 4.5 if secondary==1	// secondary school	
-			gen cspeed = 6.1	
-			replace cspeed = 9.4 if secondary==1	
+			gen cycleeduc_cycletripsperweek = 2.3						// primary school: cycle trips/week if usual main mode cycling
+			replace cycleeduc_cycletripsperweek = 5.1 if secondary==1	// secondary school	
+			gen cycleeduc_walktripsperweek = 3.1						// walk trips if cycle usual main mode
+			replace cycleeduc_walktripsperweek = 1.2 if secondary==1		
+			gen walkeduc_cycletripsperweek = 0.04						
+			replace walkeduc_cycletripsperweek = 0.07 if secondary==1	
+			gen walkeduc_walktripsperweek = 5.2						
+			replace walkeduc_walktripsperweek = 5.3 if secondary==1	
+			gen carothereduc_cycletripsperweek = 0.01						
+			replace carothereduc_cycletripsperweek = 0.03 if secondary==1	
+			gen carothereduc_walktripsperweek = 0.51						
+			replace carothereduc_walktripsperweek = 0.35 if secondary==1	
+			
+			gen cspeed = 6.6	
+			replace cspeed = 9.6 if secondary==1	
 			gen wspeed = 3.8
 			replace wspeed = 4.0 if secondary==1
 			
@@ -374,29 +400,63 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen wmmets = 3.3 - 1
 			replace wmmets = 3.6 - 1 if secondary==1
 			
-		* MMET HOURS OF CYCLING/WALKING IN HOURS PER PERSON PER WEEK 
-			gen cdur_week = cycleeduc_tripsperweek * (cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
-			gen cmmets_week=cmmets * cdur_week
-			gen wdur_week = cycleeduc_tripsperweek * (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
-			gen wmmets_week=wmmets * wdur_week	
-			
-		* CALCULATE CHANGE AT FLOW LEVEL IN *AVERAGE* METS PER WEEK *PER CHILD*
+		* MMET HOURS OF CYCLING/WALKING IN HOURS PER PERSON PER WEEK , AMONG THOSE SWITCHED TO CYCLING
+			gen cdur_trip = (cyc_dist_km/cspeed) // HOURS CYCLING PER WEEK AMONG NEW CYCLISTS IN A FLOW		
+			gen cmmets_week=cmmets * cycleeduc_cycletripsperweek * cdur_trip
+			gen wdur_trip = (cyc_dist_km/wspeed) // HOURS WALKING PER WEEK AMONG THOSE NOW SWITCHING TO CYCLING IN A FLOW
+			gen wmmets_week=wmmets * cycleeduc_cycletripsperweek * wdur_trip	
+					
+		* CALCULATE BASELINE AMOUNT OF AT IN FLOW [need to add in for car/other]
+			gen baseline_at_mmet= /*
+				*/ (bicycle * cmmets * cycleeduc_cycletripsperweek * cdur_trip) + /*
+				*/ (bicycle * wmmets * cycleeduc_walktripsperweek * wdur_trip) + /*
+				*/ (foot * cmmets * walkeduc_cycletripsperweek * cdur_trip) + /*
+				*/ (foot * wmmets * walkeduc_walktripsperweek * wdur_trip)  + /*
+				*/ ((car+other) * cmmets * carothereduc_cycletripsperweek * cdur_trip) + /*
+				*/ ((car+other) * wmmets * carothereduc_walktripsperweek * wdur_trip)
+
+		* CALCULATE CHANGE AT FLOW LEVEL IN METS PER WEEK
 			foreach x in nocyclists govtarget dutch {
 			gen `x'_sic_mmet=`x'_sic*cmmets_week
 			gen `x'_siw_mmet=`x'_siw*wmmets_week
 			gen `x'_simmet=`x'_sic_mmet+`x'_siw_mmet
-			replace `x'_simmet = `x'_simmet/all  // DIVIDE BY NO. CHILDREN TO GIVE METS/CHILD - WITHOUT THIS LINE IS OVERALL METS IN THE FLOW
-* remove this line if go for  flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
 			drop `x'_sic_mmet `x'_siw_mmet
 			}
+	
 			gen base_slmmet=-1*nocyclists_simmet	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 			foreach x in govtarget dutch {
 			gen `x'_slmmet=`x'_simmet+base_slmmet
 			order `x'_simmet , after(`x'_slmmet)
 			}
+		
+		* CHANGE FROM TOTAL METS TO *AVERAGE* METS PER *CHILD*
+* remove this part if go for  flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
+			replace baseline_at_mmet=baseline_at_mmet/all
+			replace base_slmmet=base_slmmet/all
+			foreach x in govtarget dutch {
+			foreach y in slmmet simmet {
+			replace `x'_`y' = `x'_`y'/all
+			}
+			}
 			
+		/* NUMBER IN MAIN TEXT: CALCULATE % CHILDREN GETTING HALF PA FROM SCHOOL AT
+			gen met_bicycle=(cmmets * cycleeduc_cycletripsperweek * cdur_trip)+(wmmets * cycleeduc_walktripsperweek * wdur_trip)
+			gen met_foot=(cmmets * walkeduc_cycletripsperweek * cdur_trip)+(wmmets * walkeduc_cycletripsperweek * wdur_trip)
+			recode met_bicycle min/6.9999999=0 7/max=1
+			recode met_foot min/6.9999999=0 7/max=1
+			gen base_numchild_palevel=(met_bicycle*bicycle) + (met_foot*foot)
+			gen dutch_numchild_palevel=(met_bicycle*dutch_slc) + (met_foot*dutch_slw)
+			total base_numchild_palevel dutch_numchild_palevel all if secondary==0
+				di 5135/41887.69
+				di 149307.9/41887.69
+			total base_numchild_palevel dutch_numchild_palevel all if secondary==1
+				di 53508/32537.63
+				di 1011811/32537.63
+			drop met_bicycle met_foot base_numchild_palevel dutch_numchild_palevel
+			*/
+		
 		* DROP INTERMEDIARY VARIABLES
-			drop cspeed wspeed cmmets wmmets cdur_week cmmets_week wdur_week wmmets_week
+			drop cspeed wspeed cmmets wmmets cdur_trip cmmets_week wdur_trip wmmets_week
 			drop nocyclists_simmet 
 
 	*****************
@@ -405,21 +465,21 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		* Calculate the average number of education escort car driver trips per child education trips by car.
 		* NB this ranges up to a maximum of 2: if an adult drives a single child to school and back then they are making two car trips for each one trip made by the child. But if e.g. they drive the charter school and then go on to work, only the first trip is counted. And if there are several children in the household driven at the same time, the number of adult trips per child is reduced
 		gen cardrivertrips_perchildcaruser=1.2
-		gen co2kg_km=0.186
-		
+		gen co2kg_km=0.182
+				
 		foreach x in nocyclists govtarget dutch {
-		gen long `x'_sico2=`x'_sid * cyc_dist_km * cycleeduc_tripsperweek * cardrivertrips_perchildcaruser * 52.2 * co2kg_km 	// NO DRIVERS CHANGED * DIST * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP * CO2 EMISSIONS FACOTR
+		gen long `x'_sico2=`x'_sid * cyc_dist_km * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * co2kg_km 	// NO DRIVERS CHANGED * DIST * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP * CO2 EMISSIONS FACOTR
 		}
 		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 		foreach x in govtarget dutch {
 		gen long `x'_slco2=`x'_sico2+base_slco2
 		order `x'_sico2 , after(`x'_slco2)
 		}
-		drop nocyclists* cycleeduc_tripsperweek cardrivertrips_perchildcaruser co2kg_km cyc_dist_km
+		drop nocyclists* cycleeduc_cycletripsperweek- carothereduc_walktripsperweek cardrivertrips_perchildcaruser co2kg_km 
 		
 		compress
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", replace
-
+x
 	*****************
 	** AGGREGATE TO ZONE LEVEL
 	*****************
@@ -428,7 +488,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort geo_code_o: egen a_`var'=sum(`var')
 			}
-			foreach var of varlist base_slmmet - dutch_simmet {
+			foreach var of varlist baseline_at_mmet base_slmmet - dutch_simmet {
 			bysort geo_code_o: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
@@ -466,8 +526,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			recode `var' .=0 if _m==2
 			}
 			drop country _m
-		* SAVE
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_unrounded.csv", replace
+		* SAVE FULL VERSION
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_private_unrounded.csv", replace
 
 		
 	*****************
@@ -478,7 +538,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort urn: egen a_`var'=sum(`var')
 			}
-			foreach var of varlist base_slmmet - dutch_simmet {
+			foreach var of varlist baseline_at_mmet base_slmmet - dutch_simmet {
 			bysort urn: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
@@ -507,7 +567,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			duplicates drop
 			
 		* MERGE IN GEOGRAPHY
-			merge 1:1 urn using "lookup_urn_lsoa11.dta"
+			merge 1:1 urn using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\lookup_urn_lsoa11.dta"
 			drop if _m==2 // excluded schools
 			drop _m
 			gen geo_code=lsoa11cd
@@ -516,20 +576,53 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			drop _m
 			gen lsoa11nm = geo_name
 			order urn schoolname phase secondary lsoa11cd lsoa11nm lad11cd lad_name
-			drop geo_code geo_name	
-		* SAVE
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\d_all_attributes_unrounded.csv", replace
+			drop geo_code geo_name
+		* SAVE FULL VERSION
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\d_all_attributes_private_unrounded.csv", replace
 
+			
+	*****************
+	** SAVE SDC-COMPLIANT PUBLIC VERSION FOR SCHOOL AND ZONE
+	*****************
+		foreach layer in z d {
+			import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_private_unrounded.csv", clear
+			* SET SMALL CELL LIMITS
+				gen zmax=2 // 'local results' = suppress if <=2, 0 allowed
+				gen dmax=5 // 'school results' = suppress if <=5, 0 allowed
+			* AVERAGE SMALL CELL VALUES, FOR IMPUTING...ALL ARE CLOSE TO 1.5 FOR z, SO JUST USE THAT
+				foreach x in all bicycle foot car {
+				sum `x' if (`x'>0 & `x'<=`layer'max)
+				}
+				gen zimpute=1.5 // NB all ARE CLOSE TO 1.5 FOR z, SO JUST USE THAT
+				gen dimpute=3
+			* IDENTIFY SMALL CELLS
+				gen sdcflag_c=(bicycle>0 & bicycle<=`layer'max)
+				gen sdcflag_w=(foot>0 & foot<=`layer'max)
+				gen sdcflag_d=(car>0 & car<=`layer'max)		
+			* SUPPRESS SMALL CELLS FOR PUBLIC VERSION
+				replace all=. if (all>0 & all<=`layer'max) // NB if size of zone is 2 & those were different modes, could work that the true no. was all=2 out...but actually only 1 zone has all=2 [E01033656] and it has just 1 mode
+				replace bicycle=. if sdcflag_c==1
+				replace foot=. if sdcflag_w==1
+				replace car=. if sdcflag_d==1
+				foreach y in c w d {
+				foreach x in govtarget dutch {
+				replace `x'_sl`y'=. if sdcflag_`y'==1
+				}
+				}
+				drop zmax dmax sdcflag*
+				export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\\`layer'_all_attributes_unrounded.csv", replace
+		}
+			
 	*****************
 	** AGGREGATE TO LA & PCT REGION LEVEL BY WHERE CHILDREN LIVE
 	*****************
 	** LA
-		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_unrounded.csv", clear
+		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_private_unrounded.csv", clear
 		* AGGREGATE
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort lad11cd: egen a_`var'=sum(`var')
 			}
-			foreach var of varlist govtarget_slmmet- dutch_simmet {
+			foreach var of varlist baseline_at_mmet govtarget_slmmet- dutch_simmet {
 			bysort lad11cd: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}

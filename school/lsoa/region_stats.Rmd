@@ -15,8 +15,8 @@ knitr::opts_chunk$set(message = FALSE)
 
 # Read-in the data
 root <- "../.."
-d <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "d.Rds"))
-z <- readRDS(file.path(root, path_outputs_regional_R, purpose, geography, region, "z.Rds"))
+d <- readRDS(file.path(root, path_outputs_regional_R, purpose_private, geography, region, "d.Rds"))
+z <- readRDS(file.path(root, path_outputs_regional_R, purpose_private, geography, region, "z.Rds"))
 
 # Import data for Fig 1 + 2 maps
 region_shape <- regions_highres[regions_highres$region_name==region,]
@@ -48,9 +48,11 @@ This document provides information about the data underlying the Propensity to C
 
 This layer of the PCT uses origin-destination data on travel to school from the 2011 National School Census (NSC). The interface is currently displaying the number of children travelling by different modes to school from the Lower Super Output Area (LSOA) where they live (LSOAs have an average size 360 children). 
 
-There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` school children living in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **zones** data that are visualised on the map interface and available for download.  There were `r prettyNum(sum(d$all), big.mark = ",", scientific = F)` school children attending a school in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **destinations** data that are visualised on the map interface and available for download.  
+There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` school children living in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **zones** data that are visualised on the map interface and available for download. The interface pop-ups do not, however, present exact numbers for counts based on 1 or 2 children.
 
-Finally, the **Route Network (LSOA, clickable)** is built from all origin-destination fast routes within the region that contain at least 5 children and have a fast route distance <5km (for primary school children)/<10km (for secondary school children). 
+There were `r prettyNum(sum(d$all), big.mark = ",", scientific = F)` school children attending a school in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **destinations** data that are visualised on the map interface and available for download.  The interface pop-ups do not, however, present exact numbers for counts based on 1 to 5 children.
+
+Finally, the **Route Network (LSOA, clickable)** is built from all origin-destination fast routes within the region that contain at least `r region_build_param$minflow_rnet` children and have a fast route distance <5km (for primary school children)/<10km (for secondary school children). The pop-ups do not present exact numbers for segments containing 1 to 2 cyclists.
 
 For more details of methods please see the User Manual.
 

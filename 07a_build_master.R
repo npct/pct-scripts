@@ -5,9 +5,11 @@ memory.limit(size=1000000)
 
 # SET INPUT PARAMETERS
 purpose <- "school"
+purpose_private <- paste0(purpose, "_private")
 geography <- "lsoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
-init_outputs_national(purpose, geography) # Load national data - need memory size around 13-14k
+init_outputs_national(purpose, geography) # Load national data
+
 
 #########################
 ### READ IN REGIONS AND RUN BUILD MASTER FOR EACH

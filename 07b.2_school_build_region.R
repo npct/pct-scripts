@@ -7,6 +7,10 @@ if(!dir.exists(file.path(path_outputs_regional_notR, purpose))) { dir.create(fil
 if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography)) }
 if(!dir.exists(file.path(path_outputs_regional_notR, purpose, geography, region))) { dir.create(file.path(path_outputs_regional_notR, purpose, geography, region)) }
 
+if(!dir.exists(file.path(path_outputs_regional_R, purpose_private))) { dir.create(file.path(path_outputs_regional_R, purpose_private)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose_private, geography))) { dir.create(file.path(path_outputs_regional_R, purpose_private, geography)) }
+if(!dir.exists(file.path(path_outputs_regional_R, purpose_private, geography, region))) { dir.create(file.path(path_outputs_regional_R, purpose_private, geography, region)) }
+
 start_time <- Sys.time() # for timing the script
 
 ###########################
@@ -15,7 +19,10 @@ start_time <- Sys.time() # for timing the script
 
 # Within-region zone + school
 z <- z_all[z_all@data$lad11cd %in% region_lad_lookup$lad11cd, ]
+z_private <- z_all_private[z_all_private@data$lad11cd %in% region_lad_lookup$lad11cd, ]
+
 d <- d_all[d_all@data$lad11cd %in% region_lad_lookup$lad11cd, ]
+d_private <- d_all_private[d_all_private@data$lad11cd %in% region_lad_lookup$lad11cd, ]
 
 ###########################
 ### RUN RNET (UNLESS FLAGGED NOT TO IN BUILD PARAM CSV)
@@ -73,6 +80,16 @@ if (region_build_param$to_rebuild_rnet=="1") {
   rnet_codebook <- read_csv(file.path(path_codebooks, purpose, "rnet_codebook.csv"))
   rnet <- rnet[rnet_codebook$`Variable name`]
   rnet@data <- as.data.frame(apply(rnet@data, c(2), round, 2), stringsAsFactors = F)
+  
+  # FOR SDC CONTROLS, SET AS MISSING VALUES WHERE BICYCLE 1 OR 2, AND SCENARIO VALUE <=2
+  rnet_private <- rnet
+  
+  rnet <- rnet
+  rnet@data$bicycle[rnet@data$bicycle>0 & rnet@data$bicycle<=2] <- NA
+  for(i in scenarios){
+    rnet@data[[i]][is.na(rnet@data$bicycle) & rnet@data[[i]]<=2] <- NA
+  }
+  
 }
 
 ###########################
@@ -84,13 +101,20 @@ write_csv(z@data, file.path(path_outputs_regional_notR, purpose, geography, regi
 saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
 geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
 
+saveRDS(z_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "z.Rds")))
+
+
 write_csv(d@data, file.path(path_outputs_regional_notR, purpose, geography, region, "d_attributes.csv"))
 saveRDS(d, (file.path(path_outputs_regional_R, purpose, geography, region, "d.Rds")))
 geojson_write(d, file = file.path(path_outputs_regional_notR, purpose, geography, region, "d.geojson"))
 
+saveRDS(d_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "d.Rds")))
+
+
 if (region_build_param$to_rebuild_rnet=="1") {
   saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")))
   geojson_write(rnet, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rnet.geojson"))
+  saveRDS(rnet_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "rnet.Rds")))
 }
 
 # SAVE UPDATED OUTPUT PARAMETERS TO CSV, AND RE-CREATE REGION PARAMS SO THEY ARE UPDATED

@@ -5,10 +5,8 @@ memory.limit(size = 1000000)
 
 # SET INPUT PARAMETERS
 purpose <- "school"
+purpose_private <- paste0(purpose, "_private")
 geography <- "lsoa"
-
-if(!dir.exists(file.path(path_outputs_national, purpose))) { dir.create(file.path(path_outputs_national, purpose)) }
-if(!dir.exists(file.path(path_outputs_national, purpose, geography))) { dir.create(file.path(path_outputs_national, purpose, geography)) }
 
 #########################
 ### LOAD SHAPE AND SCENARIO FILES
@@ -30,6 +28,8 @@ if(geography == "msoa") {
 } else {
 }
 z_shape <- spTransform(z_shape, proj_4326)
+z_shape_private <- z_shape
+
 if(purpose == "commute") {
   c_shape <- spTransform(c_shape, proj_4326)
   l_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds"))
@@ -39,6 +39,7 @@ if(purpose == "commute") {
 if(purpose == "school") {
   d_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"))
   d_shape <- spTransform(d_shape, proj_4326)
+  d_shape_private <- d_shape
 }
 lad <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/lad.geojson"))
 pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/pct_regions_lowres.geojson"))
@@ -47,7 +48,9 @@ pct_regions_lowres <- readOGR(file.path(path_inputs,"02_intermediate/01_geograph
 # OPEN ATTRIBUTE DATA 
 z_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "z_all_attributes.csv"))
 if(purpose == "school") {
+  z_all_attributes_private <- read_csv(file.path(path_outputs_national, purpose_private, geography, "z_all_attributes.csv"))
   d_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "d_all_attributes.csv"))
+  d_all_attributes_private <- read_csv(file.path(path_outputs_national, purpose_private, geography, "d_all_attributes.csv"))
 }
 if(purpose == "commute") {
   od_all_attributes <- read_csv(file.path(path_outputs_national, purpose, geography, "od_all_attributes.csv"))
@@ -70,12 +73,13 @@ if(purpose == "school") {
 #########################
 
 # MERGE [ORIGIN] ZONE SCENARIO DATA TO ZONES FILE
-summary({sel_zone <- z_shape$geo_code %in% z_all_attributes$geo_code}) # Check perfect match commute, 1909 false school
+summary({sel_zone <- z_shape$geo_code %in% z_all_attributes$geo_code}) # Check perfect match commute, 1909 false school = LSOA's in Wales
 z_shape <- z_shape[sel_zone,]  
 z_shape@data <- data.frame(geo_code = z_shape$geo_code) 
 z_shape@data <- left_join(z_shape@data, z_all_attributes, by="geo_code")
 saveRDS(z_shape, file.path(path_outputs_national, purpose, geography, "z_all.Rds"))
 geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
+
 
 if(purpose == "commute") {
 # MERGE OD SCENARIO DATA TO CENTS FILE [commute, not schools]
@@ -119,14 +123,29 @@ if(purpose == "commute") {
   saveRDS(rq_shape, (file.path(path_outputs_national, purpose, geography, "rq_all.Rds")))
 }
 
-# MERGE DESTINATION CENTROIDS DATA TO DESTINATIONS FILE
+# MERGE DESTINATION DATA TO DESTINATIONS FILE
 if(purpose == "school") {
-  summary({sel_zone <- d_shape$urn %in% d_all_attributes$urn}) # 205 false = excluded from study pop. 
+  summary({sel_zone <- d_shape$urn %in% d_all_attributes$urn}) # 205 false = schools excluded from study pop. 
   d_shape <- d_shape[sel_zone,]  
   d_shape@data <- data.frame(urn = d_shape$urn) 
   d_shape@data <- left_join(d_shape@data, d_all_attributes, by="urn")
   saveRDS(d_shape, file.path(path_outputs_national, purpose, geography, "d_all.Rds"))
   geojson_write(d_shape, file = file.path(path_outputs_national, purpose, geography, "d_all.geojson"))
+}
+
+# CREATE PRIVATE VERSIONS OF DATASETS
+if(purpose == "school") {
+  summary({sel_zone <- z_shape_private$geo_code %in% z_all_attributes_private$geo_code}) # Check perfect match commute, 1909 false school = LSOA's in Wales
+  z_shape_private <- z_shape_private[sel_zone,]  
+  z_shape_private@data <- data.frame(geo_code = z_shape_private$geo_code) 
+  z_shape_private@data <- left_join(z_shape_private@data, z_all_attributes_private, by="geo_code")
+  saveRDS(z_shape_private, file.path(path_outputs_national, purpose_private, geography, "z_all.Rds"))
+
+  summary({sel_zone <- d_shape_private$urn %in% d_all_attributes_private$urn}) # 205 false = schools excluded from study pop. 
+  d_shape_private <- d_shape_private[sel_zone,]  
+  d_shape_private@data <- data.frame(urn = d_shape_private$urn) 
+  d_shape_private@data <- left_join(d_shape_private@data, d_all_attributes_private, by="urn")
+  saveRDS(d_shape_private, file.path(path_outputs_national, purpose_private, geography, "d_all.Rds"))
 }
 
 # MERGE LA DATA TO LA GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 
@@ -141,9 +160,4 @@ geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson
 summary({sel_regions <- (pct_regions_lowres$region_name %in% pct_regions_all_attributes$region_name)}) # Should be perfect match commute, 1 false school
 pct_regions_lowres <- pct_regions_lowres[sel_regions,]  
 pct_regions_lowres@data <- left_join(pct_regions_lowres@data, pct_regions_all_attributes, by = "region_name")
-if(purpose == "commute") {
-  geojson_write(pct_regions_lowres, file = file.path(path_shiny,"regions_www/pct_regions_lowres_scenario.geojson"))
-}
-if(purpose == "school") {
-  geojson_write(pct_regions_lowres, file = file.path(path_shiny,"regions_www/pct_regions_lowres_scenarioschool.geojson"))
-}
+geojson_write(pct_regions_lowres, file = file.path(path_shiny,"regions_www/www/front_page", purpose, "pct_regions_lowres_scenario.geojson"))

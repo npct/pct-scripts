@@ -127,8 +127,8 @@ init_region <- function(region_type, geography, purpose){
 
 #Initiate national output datasets
 init_outputs_national <- function(purpose, geography){
-  assign("z_all", readRDS(file.path(path_outputs_national, purpose, geography,  "z_all.Rds")), envir = .GlobalEnv)
   if(purpose == "commute") {
+    assign("z_all", readRDS(file.path(path_outputs_national, purpose, geography,  "z_all.Rds")), envir = .GlobalEnv)
     assign("c_all", readRDS(file.path(path_outputs_national, purpose, geography,  "c_all.Rds")), envir = .GlobalEnv)
     assign("od_all_attributes", read_csv(file.path(path_outputs_national, purpose, geography, "od_all_attributes.csv")), envir = .GlobalEnv)
     assign("l_all", readRDS(file.path(path_outputs_national, purpose, geography, "l_all.Rds")), envir = .GlobalEnv)
@@ -136,7 +136,10 @@ init_outputs_national <- function(purpose, geography){
     assign("rq_all", readRDS(file.path(path_outputs_national, purpose, geography, "rq_all.Rds")), envir = .GlobalEnv)
   }
   if(purpose == "school") {
+    assign("z_all", readRDS(file.path(path_outputs_national, purpose, geography,  "z_all.Rds")), envir = .GlobalEnv)
+    assign("z_all_private", readRDS(file.path(path_outputs_national, purpose_private, geography,  "z_all.Rds")), envir = .GlobalEnv)
     assign("d_all", readRDS(file.path(path_outputs_national, purpose, geography,  "d_all.Rds")), envir = .GlobalEnv)
+    assign("d_all_private", readRDS(file.path(path_outputs_national, purpose_private, geography,  "d_all.Rds")), envir = .GlobalEnv)
     assign("rf_shape", readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds")), envir = .GlobalEnv)
     assign("rnet_all_attributes", read_csv(file.path(path_temp_scenario, purpose, geography, "rnet_all_attributes.csv")), envir = .GlobalEnv)
   }
