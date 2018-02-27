@@ -264,9 +264,9 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				gen interact=rf_dist_km*ned_rf_avslope_perc
 				
 				gen pred_base= /*
-					*/ -5.331 + (0.1398 * rf_dist_km) + (1.3065 * rf_dist_kmsqrt) + (-0.1448 * rf_dist_kmsq) + (-0.2769 * ned_rf_avslope_perc) + (-0.06259 * rf_dist_km*ned_rf_avslope_perc)
+					*/ -5.327 + (0.1516 * rf_dist_km) + (1.291 * rf_dist_kmsqrt) + (-0.1463 * rf_dist_kmsq) + (-0.2766 * ned_rf_avslope_perc) + (-0.06263 * rf_dist_km*ned_rf_avslope_perc)
 				replace pred_base= /*
-					*/ -7.827 + (-2.359 * rf_dist_km) + (7.048 * rf_dist_kmsqrt) + (0.03198	* rf_dist_kmsq) + (-0.3265 * ned_rf_avslope_perc) + (-0.04561 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
+					*/ -7.821 + (-2.354 * rf_dist_km) + (7.038 * rf_dist_kmsqrt) + (0.03170	* rf_dist_kmsq) + (-0.3268 * ned_rf_avslope_perc) + (-0.04546 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
 				replace pred_base=. if flowtype==2
 								
 				gen bdutch = 3.690
@@ -290,8 +290,22 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					table rf_avslope_perccat if secondary==1 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					drop pcycle		
 								
-				** NUMBER FOR TEXT: DUTCH RAW AVERAGE TRIPS 2KM
+				** NUMBER FOR APPENDIX TEXT: DUTCH RAW AVERAGE TRIPS 2KM
 					table secondary if flowtype==1 & rf_dist_km>=2 & rf_dist_km<3 [fw=all], c(mean pred_dutch)
+				
+				** NUMBER FOR TEXT: AVERAGE DISTANCES
+					recode rf_dist_km .=35, gen(rf_dist_kmlimit)
+					sum rf_dist_kmlimit if secondary==0 [fw=all], det
+					sum rf_dist_kmlimit if secondary==1 [fw=all], det
+					ta flowtype [fw=bicycle]
+					ta flowtype [fw=foot]
+					ta flowtype [fw=car]
+					ta flowtype [fw=other]
+					total rf_dist_kmlimit  [fw=car]
+					total rf_dist_kmlimit if flowtype==2  [fw=car]
+					
+				
+				
 				*/
 					
 	****************
@@ -360,22 +374,22 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 ** [?? OR ACTIVE TRAVEL MINUTES, ASSUMING ALL CYCLING AND ?40% WALKING ACTIVE? ALSO THINK CURRENTLY POSSIBLY OVERESTIMATE WALK REL TO CYCLE? DISCUSS WITH JW]
 	*****************
 		* INPUT PARAMETERS FROM NTS
-			gen cycleeduc_cycletripsperweek = 2.4						// primary school: cycle trips/week if usual main mode cycling
-			replace cycleeduc_cycletripsperweek = 4.9 if secondary==1	// secondary school	
-			gen cycleeduc_walktripsperweek = 2.8						// walk trips if cycle usual main mode
-			replace cycleeduc_walktripsperweek = 1.3 if secondary==1		
+			gen cycleeduc_cycletripsperweek = 2.3						// primary school: cycle trips/week if usual main mode cycling
+			replace cycleeduc_cycletripsperweek = 5.1 if secondary==1	// secondary school	
+			gen cycleeduc_walktripsperweek = 3.1						// walk trips if cycle usual main mode
+			replace cycleeduc_walktripsperweek = 1.2 if secondary==1		
 			gen walkeduc_cycletripsperweek = 0.04						
 			replace walkeduc_cycletripsperweek = 0.07 if secondary==1	
 			gen walkeduc_walktripsperweek = 5.2						
 			replace walkeduc_walktripsperweek = 5.3 if secondary==1	
-			gen carothereduc_cycletripsperweek = 0.02						
+			gen carothereduc_cycletripsperweek = 0.01						
 			replace carothereduc_cycletripsperweek = 0.03 if secondary==1	
-			gen carothereduc_walktripsperweek = 0.53						
-			replace carothereduc_walktripsperweek = 0.37 if secondary==1	
+			gen carothereduc_walktripsperweek = 0.51						
+			replace carothereduc_walktripsperweek = 0.35 if secondary==1	
 			
-			gen cspeed = 6.4	
-			replace cspeed = 9.3 if secondary==1	
-			gen wspeed = 3.7
+			gen cspeed = 6.6	
+			replace cspeed = 9.6 if secondary==1	
+			gen wspeed = 3.8
 			replace wspeed = 4.0 if secondary==1
 			
 		* INPUT PARAMETERS ON METS
@@ -425,6 +439,22 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			}
 			}
 			
+		/* NUMBER IN MAIN TEXT: CALCULATE % CHILDREN GETTING HALF PA FROM SCHOOL AT
+			gen met_bicycle=(cmmets * cycleeduc_cycletripsperweek * cdur_trip)+(wmmets * cycleeduc_walktripsperweek * wdur_trip)
+			gen met_foot=(cmmets * walkeduc_cycletripsperweek * cdur_trip)+(wmmets * walkeduc_cycletripsperweek * wdur_trip)
+			recode met_bicycle min/6.9999999=0 7/max=1
+			recode met_foot min/6.9999999=0 7/max=1
+			gen base_numchild_palevel=(met_bicycle*bicycle) + (met_foot*foot)
+			gen dutch_numchild_palevel=(met_bicycle*dutch_slc) + (met_foot*dutch_slw)
+			total base_numchild_palevel dutch_numchild_palevel all if secondary==0
+				di 5135/41887.69
+				di 149307.9/41887.69
+			total base_numchild_palevel dutch_numchild_palevel all if secondary==1
+				di 53508/32537.63
+				di 1011811/32537.63
+			drop met_bicycle met_foot base_numchild_palevel dutch_numchild_palevel
+			*/
+		
 		* DROP INTERMEDIARY VARIABLES
 			drop cspeed wspeed cmmets wmmets cdur_trip cmmets_week wdur_trip wmmets_week
 			drop nocyclists_simmet 
