@@ -371,7 +371,6 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 
 	*****************
 	** ESTIMATE CHANGE IN MET HOURS
-** [?? OR ACTIVE TRAVEL MINUTES, ASSUMING ALL CYCLING AND ?40% WALKING ACTIVE? ALSO THINK CURRENTLY POSSIBLY OVERESTIMATE WALK REL TO CYCLE? DISCUSS WITH JW]
 	*****************
 		* INPUT PARAMETERS FROM NTS
 			gen cycleeduc_cycletripsperweek = 2.3						// primary school: cycle trips/week if usual main mode cycling
@@ -430,7 +429,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			}
 		
 		* CHANGE FROM TOTAL METS TO *AVERAGE* METS PER *CHILD*
-* remove this part if go for  flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
+			* remove this part if go for  flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
 			replace baseline_at_mmet=baseline_at_mmet/all
 			replace base_slmmet=base_slmmet/all
 			foreach x in govtarget dutch {
