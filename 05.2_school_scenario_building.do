@@ -439,19 +439,26 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			}
 			
 		/* NUMBER IN MAIN TEXT: CALCULATE % CHILDREN GETTING HALF PA FROM SCHOOL AT
-			gen met_bicycle=(cmmets * cycleeduc_cycletripsperweek * cdur_trip)+(wmmets * cycleeduc_walktripsperweek * wdur_trip)
-			gen met_foot=(cmmets * walkeduc_cycletripsperweek * cdur_trip)+(wmmets * walkeduc_cycletripsperweek * wdur_trip)
-			recode met_bicycle min/6.9999999=0 7/max=1
-			recode met_foot min/6.9999999=0 7/max=1
-			gen base_numchild_palevel=(met_bicycle*bicycle) + (met_foot*foot)
-			gen dutch_numchild_palevel=(met_bicycle*dutch_slc) + (met_foot*dutch_slw)
-			total base_numchild_palevel dutch_numchild_palevel all if secondary==0
-				di 5135/41887.69
-				di 149307.9/41887.69
-			total base_numchild_palevel dutch_numchild_palevel all if secondary==1
-				di 53508/32537.63
-				di 1011811/32537.63
-			drop met_bicycle met_foot base_numchild_palevel dutch_numchild_palevel
+			gen met_if_bicycle=(cmmets * cycleeduc_cycletripsperweek * cdur_trip)+(wmmets * cycleeduc_walktripsperweek * wdur_trip)
+			gen met_if_walk=(cmmets * walkeduc_cycletripsperweek * cdur_trip)+(wmmets * walkeduc_walktripsperweek * wdur_trip)
+			recode met_if_bicycle min/6.9999999=0 7/max=1 // make binary - get half or not?
+			recode met_if_walk min/6.9999999=0 7/max=1
+			gen base_numchild_palevel=(met_if_bicycle*bicycle) + (met_if_walk*foot)  // what N. children are getting half in each flow?
+			gen govtarget_numchild_palevel=(met_if_bicycle*govtarget_slc) + (met_if_walk*govtarget_slw)
+			gen dutch_numchild_palevel=(met_if_bicycle*dutch_slc) + (met_if_walk*dutch_slw)
+			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all
+				di 596206/74425.32
+				di 632793/74425.32
+				di 1387781/74425.32
+			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==0
+				di 150090/41887.69
+				di 154013/41887.69
+				di 255713/41887.69
+			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==1
+				di 446116/32537.63
+				di 478780/32537.63
+				di 1132068/32537.63
+			drop met_if_bicycle met_if_walk base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel
 			*/
 		
 		* DROP INTERMEDIARY VARIABLES
@@ -467,7 +474,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		gen co2kg_km=0.182
 				
 		foreach x in nocyclists govtarget dutch {
-		gen long `x'_sico2=`x'_sid * cyc_dist_km * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * co2kg_km 	// NO DRIVERS CHANGED * DIST * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP * CO2 EMISSIONS FACOTR
+		gen long `x'_sicartrips = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 	// NO DRIVERS CHANGED * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP 
+		gen long `x'_sico2 = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * cyc_dist_km * co2kg_km 	// NO TRIPS CHANGED * DIST * CO2 EMISSIONS FACOTR
 		}
 		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 		foreach x in govtarget dutch {
@@ -483,6 +491,7 @@ x
 	** AGGREGATE TO ZONE LEVEL
 	*****************
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", clear
+		drop *cartrips
 		* AGGREGATE UP AREA FIGURES
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort geo_code_o: egen a_`var'=sum(`var')
@@ -533,6 +542,7 @@ x
 	** AGGREGATE TO SCHOOL LEVEL
 	*****************
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", clear
+		drop *cartrips
 		* AGGREGATE UP AREA FIGURES
 			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort urn: egen a_`var'=sum(`var')

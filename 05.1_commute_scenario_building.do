@@ -458,12 +458,13 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 		gen cyclecommute_tripsperweek=5.24
 		gen co2kg_km=0.186
 		foreach x in nocyclists govtarget gendereq dutch ebike {
-		gen long `x'_sico2=`x'_sid * cyc_dist_km * cyclecommute_tripsperweek * 52.2 * co2kg_km 	// NO CYCLISTS * DIST * COMMUTE PER DAY * CO2 EMISSIONS FACOTR
+		gen long `x'_sicartrips=`x'_sid * cyclecommute_tripsperweek * 52.2	// NO CYCLISTS * COMMUTE PER DAY 
+		gen long `x'_sico2=`x'_sid * cyc_dist_km * cyclecommute_tripsperweek * 52.2 * co2kg_km 	// NO CYCLISTS * DIST * COMMUTE PER DAY * CO2 EMISSIONS FACTOR
 		}
 		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 		foreach x in govtarget gendereq dutch ebike {
 		gen long `x'_slco2=`x'_sico2+base_slco2
-		order `x'_sico2 , after(`x'_slco2)
+		order `x'_sicartrips `x'_slco2 , before(`x'_sico2)
 		}
 		drop nocyclists* cyclecommute_tripsperweek co2kg_km cyc_dist_km
 
@@ -536,6 +537,7 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 	*****************
 	** LA
 		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\z_all_attributes_unrounded.csv", clear
+		drop *cartrips
 		* AGGREGATE
 			foreach var of varlist all- other govtarget_slc- ebike_sico2 {
 			bysort lad11cd: egen a_`var'=sum(`var')
@@ -579,6 +581,7 @@ use "C:\Users\Anna Goodman\Dropbox\1 - Phys Act_1-PA main\2015_PCT_largefiles\1a
 	** PART 3B.1: AGGREGATE TO FLOW LEVEL 
 	*****************
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\ODpairs_process2.5.dta", clear
+		drop *cartrips
 		* IDENTIFY VARIABLES WHERE 'ALL' IS TOO SMALL (for lsoa combine <3 flows to 'under 3')
 			bysort geo_code1 geo_code2: egen f_all_temp=sum(all)
 			replace geo_code_d="Under 3" if f_all_temp<3 & "$geography"=="lsoa"
