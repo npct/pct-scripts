@@ -6,7 +6,7 @@ rasterOptions(datatype = "INT2U", maxmemory = 1e10)
 # SET INPUT PARAMETERS
 purpose <- "commute"
 geography <- "lsoa"  
-scenarios <- c("bicycle", "govtarget", "gendereq", "dutch", "ebike")
+scenarios <- c("bicycle", "govtarget", "nearmkt", "gendereq", "dutch", "ebike")
 
 
 # LOAD REGIONS, AND TRANSFORM TO EASTING/NORTHING PROJECTION SO THAT CAN BUFFER 1KM
