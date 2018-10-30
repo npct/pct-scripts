@@ -264,13 +264,13 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				gen interact=rf_dist_km*ned_rf_avslope_perc
 				
 				gen pred_base= /*
-					*/ -5.327 + (0.1516 * rf_dist_km) + (1.291 * rf_dist_kmsqrt) + (-0.1463 * rf_dist_kmsq) + (-0.2766 * ned_rf_avslope_perc) + (-0.06263 * rf_dist_km*ned_rf_avslope_perc)
+					*/ -4.784 + (0.9697 * rf_dist_km) + (-0.2394 * rf_dist_kmsq) + (-0.3503 * ned_rf_avslope_perc)
 				replace pred_base= /*
-					*/ -7.821 + (-2.354 * rf_dist_km) + (7.038 * rf_dist_kmsqrt) + (0.03170	* rf_dist_kmsq) + (-0.3268 * ned_rf_avslope_perc) + (-0.04546 * rf_dist_km*ned_rf_avslope_perc) if secondary==1
+					*/ -7.133 + (-1.861 * rf_dist_km) + (5.939 * rf_dist_kmsqrt) + (-0.4344 * ned_rf_avslope_perc) if secondary==1
 				replace pred_base=. if flowtype==2
 								
-				gen bdutch = 3.690
-				replace bdutch = 3.941 + (0.2645 * rf_dist_kmsqrt) if secondary==1 
+				gen bdutch = 3.642
+				replace bdutch = 3.574 + (0.3438 * rf_dist_kmsqrt) if secondary==1 
 				
 				gen pred_dutch= pred_base + bdutch
 				foreach x in base dutch {
@@ -290,7 +290,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					table rf_avslope_perccat if secondary==1 & flowtype==1 [fw=all], c(mean pcycle mean pred_base mean pred_dutch)
 					drop pcycle		
 								
-				** NUMBER FOR APPENDIX TEXT: DUTCH RAW AVERAGE TRIPS 2KM
+				** NUMBER FOR APPENDIX TEXT: GO DUTCH EST TRIPS 2KM
 					table secondary if flowtype==1 & rf_dist_km>=2 & rf_dist_km<3 [fw=all], c(mean pred_dutch)
 				
 				** NUMBER FOR TEXT: AVERAGE DISTANCES
@@ -303,9 +303,6 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					ta flowtype [fw=other]
 					total rf_dist_kmlimit  [fw=car]
 					total rf_dist_kmlimit if flowtype==2  [fw=car]
-					
-				
-				
 				*/
 					
 	****************
@@ -448,16 +445,16 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen dutch_numchild_palevel=(met_if_bicycle*dutch_slc) + (met_if_walk*dutch_slw)
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all
 				di 596206/74425.32
-				di 632793/74425.32
-				di 1387781/74425.32
+				di 633158/74425.32
+				di 1347687/74425.32
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==0
 				di 150090/41887.69
-				di 154013/41887.69
-				di 255713/41887.69
+				di 154104/41887.69
+				di 255003/41887.69
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==1
 				di 446116/32537.63
-				di 478780/32537.63
-				di 1132068/32537.63
+				di 479053/32537.63
+				di 1092684/32537.63
 			drop met_if_bicycle met_if_walk base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel
 			*/
 		
