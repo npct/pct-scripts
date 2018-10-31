@@ -270,7 +270,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				replace pred_base=. if flowtype==2
 								
 				gen bdutch = 3.642
-				replace bdutch = 3.574 + (0.3438 * rf_dist_kmsqrt) if secondary==1 
+				replace bdutch = 3.574 + (0.3438 * rf_dist_km) if secondary==1 
 				
 				gen pred_dutch= pred_base + bdutch
 				foreach x in base dutch {
@@ -446,7 +446,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all
 				di 596206/74425.32
 				di 633158/74425.32
-				di 1347687/74425.32
+				di 1575329/74425.32
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==0
 				di 150090/41887.69
 				di 154104/41887.69
@@ -454,7 +454,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==1
 				di 446116/32537.63
 				di 479053/32537.63
-				di 1092684/32537.63
+				di 1320326/32537.63
 			drop met_if_bicycle met_if_walk base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel
 			*/
 		
