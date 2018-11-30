@@ -123,7 +123,7 @@ sf11$boarding_perc <- ifelse(!is.na(sf11$boarding_perc.x), sf11$boarding_perc.x,
 
 # Asign phase of education + easting/northing where missing from current edubase, based on urn: http://www.education.gov.uk/edubase/establishment/viewMapTab.xhtml?urn=136087
 sd_extra <- unique(sf11[is.na(sf11$easting), c("urn", "schoolname", "northing", "easting", "phase", "secondary", "age2to3_num", "boarding_perc")])
-write_csv(sd_extra, file.path(path_inputs, "01_raw/02_travel_data/school/lsoa/x-manual_extras", "1_missing_schools_details.csv"))
+# write_csv(sd_extra, file.path(path_inputs, "01_raw/02_travel_data/school/lsoa/x-manual_extras", "1_missing_schools_details.csv"))
 # [ manually edit]
 sd_extra <- read_csv(file.path(path_inputs, "01_raw/02_travel_data/school/lsoa/x-manual_extras", "1_missing_schools_details_manualedit.csv"))
 sd_extra <- dplyr::rename(sd_extra, schoolname_edit = `schoolname`, northing_edit = `northing`, easting_edit = `easting`, phase_edit = `phase`, secondary_edit = `secondary`, age2to3_num_edit = `age2to3_num`, boarding_perc_edit = `boarding_perc`)
