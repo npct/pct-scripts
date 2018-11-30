@@ -22,11 +22,11 @@ for (i in (10:11) ) {
 
 # Drop from 2011 the flows with too much missing data (0.3%) in 2011 but enough in 2010 , and rebind
 # this list was derived semi-manually downstream in '05.2 EXTRA' code commented out: to redo it, have to comment out this subsection and re-run that code
-sf11_missing <- read_csv(file.path(path_inputs, "01_raw/02_travel_data/school/lsoa/x-manual_extras", "0_flowdata_missing2011_present2010.csv"))
-sf11 <- left_join(sf11, sf11_missing, by="urn")
-sf10 <- left_join(sf10, sf11_missing, by="urn")
-sf11 <- sf11[is.na(sf11$replace2011),]
-sf10 <- sf10[!is.na(sf10$replace2011),]
+# sf11_missing <- read_csv(file.path(path_inputs, "01_raw/02_travel_data/school/lsoa/x-manual_extras", "0_flowdata_missing2011_present2010.csv"))
+# sf11 <- left_join(sf11, sf11_missing, by="urn")
+# sf10 <- left_join(sf10, sf11_missing, by="urn")
+# sf11 <- sf11[is.na(sf11$replace2011),]
+# sf10 <- sf10[!is.na(sf10$replace2011),]
 sf11 <- rbind(sf11, sf10)
 sf11 <- sf11[,c("lsoa01cd", "urn","schoolname", "car", "bicycle", "foot", "other","unknown")]
 
