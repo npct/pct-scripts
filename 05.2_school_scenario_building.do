@@ -220,7 +220,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.0.dta", replace
 	
 	****************
-	** GENERATE AND APPLY PROPENSITY EQUATIONS AT FLOW LEVEL
+	** GENERATE AND APPLY PROPENSITY EQUATIONS AT FLOW LEVEL [REDO AFTER NAT BUILD]
 	****************
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.0.dta", clear
 		* RENAME AND GEN VARS
@@ -264,9 +264,9 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				gen interact=rf_dist_km*ned_rf_avslope_perc
 				
 				gen pred_base= /*
-					*/ -4.784 + (0.9697 * rf_dist_km) + (-0.2394 * rf_dist_kmsq) + (-0.3503 * ned_rf_avslope_perc)
+					*/ -4.813 + (0.9758 * rf_dist_km) + (-0.2405 * rf_dist_kmsq) + (-0.4245 * ned_rf_avslope_perc)
 				replace pred_base= /*
-					*/ -7.133 + (-1.861 * rf_dist_km) + (5.939 * rf_dist_kmsqrt) + (-0.4344 * ned_rf_avslope_perc) if secondary==1
+					*/ -7.186 + (-1.874 * rf_dist_km) + (5.972 * rf_dist_kmsqrt) + (-0.5278 * ned_rf_avslope_perc) if secondary==1
 				replace pred_base=. if flowtype==2
 								
 				gen bdutch = 3.642
@@ -301,8 +301,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 					ta flowtype [fw=foot]
 					ta flowtype [fw=car]
 					ta flowtype [fw=other]
-					total rf_dist_kmlimit  [fw=car]
-					total rf_dist_kmlimit if flowtype==2  [fw=car]
+					total rf_dist_kmlimit [fw=car]
+					total rf_dist_kmlimit if flowtype==2 [fw=car]
 				*/
 					
 	****************
@@ -407,7 +407,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				*/ (bicycle * cmmets * cycleeduc_cycletripsperweek * cdur_trip) + /*
 				*/ (bicycle * wmmets * cycleeduc_walktripsperweek * wdur_trip) + /*
 				*/ (foot * cmmets * walkeduc_cycletripsperweek * cdur_trip) + /*
-				*/ (foot * wmmets * walkeduc_walktripsperweek * wdur_trip)  + /*
+				*/ (foot * wmmets * walkeduc_walktripsperweek * wdur_trip) + /*
 				*/ ((car+other) * cmmets * carothereduc_cycletripsperweek * cdur_trip) + /*
 				*/ ((car+other) * wmmets * carothereduc_walktripsperweek * wdur_trip)
 
@@ -426,7 +426,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			}
 		
 		* CHANGE FROM TOTAL METS TO *AVERAGE* METS PER *CHILD*
-			* remove this part if go for  flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
+			* remove this part if go for flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
 			replace baseline_at_mmet=baseline_at_mmet/all
 			replace base_slmmet=base_slmmet/all
 			foreach x in govtarget dutch {
@@ -440,21 +440,21 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen met_if_walk=(cmmets * walkeduc_cycletripsperweek * cdur_trip)+(wmmets * walkeduc_walktripsperweek * wdur_trip)
 			recode met_if_bicycle min/6.9999999=0 7/max=1 // make binary - get half or not?
 			recode met_if_walk min/6.9999999=0 7/max=1
-			gen base_numchild_palevel=(met_if_bicycle*bicycle) + (met_if_walk*foot)  // what N. children are getting half in each flow?
+			gen base_numchild_palevel=(met_if_bicycle*bicycle) + (met_if_walk*foot) // what N. children are getting half in each flow?
 			gen govtarget_numchild_palevel=(met_if_bicycle*govtarget_slc) + (met_if_walk*govtarget_slw)
 			gen dutch_numchild_palevel=(met_if_bicycle*dutch_slc) + (met_if_walk*dutch_slw)
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all
-				di 596206/74425.32
-				di 633158/74425.32
-				di 1575329/74425.32
+				di 593879/74425.32
+				di 630817.6/74425.32
+				di 1568861/74425.32
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==0
-				di 150090/41887.69
-				di 154104/41887.69
-				di 255003/41887.69
+				di 149588/41887.69
+				di 153643.1/41887.69
+				di 254988.5/41887.69
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==1
-				di 446116/32537.63
-				di 479053/32537.63
-				di 1320326/32537.63
+				di 444291/32537.63
+				di 477174.5/32537.63
+				di 1313873/32537.63
 			drop met_if_bicycle met_if_walk base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel
 			*/
 		
