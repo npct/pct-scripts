@@ -7,7 +7,7 @@ rasterOptions(datatype = "INT2U")
 ## VARIABLE INPUTS
 purpose <- "school"
 geography <- "lsoa"  
-run_name <- "school_1802"   # Name for this batch of routes
+run_name <- "school_1812"   # Name for this batch of routes
 scenario <- "bicycle" # WHICH SCENARIO? (parts 1-4)
 clusterno <- 1        # WHICH LARGE CLUSTER? (parts 2-4)
 
