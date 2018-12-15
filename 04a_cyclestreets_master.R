@@ -91,12 +91,6 @@ if (purpose=="commute")  {
 lines_cs_data <- unique(lines_cs_data[,c("geo_code1", "geo_code2", "id", "e_dist_km")])
 lines_cs_data <- lines_cs_data[order(lines_cs_data$id),]
 
-# DROP LINES THAT REPEATEDLY FAIL IN CYCLESTREETS 1812 BUILD [ EVEN THOUGH WORKED IN 1707]
-if (purpose=="school") {
-  problemid <- "E01017354 urn116416" # "Error: Waypoints are on isolated parts of the network."
-  lines_cs_data <- lines_cs_data[(lines_cs_data$id!=problemid),]
-}
-
 # MAKE A SPATIAL OBJECT OF CS LINES
 if (purpose=="commute")  {
   lines_cs_lines <- od2line2(flow = lines_cs_data, zones = cents_all) # faster implementation for where o and d have same geography
