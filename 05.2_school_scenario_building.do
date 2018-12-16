@@ -2,7 +2,7 @@ clear
 clear matrix
 cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 
-	/** SAVE CSV FILES IN STATA FORMAT
+	** SAVE CSV FILES IN STATA FORMAT
 		import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\flows_2011.csv", delimiter(comma) varnames(1) clear
 		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\flows_2011.dta", replace
 		import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\rfrq_all_data.csv", varnames(1) clear 
@@ -218,7 +218,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			rename numpupils4 other
 			duplicates drop
 			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.0.dta", replace
-	
+*/	
 	****************
 	** GENERATE AND APPLY PROPENSITY EQUATIONS AT FLOW LEVEL [REDO AFTER NAT BUILD]
 	****************
@@ -254,7 +254,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			compress
 			saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.1.dta", replace	
 			* FIT INDIVIDUAL MODEL FOR ENGLISH AND GO DUTCH PARAMS IN '0.2d_NatModelSchoolLSOA_parameterise.do'
-*/
+
 
 		* MODEL FITTING FOR FLOWTYPE 1 TRIPS
 			use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.1.dta", clear
@@ -264,9 +264,9 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				gen interact=rf_dist_km*ned_rf_avslope_perc
 				
 				gen pred_base= /*
-					*/ -4.813 + (0.9758 * rf_dist_km) + (-0.2405 * rf_dist_kmsq) + (-0.4245 * ned_rf_avslope_perc)
+					*/ -4.813 + (0.9743 * rf_dist_km) + (-0.2401 * rf_dist_kmsq) + (-0.4245 * ned_rf_avslope_perc)
 				replace pred_base= /*
-					*/ -7.186 + (-1.874 * rf_dist_km) + (5.972 * rf_dist_kmsqrt) + (-0.5278 * ned_rf_avslope_perc) if secondary==1
+					*/ -7.178 + (-1.870 * rf_dist_km) + (5.961 * rf_dist_kmsqrt) + (-0.5290 * ned_rf_avslope_perc) if secondary==1
 				replace pred_base=. if flowtype==2
 								
 				gen bdutch = 3.642
@@ -444,17 +444,17 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen govtarget_numchild_palevel=(met_if_bicycle*govtarget_slc) + (met_if_walk*govtarget_slw)
 			gen dutch_numchild_palevel=(met_if_bicycle*dutch_slc) + (met_if_walk*dutch_slw)
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all
-				di 593879/74425.32
-				di 630817.6/74425.32
-				di 1568861/74425.32
+				di 593617/74425.32
+				di 630599.7/74425.32
+				di 1569469/74425.32
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==0
-				di 149588/41887.69
-				di 153643.1/41887.69
-				di 254988.5/41887.69
+				di 149543/41887.69
+				di 153595.1/41887.69
+				di 254897.8/41887.69
 			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==1
-				di 444291/32537.63
-				di 477174.5/32537.63
-				di 1313873/32537.63
+				di 444074/32537.63
+				di 477004.6/32537.63
+				di 1314572/32537.63
 			drop met_if_bicycle met_if_walk base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel
 			*/
 		
@@ -483,7 +483,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		
 		compress
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", replace
-x
+
 	*****************
 	** AGGREGATE TO ZONE LEVEL
 	*****************
