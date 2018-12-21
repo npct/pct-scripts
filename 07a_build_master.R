@@ -27,7 +27,7 @@ for(k in 1:length(regions_tobuild)){
 
   # BUILD THE REGION
   message(paste0("Building for ", region, " (region ", k, ")"))
-  region_build_param$to_rebuild_rnet <- 0 # uncomment to forcibly skip rnet
+  #region_build_param$to_rebuild_rnet <- 0 # uncomment to forcibly skip rnet
   if (purpose=="commute") {
     source("07b.1_commute_build_region.R") # comment out to skip build entirely
   } else if (purpose=="school") {
