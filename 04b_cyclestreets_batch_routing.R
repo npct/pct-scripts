@@ -116,9 +116,20 @@ if(nbatch_stacks > 1) {
       stack <- spRbind(stack, stack_next)
     }
   }
-} else {
-  stack <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_1", "of", nbatch, ".Rds")))
-}
+ } else {
+  stack <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_1of", nbatch, ".Rds")))
+  rownames(stack@data) <- sapply(1:length(stack), function(j) stack@lines[[j]]@ID) # FORCE DATA ROW NAMES TO BE SAME AS ID IN LINES (in case don't start from '1')
+  stack <- stack[((stack@data$id %in% rf_data_visualise$id) & is.na(stack@data$error)),]
+  if (nbatch > 1){
+    for(i in 2:nbatch){
+      file_next <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",i,"of",nbatch,".Rds")))
+      rownames(file_next@data) <- sapply(1:length(file_next), function(j) file_next@lines[[j]]@ID)
+      file_next <- file_next[((file_next@data$id %in% rf_data_visualise$id) & is.na(file_next@data$error)),]
+      stack <- spRbind(stack, file_next)
+      print(paste0("Stack ",i," of ",nbatch," added at ",Sys.time()))
+    }
+  }
+ }
 
 if(file.exists(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_redo_of", nbatch,".Rds")))) {
   routes_redo <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_redo_of", nbatch,".Rds")))
