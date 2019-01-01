@@ -109,7 +109,7 @@ x
 	** MERGE OD DATA
 	*****************
 	use "..\1 - Phys Act_1-PA main\2017_MetaHIT_analysis\1b_datacreated\Census2011EW_AllAdults.dta", clear
-			drop census_id ecactivity commute_bicycle12- commute_bus12
+			drop census_id ecactivity commute_distcat commute_bicycle12- commute_bus12
 			
 		* DROP WORK FROM HOME OR NON-COMMUTERS
 			drop if work_lsoa=="OD0000001" | work_lsoa==""
