@@ -428,7 +428,7 @@ x
 			drop odcyclist_all`x' odcyclist_noncyclist`x'
 			}
 			rename basegt* govtarget*
-			rename basenm* nearmkt*			
+			rename basenm* govnearmkt*			
 			
 		* GENDER EQ	
 			bysort home_lsoa work_lsoa: egen bicycle_all=sum(bicycle)
@@ -457,7 +457,7 @@ x
 			}
 			
 		* NO INCREASE IN FLOW TYPE 4 (TOO LONG/OUTSIDE EW)
-			foreach x in nearmkt govtarget gendereq dutch ebike {
+			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			replace `x'_slc=bicycle if flowtype==4	
 			replace `x'_sic=0 if flowtype==4
 			}
@@ -484,7 +484,7 @@ x
 			gen nocyclists_sid=nocyclists_sld-car_driver
 			
 		* BY SCENARIO
-			foreach x in govtarget nearmkt gendereq dutch ebike {
+			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_siw=foot*`x'_sic*-1
 			gen `x'_slw=foot+`x'_siw
 			gen `x'_sid=car_driver*`x'_sic*-1
@@ -493,7 +493,7 @@ x
 		* ORDER + DROP EXCESS VARIABLES
 			drop pred_basegt pred_dutch pred_ebike pred_basenmorig pred_basenm
 			drop bicycle foot- od_car_driver
-			foreach x in ebike dutch gendereq nearmkt govtarget nocyclists {
+			foreach x in ebike dutch gendereq govnearmkt govtarget nocyclists {
 			order `x'_slc `x'_sic `x'_slw `x'_siw `x'_sld `x'_sid, after(incomedecile)
 			}
 			
@@ -534,18 +534,18 @@ x
 		** MORTALITY PROTECTION
 			gen cprotection_govtarget= (1-crr_heat)*(cdur_obs/cdur_ref_heat)	// SCALE RR DEPENDING ON HOW DURATION IN THIS POP COMPARES TO REF
 			gen cprotection_nocyclists=cprotection_govtarget
-			gen cprotection_nearmkt=cprotection_govtarget
+			gen cprotection_govnearmkt=cprotection_govtarget
 			gen cprotection_gendereq=cprotection_govtarget
 			gen cprotection_dutch= (1-crr_heat)*(cdur_obs_dutch/cdur_ref_heat) // GO DUTCH AND EBIKE USE SCALING INCORPORATING FACT SOME EBIKES
 			gen cprotection_ebike= (1-crr_heat)*(cdur_obs_ebike/cdur_ref_heat)
-			foreach x in nocyclists govtarget nearmkt gendereq dutch ebike {			
+			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			recode cprotection_`x' 0.45/max=0.45			
 			}
 			gen wprotection_heat= (1-wrr_heat)*(wdur_obs/wdur_ref_heat)
 			recode wprotection_heat 0.30/max=0.30		
 
 		** DEATHS AND VALUES
-			foreach x in nocyclists govtarget nearmkt gendereq dutch ebike {			
+			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			gen `x'_sic_death=`x'_sic*mortrate*cprotection_`x'*-1
 			gen `x'_siw_death=`x'_siw*mortrate*wprotection*-1
 			gen `x'_sideath_heat=`x'_sic_death+`x'_siw_death
@@ -554,20 +554,20 @@ x
 			}
 			gen base_sldeath_heat=-1*nocyclists_sideath_heat	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 			gen base_slvalue_heat=-1*nocyclists_sivalue_heat			
-			foreach x in govtarget nearmkt gendereq dutch ebike {			
+			foreach x in govtarget govnearmkt gendereq dutch ebike {			
 			gen `x'_sldeath_heat=`x'_sideath_heat+base_sldeath_heat
 			gen `x'_slvalue_heat=`x'_sivalue_heat+base_slvalue_heat
 			order `x'_sideath_heat `x'_sivalue_heat, after(`x'_slvalue_heat)
 			}
 			
 		** CO2
-			foreach x in nocyclists govtarget nearmkt gendereq dutch ebike {
+			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_sicartrips	=`x'_sid * cyclecommute_tripsperweek * 52.2 	// NO. CYCLISTS * COMMUTE PER DAY 
 			gen `x'_sico2		=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km * co2kg_km 	// NO. CAR TRIPS * DIST * CO2 EMISSIONS FACTOR
 			}
 			gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 			order base_slco2, before(govtarget_sicartrips)
-			foreach x in govtarget nearmkt gendereq dutch ebike {
+			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_slco2=`x'_sico2+base_slco2
 			order `x'_sicartrips `x'_slco2 , before(`x'_sico2)
 			}
@@ -761,7 +761,7 @@ x
 			rename a_* *
 			duplicates drop
 		* CHANGE UNITS
-			foreach x in base_sl govtarget_sl govtarget_si nearmkt_sl nearmkt_si gendereq_sl gendereq_si dutch_sl dutch_si ebike_sl ebike_si{
+			foreach x in base_sl govtarget_sl govtarget_si govnearmkt_sl govnearmkt_si gendereq_sl gendereq_si dutch_sl dutch_si ebike_sl ebike_si{
 			replace `x'value_heat=`x'value_heat/1000000 // convert to millions of pounds
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
@@ -779,7 +779,7 @@ x
 			rename a_* *
 			duplicates drop
 		* PERCENTAGES FOR INTERFACE
-			foreach var of varlist bicycle govtarget_slc nearmkt_slc gendereq_slc dutch_slc ebike_slc {
+			foreach var of varlist bicycle govtarget_slc govnearmkt_slc gendereq_slc dutch_slc ebike_slc {
 			gen `var'_perc=round(`var'*100/all, 1)
 			order `var'_perc, after(`var')
 			}
@@ -806,14 +806,14 @@ x
 		* ROUND + MOVE SOME CYCLISTS 0 TO 1, TO GET TOTAL CORRECT NUMBER	
 			set seed 20170121
 			gen random=uniform()
-			foreach var of varlist govtarget_slc nearmkt_slc gendereq_slc dutch_slc ebike_slc {
+			foreach var of varlist govtarget_slc govnearmkt_slc gendereq_slc dutch_slc ebike_slc {
 			rename `var' `var'_orig 
 			gen `var'=round(`var'_orig)
 			total `var'_orig `var'
 			matrix A=r(table)
 			di "`var': " round((100*(1-A[1,2]/A[1,1])),0.01) "%"
 			}
-			foreach var of varlist govtarget_slc nearmkt_slc dutch_slc ebike_slc {	// not needed gendereq, as similar with/without rounding
+			foreach var of varlist govtarget_slc govnearmkt_slc dutch_slc ebike_slc {	// not needed gendereq, as similar with/without rounding
 			total `var'_orig `var' if `var'_orig<1.5
 			matrix A=r(table)
 			gen `var'_diff = round(A[1,1]-A[1,2]) // COUNT THE DIFFERENCE BETWEEN NO CYCLISTS ROUNDED VS NOT ROUNDED AMONG THOSE WHERE NOT ROUNDED IS <1.5	
@@ -822,15 +822,15 @@ x
 			recode `var' 0=1 if littlen <=`var'_diff // ROUND SOME 0 TO 1 SO THAT TOTAL NO. <1.5 IS CORRECT
 			drop littlen
 			}
-			foreach var of varlist govtarget_slc nearmkt_slc gendereq_slc dutch_slc ebike_slc {			
+			foreach var of varlist govtarget_slc govnearmkt_slc gendereq_slc dutch_slc ebike_slc {			
 			total `var'_orig `var' 
 			matrix A=r(table)
 			di "`var': " round((100*(1-A[1,2]/A[1,1])),0.01) "%"
 			}
 		* LIMIT TO THOSE WITH ANY CYCLING, AND SAVE
-			egen sumcycle=rowtotal(bicycle govtarget_slc nearmkt_slc gendereq_slc dutch_slc ebike_slc)
+			egen sumcycle=rowtotal(bicycle govtarget_slc govnearmkt_slc gendereq_slc dutch_slc ebike_slc)
 			drop if sumcycle==0
-			keep id bicycle govtarget_slc nearmkt_slc gendereq_slc dutch_slc ebike_slc
+			keep id bicycle govtarget_slc govnearmkt_slc gendereq_slc dutch_slc ebike_slc
 			sort id
 			export delimited using "pct-inputs\02_intermediate\02_travel_data\commute_microsim\lsoa\od_raster_attributes.csv", replace
 
