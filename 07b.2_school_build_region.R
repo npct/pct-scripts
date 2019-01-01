@@ -29,7 +29,7 @@ d_private <- d_all_private[d_all_private@data$lad11cd %in% region_lad_lookup$lad
 ###########################
 if (region_build_param$to_rebuild_rnet=="1") {
   # DEFINE SCENARIOS
-  scenarios <- c("govtarget_slc","dutch_slc")
+  scenarios <- c("govequity_slc","dutch_slc")
 
   # IDENTIFY WITHIN-REGION FAST ROUTES
   rnet_attributes <- rnet_all_attributes[(rnet_all_attributes$geo_code_o %in% z@data$geo_code) & (rnet_all_attributes$urn %in% d@data$urn), ]

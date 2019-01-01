@@ -11,14 +11,14 @@ memory.limit(size = 1000000)
 # RUN SECTION 4 [merges fast and quiet routes]
 
 # Code to only run for one region (comment out following lines for national build)
-region <- "isle-of-wight"
-pct_regions <- geojson_read(file.path(path_inputs, "02_intermediate/01_geographies/pct_regions_lowres.geojson"), what = "sp")
-region_shp <- pct_regions[grep(pattern = region, x = pct_regions$region_name),]
+#region <- "isle-of-wight"
+#pct_regions <- geojson_read(file.path(path_inputs, "02_intermediate/01_geographies/pct_regions_lowres.geojson"), what = "sp")
+#region_shp <- pct_regions[grep(pattern = region, x = pct_regions$region_name),]
 
 # SET INPUT PARAMETERS
-purpose <- "commute"
-geography <- "msoa"  
-file_name <- "nat1707"   # Name for this batch of routes
+purpose <- "school"
+geography <- "lsoa"  
+file_name <- "nat1812"   # Name for this batch of routes
 
 # CREATE DIRECTORIES (IF NEEDED)
 if(!dir.exists(file.path(path_inputs, "02_intermediate/02_travel_data", purpose))) { dir.create(file.path(path_inputs, "02_intermediate/02_travel_data", purpose)) }
@@ -107,11 +107,11 @@ saveRDS(lines_cs, (file.path(path_inputs, "02_intermediate/02_travel_data", purp
 #########################
 
 route_type <- "fastest" # run for fastest then quietest
-source("04.1_batch_routing.R")
+source("04b_cyclestreets_batch_routing.R")
 
 # RE-RUN FOR QUIET ROUTES
 route_type <- "quietest" 
-source("04.1_batch_routing.R")
+source("04b_cyclestreets_batch_routing.R")
 
 #########################
 ### PART 4: PREPARE CS VARIABLES FOR SCENARiOS/ATTRIBUTES

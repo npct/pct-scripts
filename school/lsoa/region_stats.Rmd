@@ -90,7 +90,7 @@ tm_shape(z) +
 
 At baseline (NSC 2011), the proportion of commuters who cycled to school in `r get_pretty_region_name(region)` was 
 `r round(100 * sum(z$bicycle) / sum(z$all) , 1)`%, compared to the national average of 1.8% in England as a whole.  The percentage of cycling expected was
-`r round(100 * (sum(z$govtarget_slc) - sum(z$bicycle)) / sum(z$all) , 1)`%, based on the distance and hilliness of school trips in the region using the baseline model for England.
+`r round(100 * (sum(z$govequity_slc) - sum(z$bicycle)) / sum(z$all) , 1)`%, based on the distance and hilliness of school trips in the region using the baseline model for England.
 
 Table 1 summarises the proportion of children cycling, walking, driving and using other modes under each scenario in `r get_pretty_region_name(region)`, based on aggregating across all residents in all the LSOA zones.
 
@@ -99,7 +99,7 @@ Table 1 summarises the proportion of children cycling, walking, driving and usin
 | Scenario | % cycling | % walking | % driven by car | % all other modes |
 | ------------- |:-------------: |:-------------: |:--------------:| :----------------: |
 | NSC 2011 | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$bicycle) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (f <- round(100 * sum(z$foot) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$car) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
-| Government Target | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$govtarget_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$govtarget_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$govtarget_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Government Target (equity) | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$govequity_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$govequity_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$govequity_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
 | Go Dutch | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$dutch_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$dutch_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$dutch_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
 
 <br>

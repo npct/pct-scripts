@@ -90,6 +90,8 @@ geojson_write(msoa_cents, file = file.path(path_inputs, "02_intermediate/01_geog
 # OPEN LSOA CENTS FILE & MODIFY EASTINGS/NORTHINGS OF 10 POINTS
 unzip(file.path(path_inputs, "01_raw/01_geographies/lsoa_centroids/Lower_Layer_Super_Output_Areas_December_2011_Population_Weighted_Centroids.zip"), exdir = path_temp_unzip)
 lsoa_cents <- readOGR(file.path(path_temp_unzip, "Lower_Layer_Super_Output_Areas_December_2011_Population_Weighted_Centroids.shp"))
+lsoa_cents@coords[lsoa_cents@data$lsoa11cd=="E01005213", 1] <- -2.2577843   
+lsoa_cents@coords[lsoa_cents@data$lsoa11cd=="E01005213", 2] <- 53.468019
 lsoa_cents@coords[lsoa_cents@data$lsoa11cd=="E01013048", 1] <- -0.194517  
 lsoa_cents@coords[lsoa_cents@data$lsoa11cd=="E01013048", 2] <- 53.917793
 lsoa_cents@coords[lsoa_cents@data$lsoa11cd=="E01013787", 1] <- -0.745443   

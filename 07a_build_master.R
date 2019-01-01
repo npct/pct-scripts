@@ -63,6 +63,13 @@ for(k in 1:length(regions_tobuild)){
   message(paste0("Finished ", region," at ",Sys.time()))
 }
 
+# TEST RNETS VISUALLY, ONE BY ONE
+# for(k in 1) {
+#   region <- regions_tobuild[k]
+#   rnet <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds"))
+#   plot(rnet)  
+# }
+
 # DELETE THE TEMP FILES CREATED BY MARKDOWN DOC
 unlink("figure", recursive=TRUE)
 file.remove("region_stats.md")

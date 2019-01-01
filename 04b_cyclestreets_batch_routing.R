@@ -49,19 +49,20 @@ if(nbatch > 1) {
 }
 
 nrow(stack_data) == nrow(lines_cs)
-summary(stack_data$id == lines_cs@data$id) # check route IDS
+summary(stack_data$id == lines_cs@data$id) # check route IDS - should all be True
 
-# REDO FAILED LINES IF THERE ARE ANY, AND MERGE IN TO STACK DATA
+# REDO FAILED LINES IF THERE ARE ANY, AND MERGE INTO STACK DATA
 if(any(is.na(stack_data$length))) {
-  stack_keep <- stack_data[!is.na(stack_data$length) & !is.na(stack_data$av_incline) & !is.na(stack_data$time) & is.na(stack_data$error), ]
-  stack_redo <- stack_data[is.na(stack_data$length) | is.na(stack_data$av_incline) | is.na(stack_data$time) | !is.na(stack_data$error), ]
+  stack_keep <- stack_data[!is.na(stack_data$length) & !is.na(stack_data$av_incline) & !is.na(stack_data$time) & is.na(stack_data$error), ] 
+  id1 <- (stack_data$id[1])
+  stack_redo <- stack_data[is.na(stack_data$length) | is.na(stack_data$av_incline) | is.na(stack_data$time) | !is.na(stack_data$error) | (stack_data$id==id1), ] #   ## put in the top line, assuming it has not failed, so that first re-done line does not fail and cause line2route to give error
   summary(stack_redo$error)
   # View(stack_redo[c("geo_code1", "geo_code2", "id", "e_dist_km", "error")]) # view errors interactively if needs be
   stack_redo_data <- stack_redo[c("geo_code1", "geo_code2", "id", "e_dist_km")]
   if (purpose=="commute")  {
     stack_redo_lines <- od2line2(flow = stack_redo_data, zones = cents_all)
   } else if (purpose=="school")  {
-    stack_redo_lines <- od2line(flow = stack_redo_data, zones = cents_all, destinations = cents_d)
+    stack_redo_lines <- od2line(flow = stack_redo_data, zones = cents_o, destinations = cents_d)
   } else {
   }
   row.names(stack_redo_lines) <- row.names(stack_redo_data)
@@ -70,12 +71,13 @@ if(any(is.na(stack_data$length))) {
   routes_redo <- line2route(l = stack_redo, route_fun = route_cyclestreet, plan = route_type, n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
   routes_redo@data <- routes_redo@data[,!names(routes_redo@data) %in% c("plan","start","finish")] # drop fields not wanted
   routes_redo@data <- left_join(routes_redo@data, stack_redo@data, by = "id")
+  routes_redo <- routes_redo[routes_redo@data$id!=id1,] # REMOVE THE FIRST LINE, THAT WAS REPEATED JUST TO MAKE SURE LINE2ROUTE RAN OK
   row.names(routes_redo@data) <- sapply(1:length(routes_redo), function(j) routes_redo@lines[[j]]@ID)
   saveRDS(routes_redo,file = file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_redo_of",nbatch,".Rds")))
   routes_redo_data <- routes_redo@data
   stack_data <- rbind(stack_keep, routes_redo_data)
   stack_redo2 <- stack_data[is.na(stack_data$length) | is.na(stack_data$av_incline) | is.na(stack_data$time) | !is.na(stack_data$error), ]
-  summary(stack_redo2$error) # SHOULD BE ZERO - IF NOT RUN THIS SECTION AGAIN?
+  summary(stack_redo2$error) # SHOULD BE ZERO - IF NOT RUN THIS SECTION AGAIN? OR ADD IMPOSSIBLE LINES TO EXCLUDED LIST OF PROBLEM IDS
 }
 
 # FOR FASTEST LINE, LIMIT TO LINES UNDER MAXIMUM SCENARIO LENGTH & SAVE
@@ -114,9 +116,20 @@ if(nbatch_stacks > 1) {
       stack <- spRbind(stack, stack_next)
     }
   }
-} else {
-  stack <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_1", "of", nbatch, ".Rds")))
-}
+ } else {
+  stack <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_1of", nbatch, ".Rds")))
+  rownames(stack@data) <- sapply(1:length(stack), function(j) stack@lines[[j]]@ID) # FORCE DATA ROW NAMES TO BE SAME AS ID IN LINES (in case don't start from '1')
+  stack <- stack[((stack@data$id %in% rf_data_visualise$id) & is.na(stack@data$error)),]
+  if (nbatch > 1){
+    for(i in 2:nbatch){
+      file_next <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",i,"of",nbatch,".Rds")))
+      rownames(file_next@data) <- sapply(1:length(file_next), function(j) file_next@lines[[j]]@ID)
+      file_next <- file_next[((file_next@data$id %in% rf_data_visualise$id) & is.na(file_next@data$error)),]
+      stack <- spRbind(stack, file_next)
+      print(paste0("Stack ",i," of ",nbatch," added at ",Sys.time()))
+    }
+  }
+ }
 
 if(file.exists(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_redo_of", nbatch,".Rds")))) {
   routes_redo <- readRDS(file.path(path_temp_cs, purpose, geography, paste0("r", substr(route_type, 1, 1), "_", file_name, "_redo_of", nbatch,".Rds")))
@@ -127,4 +140,3 @@ stack@data <- stack@data["id"]
 
 saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/r",substr(route_type, 1, 1),"_",file_name,"_shape.Rds")))
 saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("r",substr(route_type, 1, 1),"_shape.Rds")))
-
