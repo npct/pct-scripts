@@ -48,7 +48,7 @@ build_params[build_params$region_name == region, ]$n_people <- sum(l$all)
 if (region_build_param$to_rebuild_rnet=="1") {
 
  # DEFINE SCENARIOS
- scenarios <- c("govtarget_slc", "nearmkt_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
+ scenarios <- c("govtarget_slc", "govnearmkt_slc", "gendereq_slc", "dutch_slc", "ebike_slc")
  
  # IDENTIFY WITHIN-REGION FAST ROUTES, SUBSET BY MIN FLOW
  rf_rnet <- rf_all[rf_all$id %in% l_regional$id,]
