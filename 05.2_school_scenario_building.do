@@ -312,10 +312,10 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			gen nocyclists_slc=0
 			gen nocyclists_sic=nocyclists_slc-bicycle
 		
-			gen govequity_slc=bicycle+(pred_base*all)
-			replace govequity_slc=all if govequity_slc>all & govequity_slc!=. // MAXIMUM PERCENT CYCLISTS IS 100%
-			gen govequity_sic=govequity_slc-bicycle
-			order govequity_slc, before(govequity_sic)
+			gen govtarget_slc=bicycle+(pred_base*all)
+			replace govtarget_slc=all if govtarget_slc>all & govtarget_slc!=. // MAXIMUM PERCENT CYCLISTS IS 100%
+			gen govtarget_sic=govtarget_slc-bicycle
+			order govtarget_slc, before(govtarget_sic)
 
 			foreach x in dutch {
 			gen `x'_slc=pred_`x'*all
@@ -323,7 +323,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			replace `x'_slc=bicycle if `x'_slc<bicycle 		 // MINIMUM NO. CYCLISTS IS BASELINE
 			gen `x'_sic=`x'_slc-bicycle
 			}
-			foreach x in govequity dutch {
+			foreach x in govtarget dutch {
 			replace `x'_slc=bicycle if flowtype==2	// NO INCREASE AMONG FLOWS OUT OF SCOPE AS TOO LONG
 			replace `x'_sic=0 if flowtype==2
 			}
@@ -352,7 +352,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			order `x'_slw `x'_siw `x'_sld `x'_sid, after(`x'_sic)
 			}
 			
-			foreach x in govequity dutch {
+			foreach x in govtarget dutch {
 			gen pchange_`x'=(all-`x'_slc)/(all-bicycle) 	// % change in non-cycle modes
 			recode pchange_`x' .=1 if all==bicycle 			// make 1 (i.e. no change) if everyone in the flow cycles
 			gen `x'_slw=foot*pchange_`x'
@@ -364,7 +364,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		
 			compress
 			drop pred_base pred_dutch 
-			drop pchange_nocyclists pchange_govequity pchange_dutch
+			drop pchange_nocyclists pchange_govtarget pchange_dutch
 
 	*****************
 	** ESTIMATE CHANGE IN MET HOURS
@@ -412,7 +412,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				*/ ((car+other) * wmmets * carothereduc_walktripsperweek * wdur_trip)
 
 		* CALCULATE CHANGE AT FLOW LEVEL IN METS PER WEEK
-			foreach x in nocyclists govequity dutch {
+			foreach x in nocyclists govtarget dutch {
 			gen `x'_sic_mmet=`x'_sic*cmmets_week
 			gen `x'_siw_mmet=`x'_siw*wmmets_week
 			gen `x'_simmet=`x'_sic_mmet+`x'_siw_mmet
@@ -420,7 +420,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			}
 	
 			gen base_slmmet=-1*nocyclists_simmet	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
-			foreach x in govequity dutch {
+			foreach x in govtarget dutch {
 			gen `x'_slmmet=`x'_simmet+base_slmmet
 			order `x'_simmet , after(`x'_slmmet)
 			}
@@ -429,7 +429,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			* remove this part if go for flow-level total, rather than an average - ditto change when aggregate to be total not average in zone/destination			
 			replace baseline_at_mmet=baseline_at_mmet/all
 			replace base_slmmet=base_slmmet/all
-			foreach x in govequity dutch {
+			foreach x in govtarget dutch {
 			foreach y in slmmet simmet {
 			replace `x'_`y' = `x'_`y'/all
 			}
@@ -441,21 +441,21 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			recode met_if_bicycle min/6.9999999=0 7/max=1 // make binary - get half or not?
 			recode met_if_walk min/6.9999999=0 7/max=1
 			gen base_numchild_palevel=(met_if_bicycle*bicycle) + (met_if_walk*foot) // what N. children are getting half in each flow?
-			gen govequity_numchild_palevel=(met_if_bicycle*govequity_slc) + (met_if_walk*govequity_slw)
+			gen govtarget_numchild_palevel=(met_if_bicycle*govtarget_slc) + (met_if_walk*govtarget_slw)
 			gen dutch_numchild_palevel=(met_if_bicycle*dutch_slc) + (met_if_walk*dutch_slw)
-			total base_numchild_palevel govequity_numchild_palevel dutch_numchild_palevel all
+			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all
 				di 593617/74425.32
 				di 630599.7/74425.32
 				di 1569469/74425.32
-			total base_numchild_palevel govequity_numchild_palevel dutch_numchild_palevel all if secondary==0
+			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==0
 				di 149543/41887.69
 				di 153595.1/41887.69
 				di 254897.8/41887.69
-			total base_numchild_palevel govequity_numchild_palevel dutch_numchild_palevel all if secondary==1
+			total base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel all if secondary==1
 				di 444074/32537.63
 				di 477004.6/32537.63
 				di 1314572/32537.63
-			drop met_if_bicycle met_if_walk base_numchild_palevel govequity_numchild_palevel dutch_numchild_palevel
+			drop met_if_bicycle met_if_walk base_numchild_palevel govtarget_numchild_palevel dutch_numchild_palevel
 			*/
 		
 		* DROP INTERMEDIARY VARIABLES
@@ -470,12 +470,12 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		gen cardrivertrips_perchildcaruser=1.2
 		gen co2kg_km=0.182
 				
-		foreach x in nocyclists govequity dutch {
+		foreach x in nocyclists govtarget dutch {
 		gen long `x'_sicartrips = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 	// NO DRIVERS CHANGED * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP 
 		gen long `x'_sico2 = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * cyc_dist_km * co2kg_km 	// NO TRIPS CHANGED * DIST * CO2 EMISSIONS FACOTR
 		}
 		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
-		foreach x in govequity dutch {
+		foreach x in govtarget dutch {
 		gen long `x'_slco2=`x'_sico2+base_slco2
 		order `x'_sico2 , after(`x'_slco2)
 		}
@@ -490,7 +490,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", clear
 		drop *cartrips
 		* AGGREGATE UP AREA FIGURES
-			foreach var of varlist all- other govequity_slc-dutch_sid {
+			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort geo_code_o: egen a_`var'=sum(`var')
 			}
 			foreach var of varlist baseline_at_mmet base_slmmet - dutch_simmet {
@@ -541,7 +541,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\ODpairs_process2.5.dta", clear
 		drop *cartrips
 		* AGGREGATE UP AREA FIGURES
-			foreach var of varlist all- other govequity_slc-dutch_sid {
+			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort urn: egen a_`var'=sum(`var')
 			}
 			foreach var of varlist baseline_at_mmet base_slmmet - dutch_simmet {
@@ -611,7 +611,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				replace foot=. if sdcflag_w==1
 				replace car=. if sdcflag_d==1
 				foreach y in c w d {
-				foreach x in govequity dutch {
+				foreach x in govtarget dutch {
 				replace `x'_sl`y'=. if sdcflag_`y'==1
 				}
 				}
@@ -625,10 +625,10 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 	** LA
 		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lsoa\z_all_attributes_private_unrounded.csv", clear
 		* AGGREGATE
-			foreach var of varlist all- other govequity_slc-dutch_sid {
+			foreach var of varlist all- other govtarget_slc-dutch_sid {
 			bysort lad11cd: egen a_`var'=sum(`var')
 			}
-			foreach var of varlist baseline_at_mmet govequity_slmmet- dutch_simmet {
+			foreach var of varlist baseline_at_mmet govtarget_slmmet- dutch_simmet {
 			bysort lad11cd: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
@@ -643,7 +643,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			rename a_* *
 			duplicates drop
 		* CHANGE UNITS
-			foreach x in base_sl govequity_sl govequity_si dutch_sl dutch_si {
+			foreach x in base_sl govtarget_sl govtarget_si dutch_sl dutch_si {
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lad_all_attributes_unrounded.csv", replace
@@ -653,14 +653,14 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lad_all_attributes_unrounded.csv", clear
 		merge 1:1 lad11cd using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\pct_regions_lad_lookup.dta", keepus(region_name) nogen
 		* AGGREGATE
-			foreach var of varlist all- other govequity_slc- dutch_sico2 {
+			foreach var of varlist all- other govtarget_slc- dutch_sico2 {
 			bysort region_name: egen a_`var'=sum(`var')
 			}
 			keep region_name a_*
 			rename a_* *
 			duplicates drop
 		* PERCENTAGES FOR INTERFACE
-			foreach var of varlist bicycle govequity_slc dutch_slc {
+			foreach var of varlist bicycle govtarget_slc dutch_slc {
 			gen `var'_perc=round(`var'*100/all, 1)
 			order `var'_perc, after(`var')
 			}
@@ -684,7 +684,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			keep id bicycle *_slc	
 			set seed 20170121
 			gen random=uniform()
-			foreach var of varlist govequity_slc dutch_slc {
+			foreach var of varlist govtarget_slc dutch_slc {
 			rename `var' `var'_orig 
 			gen `var'=round(`var'_orig)
 			total `var'_orig `var' if `var'_orig<1.5
@@ -699,8 +699,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			di "`var': " round((100*(1-A[1,2]/A[1,1])),0.01) "%"
 			}
 		* LIMIT TO THOSE WITH ANY CYCLING, AND SAVE
-			egen sumcycle=rowtotal(bicycle govequity_slc dutch_slc)
+			egen sumcycle=rowtotal(bicycle govtarget_slc dutch_slc)
 			drop if sumcycle==0
-			keep id bicycle govequity_slc dutch_slc
+			keep id bicycle govtarget_slc dutch_slc
 			sort id
 			export delimited using "pct-inputs\02_intermediate\02_travel_data\school\lsoa\od_raster_attributes.csv", replace
