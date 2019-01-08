@@ -2,7 +2,6 @@ clear
 clear matrix
 cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		
-*!* change 'commute_microsim' folders (in various places) to 'commute' when actually implement this
 x
 
 	/***********************
@@ -39,7 +38,7 @@ x
 		rename lad11nm lad_name
 		keep geo_code geo_name lad11cd lad_name
 		duplicates drop
-		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\`x'\geo_code_lookup.dta", replace		
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\`x'\geo_code_lookup.dta", replace		
 		}
 		
 	***************************
@@ -94,15 +93,15 @@ x
 			order home_lad11cd female agecat mortrate
 			keep home_lad11cd-mortrate
 			compress
-		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\0temp\mortrate_individual_CommuteSP.dta", replace
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\mortrate_individual_CommuteSP.dta", replace
 
 	**********************************	
 	* PREPARE CYCLE STREETS DATA - SAVE AS STATA (INPUT 3)
 	**********************************	
 		import delimited "pct-inputs\02_intermediate\02_travel_data\commute\msoa\rfrq_all_data.csv", clear
-		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\msoa\rfrq_all_data.dta", replace
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\msoa\rfrq_all_data.dta", replace
 		import delimited "pct-inputs\02_intermediate\02_travel_data\commute\lsoa\rfrq_all_data.csv", clear
-		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\lsoa\rfrq_all_data.dta", replace
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\rfrq_all_data.dta", replace
 	*/	
 
 	*****************
@@ -115,18 +114,18 @@ x
 			drop if work_lsoa=="OD0000001" | work_lsoa==""
 					
 		* MERGE IN MORT RATES
-			merge m:1 home_lad11cd agecat female using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\0temp\mortrate_individual_CommuteSP.dta", nogen
+			merge m:1 home_lad11cd agecat female using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\mortrate_individual_CommuteSP.dta", nogen
 
 		* MERGE IN CYCLE STREETS VARIABLES
 			rename home_lsoa geo_code1
 			rename work_lsoa geo_code2
-			merge m:1 geo_code1 geo_code2 using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\lsoa\rfrq_all_data.dta", keepus(rf_dist_km rf_avslope_perc)
+			merge m:1 geo_code1 geo_code2 using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\rfrq_all_data.dta", keepus(rf_dist_km rf_avslope_perc)
 			drop if _merge==2
 			drop _merge
 			rename geo_code1 geocodetemp
 			rename geo_code2 geo_code1
 			rename geocodetemp geo_code2
-			merge m:1 geo_code1 geo_code2 using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\lsoa\rfrq_all_data.dta", keepus(rf_dist_km rf_avslope_perc) update
+			merge m:1 geo_code1 geo_code2 using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\rfrq_all_data.dta", keepus(rf_dist_km rf_avslope_perc) update
 			drop if _merge==2
 			drop _merge
 			rename geo_code1 work_lsoa
@@ -199,12 +198,12 @@ x
 		order home_lsoa- work_msoa flowtype rf_dist_km rf_avslope_perc cyc_dist_km mortrate commute_mainmode9 female agecat nonwhite nocar urbancat5 sparse incomedecile
 		keep home_lsoa-incomedecile
 		compress
-		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\0temp\CommuteSPTemp1.dta", replace
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\CommuteSPTemp1.dta", replace
 		
 	*****************
 	** STEP 3A: CALCULATE PROPENSITY TO CYCLE
 	*****************
-		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\0temp\CommuteSPTemp1.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\CommuteSPTemp1.dta", clear
 		** INPUT PARAMETERS FLOW TYPE 1+2
 			recode commute_mainmode9 2/max=0,gen(bicycle)
 			recode agecat 6=5, gen(agecat5)
@@ -244,8 +243,8 @@ x
 			table home_gordet nocar , c(mean bicycle)
 			*/
 			
-		/** IDENTIFY REGRESSION EQUATION - FLOW TYPE 1+2 - NEAR MARKET. Paste to 'pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\1logfiles\NearMarket_flow1+2.xls'
-			log using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\1logfiles\NearMarket_flow1+2.smcl", replace
+		/** IDENTIFY REGRESSION EQUATION - FLOW TYPE 1+2 - NEAR MARKET. Paste to 'pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\1logfiles\NearMarket_flow1+2.xls'
+			log using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\1logfiles\NearMarket_flow1+2.smcl", replace
 			foreach x in 1 11 {
 			forval i=1/9 {
 			disp "femagecat `x' in region `i'"
@@ -361,8 +360,8 @@ x
 			gen pred2_dutch= pred2_basegt + meanbdutch
 			gen pred2_ebike= pred2_dutch + meanbebike
 
-		/* IDENTIFY REGRESSION EQUATION - FLOW TYPE 1+2 - NEAR MARKET. Paste to 'pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\1logfiles\NearMarket_flow3.xls'
-			log using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\1logfiles\NearMarket_flow3.smcl", replace
+		/* IDENTIFY REGRESSION EQUATION - FLOW TYPE 1+2 - NEAR MARKET. Paste to 'pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\1logfiles\NearMarket_flow3.xls'
+			log using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\1logfiles\NearMarket_flow3.smcl", replace
 			forval i=1/11 {
 			disp "region `i'"
 			xi: logit bicycle meanpred_basenmorigsq meanpred_basenmorigsqrt if flowtype==3 & home_gordet==`i' 
@@ -392,7 +391,7 @@ x
 			replace pred_`x'=0 if flowtype==4
 			}
 			
-		** SCALE BY REGION TO BE EQIVALENT TO GOV TARGET. Paste to 'pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\1logfiles\NearMarket_gtscale.xls'
+		** SCALE BY REGION TO BE EQIVALENT TO GOV TARGET. Paste to 'pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\1logfiles\NearMarket_gtscale.xls'
 			table home_gordet , c(mean bicycle mean pred_basegt mean pred_basenmorig)
 			gen gtscaling=. // pred_basegt divided by pred_basenmorig
 			recode gtscaling .=1.731 if home_gordet==1
@@ -412,12 +411,12 @@ x
 		** SAVE
 			keep home_lsoa- incomedecile bicycle pred_basegt pred_basenmorig pred_basenm pred_dutch pred_ebike 
 			compress
-		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\0temp\CommuteSPTemp2.dta", replace
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\CommuteSPTemp2.dta", replace
 				
 	*****************
 	** PART 3B: APPLY SCENARIOS TO DATA: SLC AND SIC
 	*****************
-		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\0temp\CommuteSPTemp2.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\CommuteSPTemp2.dta", clear
 		* NO CYCLISTS	
 			gen nocyclists_slc=0
 			gen nocyclists_sic=nocyclists_slc-bicycle
@@ -580,7 +579,7 @@ x
 			
 		** SAVE
 			compress
-		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\CommuteSP_individual.dta", replace
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\CommuteSP_individual.dta", replace
 
 		
 	***********************************
@@ -591,7 +590,7 @@ x
 	*****************
 	** PART pre5: PREPARE INDIVID FOR AGGREGATION [LSOA AND MSOA]
 	*****************			
-		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\CommuteSP_individual.dta", clear	
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\CommuteSP_individual.dta", clear	
 		* PREPARE FOR AGGREGATION
 			rename home_$geography geo_code_o 
 			rename work_$geography geo_code_d
@@ -632,21 +631,21 @@ x
 			rename geo_code_o geo_code
 			rename home_gordet gordet
 			duplicates drop
-			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\geo_code_gordet.dta", replace
+			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", replace
 			restore
 			drop home_gordet
 		
 		order geo_code1 geo_code2 geo_code_o geo_code_d all- taxi_other
-		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\CommuteSP_preaggregate_temp.dta", replace
+		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\CommuteSP_preaggregate_temp.dta", replace
 
 	*****************
 	** PART 5A: AGGREGATE TO ZONE LEVEL [LSOA AND MSOA]
 	*****************	
 		forval reg=1/11 {
-		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\CommuteSP_preaggregate_temp.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\CommuteSP_preaggregate_temp.dta", clear
 		* RESTRICT TO HOME REGION
 			rename geo_code_o geo_code
-			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\geo_code_gordet.dta", nogen
+			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", nogen
 			rename geo_code geo_code_o
 			keep if gordet==`reg'
 		* AGGREGATE UP AREA FIGURES
@@ -666,31 +665,31 @@ x
 			rename geo_code_o geo_code
 			rename a_* *
 			duplicates drop
-			merge 1:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\geo_code_lookup.dta"
+			merge 1:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_lookup.dta"
 			drop if _m==2
 			drop _m
 			order geo_code geo_name lad11cd lad_name all bicycle- taxi_other
 		* SAVE + APPEND
-			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\z_all_reg`reg'.dta", replace
+			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\z_all_reg`reg'.dta", replace
 		}
-			use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\z_all_reg1.dta", replace
+			use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\z_all_reg1.dta", replace
 			forval reg=2/11 {
-			append using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\z_all_reg`reg'.dta"
+			append using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\z_all_reg`reg'.dta"
 			}
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\z_all_attributes_unrounded.csv", replace
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\z_all_attributes_unrounded.csv", replace
 			forval reg=1/11 {
-			erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\z_all_reg`reg'.dta"
+			erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\z_all_reg`reg'.dta"
 			}		
 	
 	*****************
 	** PART 5B: AGGREGATE TO FLOW LEVEL [LSOA AND MSOA]
 	*****************
 		forval reg=1/11 {
-		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\CommuteSP_preaggregate_temp.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\CommuteSP_preaggregate_temp.dta", clear
 			drop *cartrips	
 		* RESTRICT TO STARTING ZONE REGION
 			rename geo_code1 geo_code
-			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\geo_code_gordet.dta", nogen
+			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", nogen
 			rename geo_code geo_code1
 			keep if gordet==`reg'
 		* IDENTIFY VARIABLES WHERE 'ALL' IS TOO SMALL (for lsoa combine <3 flows to 'under 3')
@@ -716,7 +715,7 @@ x
 			duplicates drop
 			forval i=1/2 {
 			rename geo_code`i' geo_code
-			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\geo_code_lookup.dta"
+			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_lookup.dta"
 			drop if _m==2
 			drop _m
 			foreach x in geo_code geo_name lad11cd lad_name {
@@ -730,29 +729,29 @@ x
 			}
 			order id geo_code1 geo_code2 geo_name1 geo_name2 lad11cd1 lad11cd2 lad_name1 lad_name2 all bicycle- taxi_other govtarget_slc- ebike_sico2
 		* MERGE IN OTHER CS DATA (BETWEEN-LINES ONLY)
-			merge 1:1 id using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\rfrq_all_data.dta"
+			merge 1:1 id using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\rfrq_all_data.dta"
 			recode e_dist_km .=0 if geo_code1==geo_code2 // within-zone
 			order e_dist_km, before(rf_dist_km)
 			drop if _m==2
 			count if _m!=3 & geo_code1!=geo_code2 & geo_code2!="Other" & geo_code2!="OD0000003" & geo_code2!="Under 3" // should be none
 			drop _m		
 		* SAVE + APPEND
-			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\od_all_reg`reg'.dta", replace
+			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg`reg'.dta", replace
 		}
-			use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\od_all_reg1.dta", replace
+			use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg1.dta", replace
 			forval reg=2/11 {
-			append using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\od_all_reg`reg'.dta"
+			append using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg`reg'.dta"
 			}
-			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\od_all_attributes_unrounded.csv", replace
+			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_attributes_unrounded.csv", replace
 			forval reg=1/11 {
-			erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\od_all_reg`reg'.dta"
+			erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg`reg'.dta"
 			}
 	
 	*****************
 	** PART 5C: AGGREGATE TO LA & PCT REGION LEVEL [LSOA ONLY]
 	*****************
 	** LA
-		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\lsoa\z_all_attributes_unrounded.csv", clear
+		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\z_all_attributes_unrounded.csv", clear
 		drop *cartrips
 		* AGGREGATE
 			foreach var of varlist all- taxi_other govtarget_slc- ebike_sico2 {
@@ -770,11 +769,11 @@ x
 			replace `x'value_heat=`x'value_heat/1000000 // convert to millions of pounds
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
-		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\lad_all_attributes_unrounded.csv", replace
+		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lad_all_attributes_unrounded.csv", replace
 	** REGION
 		import delimited "pct-inputs\01_raw\01_geographies\pct_regions\pct_regions_lad_lookup.csv", varnames(1) clear 
 		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\pct_regions_lad_lookup.dta", replace
-		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\lad_all_attributes_unrounded.csv", clear
+		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lad_all_attributes_unrounded.csv", clear
 		merge 1:1 lad11cd using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\pct_regions_lad_lookup.dta", keepus(region_name) nogen
 		* AGGREGATE
 			foreach var of varlist all- taxi_other govtarget_slc- ebike_sico2 {
@@ -791,12 +790,12 @@ x
 			keep region_name *perc
 			list if bicycle_perc==. 
 			drop if bicycle_perc==. // should be nothing
-		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\pct_regions_all_attributes.csv", replace
+		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\pct_regions_all_attributes.csv", replace
 
 	*****************
 	** PART 5D: FILE FOR RASTER WITH NUMBERS ROUNDED (BUT CORRECT TOTALS MAINTAINED), AND NO FILTERING OF LINES <3 [LSOA ONLY]
 	*****************			
-		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\lsoa\CommuteSP_preaggregate_temp.dta", clear
+		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\CommuteSP_preaggregate_temp.dta", clear
 		* SUBSET BY DISTANCE AND TO SCENARIO VARIABLES
 			keep if rf_dist_km<20 & geo_code1!=geo_code2
 			gen id = geo_code1+" "+geo_code2
@@ -837,9 +836,9 @@ x
 			drop if sumcycle==0
 			keep id bicycle govtarget_slc govnearmkt_slc gendereq_slc dutch_slc ebike_slc
 			sort id
-			export delimited using "pct-inputs\02_intermediate\02_travel_data\commute_microsim\lsoa\od_raster_attributes.csv", replace
+			export delimited using "pct-inputs\02_intermediate\02_travel_data\commute\lsoa\od_raster_attributes.csv", replace
 
-	erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute_microsim\\$geography\CommuteSP_preaggregate_temp.dta"
+	erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\CommuteSP_preaggregate_temp.dta"
 
 x
 
