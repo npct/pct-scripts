@@ -73,13 +73,13 @@ if(purpose == "school") {
 #########################
 
 # MERGE [ORIGIN] ZONE SCENARIO DATA TO ZONES FILE
-summary({sel_zone <- z_shape$geo_code %in% z_all_attributes$geo_code}) # Check perfect match commute, 1909 false school = LSOA's in Wales
+print("z")
+print(summary({sel_zone <- z_shape$geo_code %in% z_all_attributes$geo_code})) # Check perfect match commute, 1909 false school = LSOA's in Wales
 z_shape <- z_shape[sel_zone,]  
 z_shape@data <- data.frame(geo_code = z_shape$geo_code) 
 z_shape@data <- left_join(z_shape@data, z_all_attributes, by="geo_code")
 saveRDS(z_shape, file.path(path_outputs_national, purpose, geography, "z_all.Rds"))
 geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
-
 
 if(purpose == "commute") {
 # MERGE OD SCENARIO DATA TO CENTS FILE [commute, not schools]
@@ -90,7 +90,8 @@ if(purpose == "commute") {
   for(i in 1:nrow(c_all_attributes)){
     if(is.na(c_all_attributes$all[i])) {c_all_attributes[i,c(13:75)] <- round(0)}
   }
-  summary({sel_c <- c_shape$geo_code %in% c_all_attributes$geo_code}) # Check perfect match
+  print("c")
+  print(summary({sel_c <- c_shape$geo_code %in% c_all_attributes$geo_code})) # Check perfect match
   c_shape <- c_shape[sel_c,] 
   c_shape@data <- data.frame(geo_code = c_shape$geo_code) 
   c_shape@data <- left_join(c_shape@data, c_all_attributes, by="geo_code")
@@ -99,23 +100,27 @@ if(purpose == "commute") {
   geojson_write(c_shape, file = (file.path(path_outputs_national, purpose, geography, "c_all.geojson")))
 
 # MERGE LINE SCENARIO DATA TO BETWEEN-ZONE LINES FILE
-  summary({sel_line1 <- (l_shape$id %in% rf_shape$id)}) # Limit to in rf (maxdist_visualise)
+  print("l")
+  print(summary({sel_line1 <- (l_shape$id %in% rf_shape$id)})) # Limit to in rf (maxdist_visualise)
   l_shape <- l_shape[sel_line1,]  
-  summary({sel_line2 <- (l_shape$id %in% od_all_attributes$id)}) # Limit to those with od_attributes (minflow_visualise)
+  print(summary({sel_line2 <- (l_shape$id %in% od_all_attributes$id)})) # Limit to those with od_attributes (minflow_visualise)
+  # Commute msoa = 1 line false, as had 19.4km on msoa and 30.04 on lsoa (msoa pair "E02000488 E02005038", lsoa pair "E01002265 E01024189")
   l_shape <- l_shape[sel_line2,]  
   l_shape@data <- data.frame(id = l_shape$id) 
   l_shape@data <- left_join(l_shape@data, od_all_attributes, by="id")
   saveRDS(l_shape, (file.path(path_outputs_national, purpose, geography, "l_all.Rds")))
   
 # MERGE LINE SCENARIO DATA TO FAST ROUTES FILE
-  summary({sel_rf <- (rf_shape$id %in% od_all_attributes$id)}) # Limit to those with od_attributes (minflow_visualise)
+  print("rf")
+  print(summary(({sel_rf <- (rf_shape$id %in% od_all_attributes$id)}))) # Limit to those with od_attributes (minflow_visualise)
   rf_shape <- rf_shape[sel_rf,]  
   rf_shape@data <- data.frame(id = rf_shape$id) 
   rf_shape@data <- left_join(rf_shape@data, od_all_attributes, by="id")
   saveRDS(rf_shape, (file.path(path_outputs_national, purpose, geography, "rf_all.Rds")))
   
 # MERGE LINE SCENARIO DATA TO QUIET ROUTES FILE 
-  summary({sel_rq <- (rq_shape$id %in% od_all_attributes$id)}) # Limit to those with od_attributes (minflow_visualise)
+  print("rq")
+  print(summary({sel_rq <- (rq_shape$id %in% od_all_attributes$id)})) # Limit to those with od_attributes (minflow_visualise)
   rq_shape <- rq_shape[sel_rq,]  
   rq_shape@data <- data.frame(id = rq_shape$id) 
   rq_shape@data <- left_join(rq_shape@data, od_all_attributes, by="id")
@@ -125,7 +130,8 @@ if(purpose == "commute") {
 
 # MERGE DESTINATION DATA TO DESTINATIONS FILE
 if(purpose == "school") {
-  summary({sel_zone <- d_shape$urn %in% d_all_attributes$urn}) # 205 false = schools excluded from study pop. 
+  print("d")
+  print(summary({sel_zone <- d_shape$urn %in% d_all_attributes$urn})) # 206 false = schools excluded from study pop. 
   d_shape <- d_shape[sel_zone,]  
   d_shape@data <- data.frame(urn = d_shape$urn) 
   d_shape@data <- left_join(d_shape@data, d_all_attributes, by="urn")
@@ -135,13 +141,15 @@ if(purpose == "school") {
 
 # CREATE PRIVATE VERSIONS OF DATASETS
 if(purpose == "school") {
-  summary({sel_zone <- z_shape_private$geo_code %in% z_all_attributes_private$geo_code}) # Check perfect match commute, 1909 false school = LSOA's in Wales
+  print("private_z")
+  print(summary({sel_zone <- z_shape_private$geo_code %in% z_all_attributes_private$geo_code})) # Check perfect match commute, 1909 false school = LSOA's in Wales
   z_shape_private <- z_shape_private[sel_zone,]  
   z_shape_private@data <- data.frame(geo_code = z_shape_private$geo_code) 
   z_shape_private@data <- left_join(z_shape_private@data, z_all_attributes_private, by="geo_code")
   saveRDS(z_shape_private, file.path(path_outputs_national, purpose_private, geography, "z_all.Rds"))
 
-  summary({sel_zone <- d_shape_private$urn %in% d_all_attributes_private$urn}) # 205 false = schools excluded from study pop. 
+  print("private_d")
+  print(summary({sel_zone <- d_shape_private$urn %in% d_all_attributes_private$urn})) # 206 false = schools excluded from study pop. 
   d_shape_private <- d_shape_private[sel_zone,]  
   d_shape_private@data <- data.frame(urn = d_shape_private$urn) 
   d_shape_private@data <- left_join(d_shape_private@data, d_all_attributes_private, by="urn")
@@ -149,7 +157,7 @@ if(purpose == "school") {
 }
 
 # MERGE LA DATA TO LA GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 
-summary({sel_lad <- (lad$lad11cd %in% lad_attributes$lad11cd)}) # Currently restricting to England, could expand LAD to extent
+summary({sel_lad <- (lad$lad11cd %in% lad_attributes$lad11cd)}) # 22 false schools = Wales
 lad <- lad[sel_lad,]  
 lad@data <- left_join(lad@data, lad_attributes, by = "lad11cd")
 saveRDS(lad, (file.path(path_outputs_national, purpose, "lad.Rds")))
@@ -157,7 +165,8 @@ geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson
 
 # MERGE REGION DATA TO REGION GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 
 ## [NB IN FUTURE NEED TO FIX THIS TO HAVE MORE RATIONAL NAMING ?& FILE LOCATIONS FOR COMMUTE/SCHOOL
-summary({sel_regions <- (pct_regions_lowres$region_name %in% pct_regions_all_attributes$region_name)}) # Should be perfect match commute, 1 false school
+print("pct_region")
+print(summary({sel_regions <- (pct_regions_lowres$region_name %in% pct_regions_all_attributes$region_name)})) # Should be perfect match commute, 1 false school
 pct_regions_lowres <- pct_regions_lowres[sel_regions,]  
 pct_regions_lowres@data <- left_join(pct_regions_lowres@data, pct_regions_all_attributes, by = "region_name")
 geojson_write(pct_regions_lowres, file = file.path(path_shiny,"regions_www/www/front_page", purpose, "pct_regions_lowres_scenario.geojson"))

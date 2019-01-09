@@ -4,9 +4,9 @@ source("00_setup_and_funs.R")
 memory.limit(size=1000000)
 
 # SET INPUT PARAMETERS
-purpose <- "school"
+purpose <- "commute"
 purpose_private <- paste0(purpose, "_private")
-geography <- "lsoa"  
+geography <- "msoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
 init_outputs_national(purpose, geography) # Load national data
 

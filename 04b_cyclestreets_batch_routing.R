@@ -67,7 +67,7 @@ if(any(is.na(stack_data$length))) {
   }
   row.names(stack_redo_lines) <- row.names(stack_redo_data)
   stack_redo <- SpatialLinesDataFrame(sl = stack_redo_lines, data = stack_redo_data)
-  stack_redo <- spTransform(stack_redo, proj_4326)
+  proj4string(stack_redo) <- proj_4326
   routes_redo <- line2route(l = stack_redo, route_fun = route_cyclestreet, plan = route_type, n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
   routes_redo@data <- routes_redo@data[,!names(routes_redo@data) %in% c("plan","start","finish")] # drop fields not wanted
   routes_redo@data <- left_join(routes_redo@data, stack_redo@data, by = "id")
