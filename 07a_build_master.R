@@ -26,7 +26,7 @@ for(k in 1:length(regions_tobuild)){
   region_lad_lookup <- pct_regions_lad_lookup[pct_regions_lad_lookup$region_name==region,]
 
   # BUILD THE REGION
-  message(paste0("Building for ", region, " (region ", k, ")"))
+  message(paste0("Building for ", region, " (region ", k, ") at ",Sys.time()))
   #region_build_param$to_rebuild_rnet <- 0 # uncomment to forcibly skip rnet
   if (purpose=="commute") {
     source("07b.1_commute_build_region.R") # comment out to skip build entirely
