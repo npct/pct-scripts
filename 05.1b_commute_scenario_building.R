@@ -3,7 +3,7 @@ rm(list = ls())
 source("00_setup_and_funs.R")
 memory.limit(size=1000000)
 purpose <- "commute"
-geography <- "msoa"  
+geography <- "lsoa"  
 
 #########################
 ### ROUND AND SAVE SCENARIO ATTRIBUTE (this will be done in previous stage when move stata to R)

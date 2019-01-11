@@ -4,7 +4,7 @@ source("00_setup_and_funs.R")
 memory.limit(size = 1000000)
 
 # SET INPUT PARAMETERS
-purpose <- "school"
+purpose <- "commute"
 purpose_private <- paste0(purpose, "_private")
 geography <- "lsoa"
 
@@ -59,7 +59,7 @@ lad_attributes <- read_csv(file.path(path_outputs_national, purpose, "lad_attrib
 pct_regions_all_attributes <- read_csv(file.path(path_temp_scenario, purpose, "pct_regions_all_attributes.csv"))
 
 
-# OPEN CODEBOOKS FOR LAYERS NOT YET SORTED BY CODEBOOK
+# OPEN CODEBOOKS FOR LAYERS NOT YET FILTERED BY CODEBOOK
 if(purpose == "commute") {
   c_codebook <- read_csv(file.path(path_codebooks, purpose, "c_codebook.csv"))
   rq_codebook <- read_csv(file.path(path_codebooks, purpose, "rq_codebook.csv"))
