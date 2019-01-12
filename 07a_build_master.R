@@ -6,7 +6,7 @@ memory.limit(size=1000000)
 # SET INPUT PARAMETERS
 purpose <- "commute"
 purpose_private <- paste0(purpose, "_private")
-geography <- "msoa"  
+geography <- "lsoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
 init_outputs_national(purpose, geography) # Load national data
 
