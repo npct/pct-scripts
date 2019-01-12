@@ -16,7 +16,7 @@ memory.limit(size = 1000000)
 #region_shp <- pct_regions[grep(pattern = region, x = pct_regions$region_name),]
 
 # SET INPUT PARAMETERS
-purpose <- "school"
+purpose <- "commute"
 geography <- "lsoa"  
 file_name <- "nat1812"   # Name for this batch of routes
 
