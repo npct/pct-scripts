@@ -39,18 +39,28 @@ rnet_new2 = rnet_new1[rnet_new1$dutch_slc >= 50, ]
 purpose <- "school"
 geography <- "lsoa" 
 
-k = which(r$region_name == "avon")
+k = which(r$region_name == "london")
 for(k in 1:nrow(r)) {
     rmini <- rnet[r[k,], ]
     rmini = as(rmini, "Spatial")
     s_new = object.size(rmini) 
     s_new / 1e6 
-    if(s_new > 109943160) {
+    if(s_new > 100000000) {
       print("reducing rnet size")
-      rmini = rmini[rmini$dutch_slc >= 50, ] 
-    }
+      rmini = rmini[rmini$dutch_slc >= 100, ] 
+    } else if(s_new > 70000000) {
+      print("reducing rnet size")
+      rmini = rmini[rmini$dutch_slc >= 70, ] 
+    } else if(s_new > 50000000) {
+      print("reducing rnet size")
+      rmini = rmini[rmini$dutch_slc >= 40, ] 
+    } else if(s_new > 30000000) {
+      print("reducing rnet size")
+      rmini = rmini[rmini$dutch_slc >= 20, ] 
+    } 
     saveRDS(rmini, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.Rds"))) 
-    message(paste0("Region ", k, " saved at ",Sys.time()))
+    geojsonio::geojson_write(rmini, file = file.path("../pct-outputs-regional-notR/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.geojson"))) 
+    message(paste0("Region ", k, " saved at ", Sys.time()))
 }
 
 
