@@ -45,7 +45,7 @@ for(k in 1:nrow(r)) {
     rmini_spatial = as(rmini, "Spatial")
     s_new = object.size(rmini_spatial) 
     s_new / 1e6 
-    if(s_new > 100000000) {
+    if(s_new > 50000000) {
       print("reducing rnet size")
       rmini_spatial = rmini_spatial[rmini_spatial$dutch_slc >= 50, ] 
     } 
