@@ -15,8 +15,12 @@ rnet_large = sf::read_sf("schools_overlined.gpkg")
 rnet = sf::st_transform(rnet_large, 4326)
 rnet = cbind(local_id = 1:nrow(rnet), rnet)
 names(rnet) %in% n # names are the same
-rnet = rnet[rnet$dutch_slc >= 10, ]
-
+rnet = rnet[rnet$dutch_slc >= 10, ] # removes around 15%
+nrow(rnet) / nrow(rnet_large)
+summary(rnet$bicycle[rnet$bicycle > 0 & rnet$bicycle <= 2])
+rnet$bicycle[rnet$bicycle > 0 & rnet$bicycle <= 2] = NA
+summary(rnet$bicycle)
+# sf::st_write(rnet, "schools_rnet.gpkg")
 
 r = sf::read_sf("../pct-shiny/regions_www/pct_regions_highres.geojson")
 
