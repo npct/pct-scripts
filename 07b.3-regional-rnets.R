@@ -81,6 +81,16 @@ for(k in 1:nrow(r)) {
 
 # test values
 region_to_test = "london" # pick any region
+test_rnet = readRDS(paste0("../pct-outputs-regional-R/school/lsoa/", region_to_test, "/rnet_full.Rds"))
+summary(test_rnet)
+
+test_rnet = readRDS(paste0("../pct-outputs-regional-R/school/lsoa/", region_to_test, "/rnet.Rds"))
+summary(test_rnet)
+
+test_rnet = sf::read_sf(paste0("../pct-outputs-regional-notR/school/lsoa/", region_to_test, "/rnet.geojson"))
+summary(test_rnet)
+
+
 u = paste0("https://github.com/npct/pct-outputs-regional-R/raw/master/school/lsoa/", region_to_test, "/rnet.Rds")
 download.file(u, "rnet.Rds")
 test_rnet = readRDS("rnet.Rds")
