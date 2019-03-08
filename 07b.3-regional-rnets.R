@@ -44,12 +44,12 @@ hist(rnet_new1$dutch_slc)
 
 
 # SET INPUT PARAMETERS
-purpose <- "school"
-geography <- "lsoa" 
+purpose = "school"
+geography = "lsoa" 
 
 k = which(r$region_name == "avon")
 for(k in 1:nrow(r)) {
-    rmini <- rnet[r[k,], ]
+    rmini = rnet[r[k,], ]
     r_spatial = as(rmini, "Spatial")
     rmini_spatial = r_spatial[r_spatial$dutch_slc > 10, ]
     s_new = object.size(rmini_spatial) 
