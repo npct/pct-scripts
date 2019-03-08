@@ -68,4 +68,26 @@ for(k in 1:nrow(r)) {
     message(paste0("Region ", k, " saved at ", Sys.time()))
 }
 
+# post-processing tests ---------------------------------------------------
+
+# test values
+region_to_test = "london" # pick any region
+u = paste0("https://github.com/npct/pct-outputs-regional-R/raw/master/school/lsoa/", region_to_test, "/rnet.Rds")
+download.file(u, "rnet.Rds")
+test_rnet = readRDS("rnet.Rds")
+summary(test_rnet$bicycle)
+summary(test_rnet$bicycle == 1)
+summary(test_rnet$bicycle == 2)
+summary(test_rnet$bicycle == 3)
+
+# test national rnet
+region_to_test = "london" # pick any region
+u = paste0("https://github.com/npct/pct-lsoa-vis/releases/download/0.0.1/schools_rnet.gpkg")
+download.file(u, "rnet.gpkg")
+test_rnet = sf::st_read("rnet.gpkg")
+summary(test_rnet$bicycle)
+summary(test_rnet$bicycle == 1)
+summary(test_rnet$bicycle == 2)
+summary(test_rnet$bicycle == 3)
+
 
