@@ -1,6 +1,6 @@
 # Aim: build regional rnets
 
-test_region = "london"
+test_region = "avon"
 
 f = paste0("../pct-outputs-regional-R/school/lsoa/", test_region, "/rnet.Rds")
 rnet_example = readRDS(f)
@@ -9,18 +9,24 @@ plot(rnet_example, lwd = rnet_example$dutch_slc / mean(rnet_example$dutch_slc))
 n = names(rnet_example)
 s = object.size(rnet_example) # save size for future reference
 
-u = "https://github.com/mem48/pct-raster-tests/releases/download/1.0.1/schools_overlined.gpkg"
-download.file(url = u, destfile = "schools_overlined.gpkg")
-rnet_large = sf::read_sf("schools_overlined.gpkg")
-rnet = sf::st_transform(rnet_large, 4326)
+# Todo: move this into rnet generation script
+rnet_orig = sf::read_sf("schools_overlined.gpkg") # original schools layer
+rnet = sf::st_transform(rnet_orig, 4326)
 rnet = cbind(local_id = 1:nrow(rnet), rnet)
 names(rnet) %in% n # names are the same
-rnet = rnet[rnet$dutch_slc >= 10, ] # removes around 15%
-nrow(rnet) / nrow(rnet_large)
 summary(rnet$bicycle[rnet$bicycle > 0 & rnet$bicycle <= 2])
 rnet$bicycle[rnet$bicycle > 0 & rnet$bicycle <= 2] = NA
+rnet$govtarget_slc[is.na(rnet$bicycle) & rnet$govtarget_slc <= 2] = NA
+rnet$dutch_slc[is.na(rnet$bicycle) & rnet$dutch_slc <= 2] = NA
+
 summary(rnet$bicycle)
+summary(rnet$govtarget_slc)
+summary(rnet$dutch_slc)
 # sf::st_write(rnet, "schools_rnet.gpkg")
+
+rnet_small = rnet[rnet$dutch_slc >= 10, ] # removes around 15%
+summary(rnet_small$bicycle)
+nrow(rnet_small) / nrow(rnet)
 
 r = sf::read_sf("../pct-shiny/regions_www/pct_regions_highres.geojson")
 
@@ -35,18 +41,17 @@ s / s_new # 30% times bigger for bedfordshire
 s_new / 1e6 # 130 MB for London...
 summary(rnet_new1$dutch_slc)
 hist(rnet_new1$dutch_slc)
-rnet_new2 = rnet_new1[rnet_new1$dutch_slc >= 50, ] 
-
 
 
 # SET INPUT PARAMETERS
 purpose <- "school"
 geography <- "lsoa" 
 
-k = which(r$region_name == "london")
+k = which(r$region_name == "avon")
 for(k in 1:nrow(r)) {
     rmini <- rnet[r[k,], ]
-    rmini_spatial = as(rmini, "Spatial")
+    r_spatial = as(rmini, "Spatial")
+    rmini_spatial = r_spatial[r_spatial$dutch_slc > 10, ]
     s_new = object.size(rmini_spatial) 
     s_new / 1e6 
     if(s_new > 50000000) {
@@ -64,7 +69,11 @@ for(k in 1:nrow(r)) {
     #   rmini = rmini[rmini$dutch_slc >= 20, ] 
     # } 
     saveRDS(rmini_spatial, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.Rds"))) 
-    geojsonio::geojson_write(rmini, file = file.path("../pct-outputs-regional-notR/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.geojson"))) 
+    
+    saveRDS(r_spatial, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet_full.Rds"))) 
+    
+    geojsonio::geojson_write(r_spatial, file = file.path("../pct-outputs-regional-notR/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.geojson"))) 
+    
     message(paste0("Region ", k, " saved at ", Sys.time()))
 }
 
