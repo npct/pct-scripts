@@ -72,7 +72,7 @@ for(k in 1:nrow(r)) {
     
     saveRDS(r_spatial, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet_full.Rds"))) 
     
-    geojsonio::geojson_write(r_spatial, file = file.path("../pct-outputs-regional-notR/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.geojson"))) 
+    geojsonio::geojson_write(r_spatial, file = file.path("../pct-outputs-regional-notR/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet_full.geojson"))) 
     
     message(paste0("Region ", k, " saved at ", Sys.time()))
 }
