@@ -43,6 +43,9 @@ summary(rf_all) # looks good:
 
 # read-in cleaned file
 rf_all = readRDS("../pct-largefiles/rf_all.Rds")
+l_all = readRDS("../pct-outputs-national/commute/lsoa/l_all.Rds")
+regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_highres.geojson")
+
 
 # tests -------------------------------------------------------------------
 
@@ -51,34 +54,84 @@ library(stplanr)
 scenarios = c("bicycle", "govtarget_slc", "govnearmkt_slc", "gendereq_slc", 
               "dutch_slc")
 
-od_test = readr::read_csv("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/z_attributes.csv")
-# od_test = readRDS("../pct-outputs-regional-R/commute/lsoa/isle-of-wight/l.Rds")
+od_test = readr::read_csv("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/od_attributes.csv")
+od_test$id = paste(od_test$geo_code1, od_test$geo_code2)
 summary({sel_isle = rf_all$id %in% od_test$id}) # 110 not in there out of 1698, ~5%
-nrow(rf_isle) / nrow(rf_all) * 100 # less than 0.1% of data - should take 1000 time longer than test to run...
 rf_isle = rf_all[sel_isle, ]
-# rf_isle = sf::st_as_sf(readRDS("../pct-outputs-regional-R/commute/lsoa/isle-of-wight/rf.Rds"))
-# for tests:
-download.file("https://github.com/npct/pct-scripts/releases/download/0.0.1/rf_isle.Rds", "rf_isle.Rds", mode = "wb")
-download.file("https://github.com/npct/pct-outputs-regional-R/raw/master/commute/lsoa/isle-of-wight/rf.Rds", "rf_isle.Rds", mode = "wb")
-rf_isle = sf::st_as_sf(readRDS("rf_isle.Rds"))
-# plot(rf_isle[1:9, ])
-# plot(rf_isle) # takes a while...
-# saveRDS(rf_isle, "rf_isle.Rds")
+nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time longer than test to run...
 
-# fails
-rnet_isle = overline2(rf_isle, attrib = scenarios)
-# works
+# # benchmarking
+# res = bench::mark(
+#   check = FALSE,
+#   t2_nc16 = overline2(rf_isle, scenarios, ncores = 16),
+#   t2_nc10 = overline2(rf_isle, scenarios, ncores = 10),
+#   t2_nc04 = overline2(rf_isle, scenarios, ncores = 4),
+#   t2_nc02 = overline2(rf_isle, scenarios, ncores = 2),
+#   t2_nc01 = overline2(rf_isle, scenarios, ncores = 1)
+#   )
+# plot(res)
+# 
+# rnet_isle = overline2(rf_isle, attrib = "bicycle")
+# rnet_isle = overline2(rf_isle, attrib = "ebike_slc")
+# 
+# # works but takes longer (18 vs 8 seconds)
+# system.time({
+#   rnet_isle = overline2(rf_isle, attrib = "bicycle", ncores = 4)
+# })
+# 
+# # fails
+# system.time({
+#   rnet_isle = overline2(rf_isle, attrib = scenarios, ncores = 4)
+# })
 
-rnet_isle = overline2(rf_isle, attrib = "bicycle")
-rnet_isle = overline2(rf_isle, attrib = "ebike_slc")
+create_rnet_region = function(r = "isle-of-wight") {
+  message("Reading in data for ", r)
+  l = pct::get_pct_lines(region = r, purpose = "commute", geography = "lsoa")
+  l_internal = l[regions, , op = st_within]
+  
+  rf_region = rf_all[rf_all$id %in% l$id, ]
+  rf_intern = rf_all[rf_all$id %in% l_internal$id, ]
+  rf_extern = rf_region[!rf_region$id %in% l_internal$id, ]
+  
+  message("Generating internal rnet")
+  rnet_intern = overline2(rf_intern, attrib = scenarios)
+  message("Generating external rnet")
+  rnet_extern = overline2(rf_extern, attrib = scenarios)
+  
+  filename_intern = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
+  filename_extern = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_extern_sf.Rds")
+  saveRDS(rnet_intern, filename_intern)
+  saveRDS(rnet_extern, filename_extern)
+  
+  message("Generating combined rnet")
+  rnet_combined = rbind(rnet_intern, rnet_extern)
+  rnet = overline2(rnet_combined, attrib = scenarios)
+  plot(rnet)
+  
+  saveRDS(rnet, paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
+  rnet = cbind(local_id = 1:nrow(rnet), rnet)
+  saveRDS(as(rnet, "Spatial"), paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds"))
+  message("Job done for ", r)
+}
 
-# works but takes longer (18 vs 8 seconds)
-system.time({
-  rnet_isle = overline2(rf_isle, attrib = "bicycle", ncores = 4)
-})
+# check rnet
+rnet = readRDS(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
+rnet_old = readRDS(paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"))
+names(rnet_old)
+names(rnet)
+plot(rnet["bicycle"])
 
-# fails
-system.time({
-  rnet_isle = overline2(rf_isle, attrib = scenarios, ncores = 4)
-})
+# to test on shiny app for single region...
+file.copy(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds"), 
+          paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"), overwrite = TRUE)
+remotes::install_cran(c("shiny", "rgdal", "rgeos", "leaflet", "shinyjs"))
+shiny::runApp("../pct-shiny/regions_www/m/")
 
+# build regional rnets ----------------------------------------------------
+
+region_names = regions$region_name  
+# region_names = region_names[grep(pattern = "isle|hereford", region_names)]
+region_names = region_names[!grepl(pattern = "london|greater", region_names)]
+parallel::mclapply(mc.cores = 6, region_names, FUN = create_rnet_region)
+region_names = region_names[grepl(pattern = "london|greater", region_names)]
+parallel::mclapply(mc.cores = 2, region_names, FUN = create_rnet_region)
