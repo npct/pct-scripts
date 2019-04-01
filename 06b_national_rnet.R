@@ -2,6 +2,7 @@
 
 # setup -------------------------------------------------------------------
 
+max_nrow_net = 20000 # max size of rnet to show (from 2/3 of what worked for schools)
 memfree <- as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern=TRUE))
 memfree / 1e6
 packageVersion("stplanr") # should be 0.2.8
@@ -100,13 +101,14 @@ create_rnet_region = function(r = "isle-of-wight") {
   
   filename_intern = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
   filename_extern = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_extern_sf.Rds")
+  
   saveRDS(rnet_intern, filename_intern)
   saveRDS(rnet_extern, filename_extern)
   
   message("Generating combined rnet")
   rnet_combined = rbind(rnet_intern, rnet_extern)
   rnet = overline2(rnet_combined, attrib = scenarios)
-  plot(rnet)
+  # plot(rnet)
   
   saveRDS(rnet, paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
   rnet = cbind(local_id = 1:nrow(rnet), rnet)
@@ -114,24 +116,41 @@ create_rnet_region = function(r = "isle-of-wight") {
   message("Job done for ", r)
 }
 
-# check rnet
-rnet = readRDS(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
-rnet_old = readRDS(paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"))
-names(rnet_old)
-names(rnet)
-plot(rnet["bicycle"])
+# r = "isle-of-wight"
+# # check rnet
+# rnet = readRDS(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
+# rnet_old = readRDS(paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"))
+# names(rnet_old)
+# names(rnet)
+# plot(rnet["bicycle"])
 
 # to test on shiny app for single region...
-file.copy(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds"), 
-          paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"), overwrite = TRUE)
-remotes::install_cran(c("shiny", "rgdal", "rgeos", "leaflet", "shinyjs"))
-shiny::runApp("../pct-shiny/regions_www/m/")
+# file.copy(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds"), 
+#           paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"), overwrite = TRUE)
+# remotes::install_cran(c("shiny", "rgdal", "rgeos", "leaflet", "shinyjs"))
+# shiny::runApp("../pct-shiny/regions_www/m/")
 
 # build regional rnets ----------------------------------------------------
 
 region_names = regions$region_name  
 # region_names = region_names[grep(pattern = "isle|hereford", region_names)]
-region_names = region_names[!grepl(pattern = "london|greater", region_names)]
-parallel::mclapply(mc.cores = 6, region_names, FUN = create_rnet_region)
+# region_names = region_names[!grepl(pattern = "london|greater", region_names)]
+# lapply(region_names, FUN = create_rnet_region)
 region_names = region_names[grepl(pattern = "london|greater", region_names)]
-parallel::mclapply(mc.cores = 2, region_names, FUN = create_rnet_region)
+lapply(region_names, FUN = create_rnet_region)
+
+# move files around -------------------------------------------------------
+
+# todo: run for all regions if OK for isle-of-wight
+
+# max_nrow_net = nrow(readRDS("../pct-outputs-regional-R/school/lsoa/london/rnet.Rds"))
+r = "isle-of-wight"
+filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
+filename_full = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_full.Rds")
+file.rename(filename_rnet, filename_full)
+rnet_full = readRDS(filename_full)
+rnet = rnet_full[tail(order(rnet_full$dutch_slc), max_nrow_net), ]
+plot(rnet) # test it works
+saveRDS(rnet, filename_rnet)
+
+
