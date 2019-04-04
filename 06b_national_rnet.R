@@ -177,15 +177,44 @@ saveRDS(rnet_nat, filename_rnet_nat)
 rnet_nat_sf = sf::st_as_sf(rnet_nat)
 sf::st_write(rnet_nat_sf, "rnet_all.gpkg")
 piggyback::pb_upload("rnet_all.gpkg")
+
+# rasterize ---------------------------------------------------------------
+
+# library(gdalUtils)
+# gdal_setInstallation()
+# library(magrittr)
+# test
+download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/ras_bicycle.tif", "rnet_all_bicycle.tif")
+file.copy("rnet_all_bicycle.tif", "rnet_all_bicycle_bak.tif")
+rnet_1layer = readRDS("../pct-outputs-regional-R//commute/lsoa/isle-of-wight/rnet_full.Rds") %>% 
+  sf::st_as_sf()
+sf::write_sf(rnet_1layer, "rnet_1layer.gpkg")
+
+
+# remotes::install_github("rspatial/terra")
+# v1 = terra::vect("rnet_1layer.gpkg")
+# r1 = terra::rast("rnet_all_bicycle.tif")
+# terra::image(r1)
+# r2 = terra::rasterize(x = v1, y = r1)
+
+# ras1 = raster::raster("rnet_all_bicycle.tif")
+# ras_bicycle = raster::rasterize(x = rnet_1layer["bicycle"], y = ras1, field = 1, fun = sum)
+# plot(ras_bicycle)
+# plot(ras1)
+# system.time(
+#   gdalUtils::gdal_rasterize(src_datasource = "rnet_1layer.gpkg", dst_filename = "rnet_all_bicycle.tif", b = "bicycle")
+#   sf::gdal_rasterize(sf = rnet_1layer, file = "rnet_all_bicycle.tif")
+# )
+
 # get rnet data -----------------------------------------------------------
-log_data_rnets = log_data[1]
-
-for(r in rs) {
-  filename_rnet_msoa = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
-  filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
-  
-
-}
+# log_data_rnets = log_data[1]
+# 
+# for(r in rs) {
+#   filename_rnet_msoa = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
+#   filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
+#   
+# 
+# }
 
 
 
