@@ -47,7 +47,7 @@ hist(rnet_new1$dutch_slc)
 purpose = "school"
 geography = "lsoa" 
 
-k = which(r$region_name == "avon")
+k = which(r$region_name == "london")
 for(k in 1:nrow(r)) {
     rmini = rnet[r[k,], ]
     r_spatial = as(rmini, "Spatial")
@@ -56,7 +56,7 @@ for(k in 1:nrow(r)) {
     s_new / 1e6 
     if(s_new > 50000000) {
       print("reducing rnet size")
-      rmini_spatial = rmini_spatial[rmini_spatial$dutch_slc >= 50, ] 
+      rmini_spatial = rmini_spatial[rmini_spatial$dutch_slc >= 100, ] 
     } 
     # else if(s_new > 70000000) {
     #   print("reducing rnet size")
