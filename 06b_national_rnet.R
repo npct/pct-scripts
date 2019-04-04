@@ -47,13 +47,7 @@ rf_all = readRDS("../pct-largefiles/rf_all.Rds")
 l_all = readRDS("../pct-outputs-national/commute/lsoa/l_all.Rds")
 regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_highres.geojson")
 
-
 # tests -------------------------------------------------------------------
-
-library(sf)
-library(stplanr)
-scenarios = c("bicycle", "govtarget_slc", "govnearmkt_slc", "gendereq_slc", 
-              "dutch_slc")
 
 od_test = readr::read_csv("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/od_attributes.csv")
 od_test$id = paste(od_test$geo_code1, od_test$geo_code2)
@@ -85,8 +79,23 @@ nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time
 #   rnet_isle = overline2(rf_isle, attrib = scenarios, ncores = 4)
 # })
 
-create_rnet_region = function(r = "isle-of-wight") {
+log_data = data.frame(
+  region_name = regions$region_name,
+  rnet_lsoa_shiny_dutch_slc_min = NA,
+  rnet_lsoa_shiny_n_row = NA,
+  rnet_lsoa_full_n_row = NA,
+  build_start_time = NA,
+  build_end_time = NA
+)
+
+# create_rnet_region = function(r = "isle-of-wight") {
+rs = c("isle-of-wight", "avon") # for testing...
+rs = regions$region_name
+for(r in rs) {
+  i = log_data$region_name == r
   message("Reading in data for ", r)
+  log_data$build_start_time[i] = Sys.time()
+  
   l = pct::get_pct_lines(region = r, purpose = "commute", geography = "lsoa")
   l_internal = l[regions, , op = st_within]
   
@@ -101,6 +110,8 @@ create_rnet_region = function(r = "isle-of-wight") {
   
   filename_intern = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
   filename_extern = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_extern_sf.Rds")
+  filename_full = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_full.Rds")
+  filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
   
   saveRDS(rnet_intern, filename_intern)
   saveRDS(rnet_extern, filename_extern)
@@ -111,46 +122,70 @@ create_rnet_region = function(r = "isle-of-wight") {
   # plot(rnet)
   
   saveRDS(rnet, paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
-  rnet = cbind(local_id = 1:nrow(rnet), rnet)
-  saveRDS(as(rnet, "Spatial"), paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds"))
+  rnet_full = cbind(local_id = 1:nrow(rnet), rnet)
+  saveRDS(as(rnet_full, "Spatial"), filename_full)
+  
+  rnet_subset = rnet_full[tail(order(rnet_full$dutch_slc), max_nrow_net), ]
+  dutch_slc_min = round(min(rnet_subset$dutch_slc / 10)) * 10
+  rnet = rnet_full[rnet_full$dutch_slc >= dutch_slc_min, ]
+  plot(rnet[rnet$dutch_slc > 100, ]) # test it works
+  saveRDS(as(rnet, "Spatial"), filename_rnet)
+  
+  # add log data
+  log_data$dutch_slc_min[i] = dutch_slc_min
+  log_data$n_row[i] = nrow(rnet)
+  
   message("Job done for ", r)
+  log_data$build_end_time[i] = Sys.time()
+  
 }
 
-# r = "isle-of-wight"
 # # check rnet
-# rnet = readRDS(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
-# rnet_old = readRDS(paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"))
-# names(rnet_old)
-# names(rnet)
-# plot(rnet["bicycle"])
+r = "south-yorkshire"
+rnet = readRDS(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
+rnet_old = readRDS(paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"))
+names(rnet_old)
+names(rnet)
+plot(rnet["bicycle"])
 
 # to test on shiny app for single region...
-# file.copy(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds"), 
-#           paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"), overwrite = TRUE)
+file.copy(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds"),
+          paste0("../pct-outputs-regional-R/commute/msoa/", r, "/rnet.Rds"), overwrite = TRUE)
 # remotes::install_cran(c("shiny", "rgdal", "rgeos", "leaflet", "shinyjs"))
 # shiny::runApp("../pct-shiny/regions_www/m/")
 
 # build regional rnets ----------------------------------------------------
 
-region_names = regions$region_name  
-# region_names = region_names[grep(pattern = "isle|hereford", region_names)]
-# region_names = region_names[!grepl(pattern = "london|greater", region_names)]
-# lapply(region_names, FUN = create_rnet_region)
-region_names = region_names[grepl(pattern = "london|greater", region_names)]
-lapply(region_names, FUN = create_rnet_region)
+rs = regions$region_name
+# rs = rs[grep(pattern = "isle|dors", x = rs)]
+# build rasters -------------------------------------------------------
+rnet_all = lapply(X = rs, function(r){
+  r1 = readRDS(paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_full.Rds"))
+  message("size r1 ", nrow(r1))
+  reg1 = as(regions[regions$region_name == r, ], "Spatial")
+  r2 = r1[reg1, ]
+  message("size r2 ", nrow(r2))
+  r2
+})
 
-# move files around -------------------------------------------------------
+rnet_nat = do.call(what = rbind, args = rnet_all)
+rnet_sample = rnet_nat[sample(nrow(rnet_nat), size = 1000), ]
+plot(rnet_sample, lwd = rnet_sample$govtarget_slc / mean(rnet_sample$bicycle))
+mapview::mapview(rnet_sample, lwd = rnet_sample$govtarget_slc / mean(rnet_sample$bicycle) * 10)
+filename_rnet_nat = "../pct-outputs-national/commute/lsoa/rnet_all.Rds"
+saveRDS(rnet_nat, filename_rnet_nat)
+rnet_nat_sf = sf::st_as_sf(rnet_nat)
+sf::st_write(rnet_nat_sf, "rnet_all.gpkg")
+piggyback::pb_upload("rnet_all.gpkg")
+# get rnet data -----------------------------------------------------------
+log_data_rnets = log_data[1]
 
-# todo: run for all regions if OK for isle-of-wight
+for(r in rs) {
+  filename_rnet_msoa = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
+  filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
+  
 
-# max_nrow_net = nrow(readRDS("../pct-outputs-regional-R/school/lsoa/london/rnet.Rds"))
-r = "isle-of-wight"
-filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
-filename_full = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_full.Rds")
-file.rename(filename_rnet, filename_full)
-rnet_full = readRDS(filename_full)
-rnet = rnet_full[tail(order(rnet_full$dutch_slc), max_nrow_net), ]
-plot(rnet) # test it works
-saveRDS(rnet, filename_rnet)
+}
+
 
 
