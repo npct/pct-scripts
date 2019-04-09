@@ -178,6 +178,23 @@ rnet_nat_sf = sf::st_as_sf(rnet_nat)
 sf::st_write(rnet_nat_sf, "rnet_all.gpkg")
 piggyback::pb_upload("rnet_all.gpkg")
 
+
+# get rnet data -----------------------------------------------------------
+log_data = readr::read_csv("commute/lsoa/build_params_pct_region.csv")
+log_data$minflow_rnet_lsoa = NA
+rs = log_data$region_name
+r = rs[9]
+for(r in rs) {
+  message("getting log data for ", r)
+  i = which(rs == r)
+  filename_rnet_msoa = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
+  filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
+  rn = readRDS(filename_rnet)
+  log_data$minflow_rnet_lsoa[i] = min(rn$dutch_slc)
+}
+
+readr::write_csv(log_data, "commute/lsoa/build_params_pct_region.csv")
+
 # rasterize ---------------------------------------------------------------
 
 # library(gdalUtils)
@@ -246,15 +263,6 @@ piggyback::pb_upload("ras_bicycle_all_new_30.tif")
 #   sf::gdal_rasterize(sf = r1, file = "ras.tif")
 # )
 
-# get rnet data -----------------------------------------------------------
-# log_data_rnets = log_data[1]
-# 
-# for(r in rs) {
-#   filename_rnet_msoa = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_intern_sf.Rds")
-#   filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
-#   
-# 
-# }
 
 
 
