@@ -201,6 +201,36 @@ r = raster::raster("empty.tif")
 summary(r)
 summary(raster::values(r))
 raster::plot(r)
+
+piggyback::pb_download("rnet_all.gpkg")
+piggyback::pb_download("rnet_all.Rds")
+rnet_all = readRDS("rnet_all.Rds")
+rnet_all = sf::st_read("rnet_all.gpkg")
+rnet_all_27700 = sf::st_transform(rnet_all, 27700)
+sf::st_write(rnet_all_27700, "rnet_all.shp")
+sf::st_write(rnet_all_27700, "rnet_all.gpkg")
+
+# create template raster - in bash
+wget https://github.com/npct/pct-outputs-national/raw/master/commute/lsoa/ras_bicycle_all.tif
+gdal_calc.py -A ras_bicycle_all.tif --outfile=empty.tif --calc "A*0" --NoDataValue=0 # takes a few minutes
+# gdal_translate -ot Int16 empty.tif empty16.tif
+cp empty.tif empty1.tif empty2.tif empty3.tif empty4.tif empty5.tif
+i=0
+while (( i++ < 5 )); do
+cp empty30.tif "empty30$i.tif"
+done
+gdalinfo empty.tif
+ogrinfo rnet_all.gpkg
+gdalwarp -tr 30 -30 empty.tif empty30.tif # about 10 times smaller
+ls -hal | grep em
+
+gdal_rasterize -burn -a bicycle -at rnet_all.gpkg empty30.tif # adds to existing layer
+cp empty30.tif ras_bicycle_all_new_30.tif
+
+
+# back in R
+piggyback::pb_upload("ras_bicycle_all_new_30.tif")
+
 # remotes::install_github("rspatial/terra")
 # v1 = terra::vect("r1.gpkg")
 # r1 = terra::rast("ras.tif")
