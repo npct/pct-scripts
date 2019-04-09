@@ -202,9 +202,18 @@ readr::write_csv(log_data, "commute/lsoa/build_params_pct_region.csv")
 # library(magrittr)
 # test
 download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/ras_bicycle.tif", "ras.tif")
-file.copy("ras.tif", "ras_bak.tif")
+file.copy("ras.tif", "ras_bak.tif", overwrite = TRUE)
 rnet_eg = pct::get_pct_rnet(region = "isle-of-wight")
+rnet_eg = sf::st_transform(rnet_eg, 27700)
 sf::write_sf(rnet_eg, "r1.gpkg")
+rnet_egb = sf::st_buffer(rnet_eg, 10, endCapStyle = "FLAT", nQuadSegs = 2)
+sf::write_sf(rnet_egb, "rnet_egb.gpkg")
+plot(rnet_egb[2, ])
+r = raster::raster("ras.tif")
+summary(raster::values(r))
+r_new = fasterize::raster(rnet_egb["bicycle"], resolution = 10)
+summary(raster::values(r_new))
+raster::writeRaster(r_new, "r_new.tif")
 
 # test rasterize
 gdal_rasterize -burn -a bicycle r1.gpkg rg1.tif # works
@@ -212,6 +221,7 @@ gdal_rasterize -burn -a bicycle -ot Int16 r1.gpkg rg2.tif # adds to existing lay
 gdal_calc.py -A ras.tif --outfile=empty.tif --calc "A*0" --NoDataValue=0
 gdal_rasterize -burn -a bicycle r1.gpkg empty.tif # adds to existing layer
 gdal_rasterize -burn -a bicycle -at r1.gpkg empty.tif # adds to existing layer
+gdal_rasterize -burn -a bicycle -at rnet_egb.gpkg empty.tif # adds to existing layer
 
 browseURL("ras.tif")
 r = raster::raster("empty.tif")
