@@ -55,30 +55,6 @@ summary({sel_isle = rf_all$id %in% od_test$id}) # 110 not in there out of 1698, 
 rf_isle = rf_all[sel_isle, ]
 nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time longer than test to run...
 
-# # benchmarking
-# res = bench::mark(
-#   check = FALSE,
-#   t2_nc16 = overline2(rf_isle, scenarios, ncores = 16),
-#   t2_nc10 = overline2(rf_isle, scenarios, ncores = 10),
-#   t2_nc04 = overline2(rf_isle, scenarios, ncores = 4),
-#   t2_nc02 = overline2(rf_isle, scenarios, ncores = 2),
-#   t2_nc01 = overline2(rf_isle, scenarios, ncores = 1)
-#   )
-# plot(res)
-# 
-# rnet_isle = overline2(rf_isle, attrib = "bicycle")
-# rnet_isle = overline2(rf_isle, attrib = "ebike_slc")
-# 
-# # works but takes longer (18 vs 8 seconds)
-# system.time({
-#   rnet_isle = overline2(rf_isle, attrib = "bicycle", ncores = 4)
-# })
-# 
-# # fails
-# system.time({
-#   rnet_isle = overline2(rf_isle, attrib = scenarios, ncores = 4)
-# })
-
 log_data = data.frame(
   region_name = regions$region_name,
   rnet_lsoa_shiny_dutch_slc_min = NA,
@@ -178,7 +154,6 @@ rnet_nat_sf = sf::st_as_sf(rnet_nat)
 sf::st_write(rnet_nat_sf, "rnet_all.gpkg")
 piggyback::pb_upload("rnet_all.gpkg")
 
-
 # get rnet data -----------------------------------------------------------
 log_data = readr::read_csv("commute/lsoa/build_params_pct_region.csv")
 log_data$minflow_rnet_lsoa = NA
@@ -197,66 +172,36 @@ readr::write_csv(log_data, "commute/lsoa/build_params_pct_region.csv")
 
 # rasterize ---------------------------------------------------------------
 
-# library(gdalUtils)
-# gdal_setInstallation()
-# library(magrittr)
-# test
-download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/ras_bicycle.tif", "ras.tif")
-file.copy("ras.tif", "ras_bak.tif", overwrite = TRUE)
-rnet_eg = pct::get_pct_rnet(region = "isle-of-wight")
-rnet_eg = sf::st_transform(rnet_eg, 27700)
-sf::write_sf(rnet_eg, "r1.gpkg")
-rnet_egb = sf::st_buffer(rnet_eg, 10, endCapStyle = "FLAT", nQuadSegs = 2)
-sf::write_sf(rnet_egb, "rnet_egb.gpkg")
-plot(rnet_egb[2, ])
-r = raster::raster("ras.tif")
-summary(raster::values(r))
-r_new = fasterize::raster(rnet_egb["bicycle"], resolution = 10)
-summary(raster::values(r_new))
-raster::writeRaster(r_new, "r_new.tif")
-
-# test rasterize
-gdal_rasterize -burn -a bicycle r1.gpkg rg1.tif # works
-gdal_rasterize -burn -a bicycle -ot Int16 r1.gpkg rg2.tif # adds to existing layer
-gdal_calc.py -A ras.tif --outfile=empty.tif --calc "A*0" --NoDataValue=0
-gdal_rasterize -burn -a bicycle r1.gpkg empty.tif # adds to existing layer
-gdal_rasterize -burn -a bicycle -at r1.gpkg empty.tif # adds to existing layer
-gdal_rasterize -burn -a bicycle -at rnet_egb.gpkg empty.tif # adds to existing layer
-
-browseURL("ras.tif")
-r = raster::raster("empty.tif")
-summary(r)
-summary(raster::values(r))
-raster::plot(r)
-
 piggyback::pb_download("rnet_all.gpkg")
 piggyback::pb_download("rnet_all.Rds")
 rnet_all = readRDS("rnet_all.Rds")
 rnet_all = sf::st_read("rnet_all.gpkg")
 rnet_all_27700 = sf::st_transform(rnet_all, 27700)
-sf::st_write(rnet_all_27700, "rnet_all.shp")
-sf::st_write(rnet_all_27700, "rnet_all.gpkg")
+sf::st_write(rnet_all_27700, "rnet_all_27700.gpkg")
+
+rnet_egb = sf::st_buffer(rnet_all_27700, 10, endCapStyle = "FLAT", nQuadSegs = 2)
+sf::write_sf(rnet_egb, "rnet_egb.gpkg")
 
 # create template raster - in bash
 wget https://github.com/npct/pct-outputs-national/raw/master/commute/lsoa/ras_bicycle_all.tif
 gdal_calc.py -A ras_bicycle_all.tif --outfile=empty.tif --calc "A*0" --NoDataValue=0 # takes a few minutes
 # gdal_translate -ot Int16 empty.tif empty16.tif
-cp empty.tif empty1.tif empty2.tif empty3.tif empty4.tif empty5.tif
 i=0
 while (( i++ < 5 )); do
-cp empty30.tif "empty30$i.tif"
+cp empty.tif "empty$i.tif"
 done
 gdalinfo empty.tif
-ogrinfo rnet_all.gpkg
-gdalwarp -tr 30 -30 empty.tif empty30.tif # about 10 times smaller
+ogrinfo rnet_egb.gpkg
+# gdalwarp -tr 30 -30 empty.tif empty30.tif # about 10 times smaller
 ls -hal | grep em
 
-gdal_rasterize -burn -a bicycle -at rnet_all.gpkg empty30.tif # adds to existing layer
-cp empty30.tif ras_bicycle_all_new_30.tif
-
+gdal_rasterize -burn -a bicycle -at rnet_egb.gpkg empty1.tif # adds to existing layer
+mv empty1.tif ras_bicycle_all_new_10.tif
+ls -hal | grep bicycle_all
+zip("ras_bicycle_all_new_10.zip", "ras_bicycle_all_new_10.tif")
 
 # back in R
-piggyback::pb_upload("ras_bicycle_all_new_30.tif")
+piggyback::pb_upload("ras_bicycle_all_new_10.zip")
 
 # remotes::install_github("rspatial/terra")
 # v1 = terra::vect("r1.gpkg")
@@ -273,6 +218,60 @@ piggyback::pb_upload("ras_bicycle_all_new_30.tif")
 #   sf::gdal_rasterize(sf = r1, file = "ras.tif")
 # )
 
+# # benchmarking
+# res = bench::mark(
+#   check = FALSE,
+#   t2_nc16 = overline2(rf_isle, scenarios, ncores = 16),
+#   t2_nc10 = overline2(rf_isle, scenarios, ncores = 10),
+#   t2_nc04 = overline2(rf_isle, scenarios, ncores = 4),
+#   t2_nc02 = overline2(rf_isle, scenarios, ncores = 2),
+#   t2_nc01 = overline2(rf_isle, scenarios, ncores = 1)
+#   )
+# plot(res)
+# 
+# rnet_isle = overline2(rf_isle, attrib = "bicycle")
+# rnet_isle = overline2(rf_isle, attrib = "ebike_slc")
+# 
+# # works but takes longer (18 vs 8 seconds)
+# system.time({
+#   rnet_isle = overline2(rf_isle, attrib = "bicycle", ncores = 4)
+# })
+# 
+# # fails
+# system.time({
+#   rnet_isle = overline2(rf_isle, attrib = scenarios, ncores = 4)
+# })
 
+# # rasterize ---------------------------------------------------------------
+# 
+# # library(gdalUtils)
+# # gdal_setInstallation()
+# # library(magrittr)
+# # test
+# download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/ras_bicycle.tif", "ras.tif")
+# file.copy("ras.tif", "ras_bak.tif", overwrite = TRUE)
+# rnet_eg = pct::get_pct_rnet(region = "isle-of-wight")
+# rnet_eg = sf::st_transform(rnet_eg, 27700)
+# sf::write_sf(rnet_eg, "r1.gpkg")
+# rnet_egb = sf::st_buffer(rnet_eg, 10, endCapStyle = "FLAT", nQuadSegs = 2)
+# sf::write_sf(rnet_egb, "rnet_egb.gpkg")
+# plot(rnet_egb[2, ])
+# r = raster::raster("ras.tif")
+# summary(raster::values(r))
+# r_new = fasterize::raster(rnet_egb["bicycle"], resolution = 10)
+# summary(raster::values(r_new))
+# raster::writeRaster(r_new, "r_new.tif")
 
-
+# # test rasterize
+# gdal_rasterize -burn -a bicycle r1.gpkg rg1.tif # works
+# gdal_rasterize -burn -a bicycle -ot Int16 r1.gpkg rg2.tif # adds to existing layer
+# gdal_calc.py -A ras.tif --outfile=empty.tif --calc "A*0" --NoDataValue=0
+# gdal_rasterize -burn -a bicycle r1.gpkg empty.tif # adds to existing layer
+# gdal_rasterize -burn -a bicycle -at r1.gpkg empty.tif # adds to existing layer
+# gdal_rasterize -burn -a bicycle -at rnet_egb.gpkg empty.tif # adds to existing layer
+# 
+# browseURL("ras.tif")
+# r = raster::raster("empty.tif")
+# summary(r)
+# summary(raster::values(r))
+# raster::plot(r)
