@@ -63,8 +63,24 @@ Adding in inter-regional flows, there were `r prettyNum(sum(od_attributes$all), 
 **Straight lines**, **Fast routes** and **Quieter routes** are both visualised on the map interface and available to download.  These lines and routes contain all `r prettyNum(region_build_param$n_flow, big.mark = ",", scientific = F)` flows between LSOAs that a) start or end in `r get_pretty_region_name(region)`, b) have a fast route distance <20km, and c) contain at least `r region_build_param$minflow_visualise` commuters (by any mode,  in either direction). These `r prettyNum(region_build_param$n_flow, big.mark = ",", scientific = F)` between-zone LSOA flows contain `r prettyNum(region_build_param$n_people, big.mark = ",", scientific = F)` commuters who either live or work in `r get_pretty_region_name(region)`. 
 
 Between-zone LSOA flows exclude **within-LSOA travel**, when the LSOA zone of origin is the same as the zone of destination. Within-LSOA travel is represented by red points on the map when the lines are shown, and accounts for `r prettyNum(sum(c$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)`.  Between-zone flows also exclude those with no fixed place of work.
+
+```{r, echo=FALSE}
+# Aim: explain route network filtering
+if(region_build_param$mingodutch_rnet==0) {
+  rnet_txt <- "The online version of the clickable route network and the downloads both include all route segments."
+} else if (region_build_param$mingodutch_rnet != 0) {
+  rnet_txt <- paste0(
+    "In the online version of the clickable route network we only present route segments that contain at least ",
+    region_build_param$mingodutch_rnet, 
+    " cyclists in the Go Dutch scenario. The downloads include all route segments."
+  )
+    }
+```
+
  
-Finally, the **Route Network (LSOA, clickable)** and the **Route Network (LSOA, image)** are  built from all between-zone LSOA fast routes (including any that start *or* end in `r get_pretty_region_name(region)`). In the online version of the clickable route network, we only present route segments that contain at least `r region_build_param$mingodutch_rnet` cyclists in the Go Dutch scenario. The downloads include all route segments.
+Finally, the **Route Network (LSOA, clickable)** and the **Route Network (LSOA, image)** are  built from all between-zone LSOA fast routes (including any that start *or* end in `r get_pretty_region_name(region)`).
+`r rnet_txt`
+ For more details please see User Manual C.
 
 See <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a> for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and the methods used to visualise results at the area, line, route and route network level.
 
