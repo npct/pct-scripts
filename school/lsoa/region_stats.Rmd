@@ -99,7 +99,7 @@ Table 1 summarises the proportion of children cycling, walking, driving and usin
 | Scenario | % cycling | % walking | % driven by car | % all other modes |
 | ------------- |:-------------: |:-------------: |:--------------:| :----------------: |
 | NSC 2011 | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$bicycle) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (f <- round(100 * sum(z$foot) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$car) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
-| Government Target (equity) | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$govtarget_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$govtarget_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$govtarget_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
+| Government Target (equality) | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$govtarget_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$govtarget_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$govtarget_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
 | Go Dutch | `r paste(sprintf('%.1f', (b <- round(100 * sum(z$dutch_slc) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (f <- round(100 * sum(z$dutch_slw) / sum(z$all) , 1))), '%')`|`r paste(sprintf('%.1f', (cd <- round(100 * sum(z$dutch_sld) / sum(z$all) , 1))), '%')` | `r paste(sprintf('%.1f', (100 - b - f - cd)), '%')` |
 
 <br>
