@@ -40,7 +40,7 @@ summary(rf_all) # looks good:
 # Mean   :  2.641                          
 # 3rd Qu.:  2.000                          
 # Max.   :361.000
-# saveRDS(rf_all, "../pct-largefiles/rf_all.Rds")
+# saveRDS(rf_all, "../pct-largefiles/rf_all.Rds", version = 2)
 
 # read-in cleaned file
 rf_all = readRDS("../pct-largefiles/rf_all.Rds")
@@ -89,23 +89,23 @@ for(r in rs) {
   filename_full = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_full.Rds")
   filename_rnet = paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet.Rds")
   
-  saveRDS(rnet_intern, filename_intern)
-  saveRDS(rnet_extern, filename_extern)
+  saveRDS(rnet_intern, filename_intern, version = 2)
+  saveRDS(rnet_extern, filename_extern, version = 2)
   
   message("Generating combined rnet")
   rnet_combined = rbind(rnet_intern, rnet_extern)
   rnet = overline2(rnet_combined, attrib = scenarios)
   # plot(rnet)
   
-  saveRDS(rnet, paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"))
+  saveRDS(rnet, paste0("../pct-outputs-regional-R/commute/lsoa/", r, "/rnet_sf.Rds"), version = 2)
   rnet_full = cbind(local_id = 1:nrow(rnet), rnet)
-  saveRDS(as(rnet_full, "Spatial"), filename_full)
+  saveRDS(as(rnet_full, "Spatial"), filename_full, version = 2)
   
   rnet_subset = rnet_full[tail(order(rnet_full$dutch_slc), max_nrow_net), ]
   dutch_slc_min = round(min(rnet_subset$dutch_slc / 10)) * 10
   rnet = rnet_full[rnet_full$dutch_slc >= dutch_slc_min, ]
   plot(rnet[rnet$dutch_slc > 100, ]) # test it works
-  saveRDS(as(rnet, "Spatial"), filename_rnet)
+  saveRDS(as(rnet, "Spatial"), filename_rnet, version = 2)
   
   # add log data
   log_data$dutch_slc_min[i] = dutch_slc_min
@@ -149,7 +149,7 @@ rnet_sample = rnet_nat[sample(nrow(rnet_nat), size = 1000), ]
 plot(rnet_sample, lwd = rnet_sample$govtarget_slc / mean(rnet_sample$bicycle))
 mapview::mapview(rnet_sample, lwd = rnet_sample$govtarget_slc / mean(rnet_sample$bicycle) * 10)
 filename_rnet_nat = "../pct-outputs-national/commute/lsoa/rnet_all.Rds"
-saveRDS(rnet_nat, filename_rnet_nat)
+saveRDS(rnet_nat, filename_rnet_nat, version = 2)
 rnet_nat_sf = sf::st_as_sf(rnet_nat)
 sf::st_write(rnet_nat_sf, "rnet_all.gpkg")
 piggyback::pb_upload("rnet_all.gpkg")

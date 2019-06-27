@@ -32,9 +32,9 @@ z_shape_private <- z_shape
 
 if(purpose == "commute") {
   c_shape <- spTransform(c_shape, proj_4326)
-  l_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds"))
-  rf_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds"))
-  rq_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rq_shape.Rds"))
+  l_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds") , version = 2)
+  rf_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds") , version = 2)
+  rq_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rq_shape.Rds") , version = 2)
 }
 if(purpose == "school") {
   d_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"))
@@ -78,7 +78,7 @@ print(summary({sel_zone <- z_shape$geo_code %in% z_all_attributes$geo_code})) # 
 z_shape <- z_shape[sel_zone,]  
 z_shape@data <- data.frame(geo_code = z_shape$geo_code) 
 z_shape@data <- left_join(z_shape@data, z_all_attributes, by="geo_code")
-saveRDS(z_shape, file.path(path_outputs_national, purpose, geography, "z_all.Rds"))
+saveRDS(z_shape, file.path(path_outputs_national, purpose, geography, "z_all.Rds") , version = 2)
 geojson_write(z_shape, file = file.path(path_outputs_national, purpose, geography, "z_all.geojson"))
 
 if(purpose == "commute") {
@@ -96,7 +96,7 @@ if(purpose == "commute") {
   c_shape@data <- data.frame(geo_code = c_shape$geo_code) 
   c_shape@data <- left_join(c_shape@data, c_all_attributes, by="geo_code")
   c_shape@data <- c_shape@data[c_codebook$`Variable name`]
-  saveRDS(c_shape, file.path(path_outputs_national, purpose, geography, "c_all.Rds"))
+  saveRDS(c_shape, file.path(path_outputs_national, purpose, geography, "c_all.Rds") , version = 2)
   geojson_write(c_shape, file = (file.path(path_outputs_national, purpose, geography, "c_all.geojson")))
 
 # MERGE LINE SCENARIO DATA TO BETWEEN-ZONE LINES FILE
@@ -108,7 +108,7 @@ if(purpose == "commute") {
   l_shape <- l_shape[sel_line2,]  
   l_shape@data <- data.frame(id = l_shape$id) 
   l_shape@data <- left_join(l_shape@data, od_all_attributes, by="id")
-  saveRDS(l_shape, (file.path(path_outputs_national, purpose, geography, "l_all.Rds")))
+  saveRDS(l_shape, (file.path(path_outputs_national, purpose, geography, "l_all.Rds")) , version = 2)
   
 # MERGE LINE SCENARIO DATA TO FAST ROUTES FILE
   print("rf")
@@ -116,7 +116,7 @@ if(purpose == "commute") {
   rf_shape <- rf_shape[sel_rf,]  
   rf_shape@data <- data.frame(id = rf_shape$id) 
   rf_shape@data <- left_join(rf_shape@data, od_all_attributes, by="id")
-  saveRDS(rf_shape, (file.path(path_outputs_national, purpose, geography, "rf_all.Rds")))
+  saveRDS(rf_shape, (file.path(path_outputs_national, purpose, geography, "rf_all.Rds")) , version = 2)
   
 # MERGE LINE SCENARIO DATA TO QUIET ROUTES FILE 
   print("rq")
@@ -125,7 +125,7 @@ if(purpose == "commute") {
   rq_shape@data <- data.frame(id = rq_shape$id) 
   rq_shape@data <- left_join(rq_shape@data, od_all_attributes, by="id")
   rq_shape@data <- rq_shape@data[rq_codebook$`Variable name`]
-  saveRDS(rq_shape, (file.path(path_outputs_national, purpose, geography, "rq_all.Rds")))
+  saveRDS(rq_shape, (file.path(path_outputs_national, purpose, geography, "rq_all.Rds")) , version = 2)
 }
 
 # MERGE DESTINATION DATA TO DESTINATIONS FILE
@@ -135,7 +135,7 @@ if(purpose == "school") {
   d_shape <- d_shape[sel_zone,]  
   d_shape@data <- data.frame(urn = d_shape$urn) 
   d_shape@data <- left_join(d_shape@data, d_all_attributes, by="urn")
-  saveRDS(d_shape, file.path(path_outputs_national, purpose, geography, "d_all.Rds"))
+  saveRDS(d_shape, file.path(path_outputs_national, purpose, geography, "d_all.Rds") , version = 2)
   geojson_write(d_shape, file = file.path(path_outputs_national, purpose, geography, "d_all.geojson"))
 }
 
@@ -146,21 +146,21 @@ if(purpose == "school") {
   z_shape_private <- z_shape_private[sel_zone,]  
   z_shape_private@data <- data.frame(geo_code = z_shape_private$geo_code) 
   z_shape_private@data <- left_join(z_shape_private@data, z_all_attributes_private, by="geo_code")
-  saveRDS(z_shape_private, file.path(path_outputs_national, purpose_private, geography, "z_all.Rds"))
+  saveRDS(z_shape_private, file.path(path_outputs_national, purpose_private, geography, "z_all.Rds") , version = 2)
 
   print("private_d")
   print(summary({sel_zone <- d_shape_private$urn %in% d_all_attributes_private$urn})) # 206 false = schools excluded from study pop. 
   d_shape_private <- d_shape_private[sel_zone,]  
   d_shape_private@data <- data.frame(urn = d_shape_private$urn) 
   d_shape_private@data <- left_join(d_shape_private@data, d_all_attributes_private, by="urn")
-  saveRDS(d_shape_private, file.path(path_outputs_national, purpose_private, geography, "d_all.Rds"))
+  saveRDS(d_shape_private, file.path(path_outputs_national, purpose_private, geography, "d_all.Rds") , version = 2)
 }
 
 # MERGE LA DATA TO LA GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 
 summary({sel_lad <- (lad$lad11cd %in% lad_attributes$lad11cd)}) # 22 false schools = Wales
 lad <- lad[sel_lad,]  
 lad@data <- left_join(lad@data, lad_attributes, by = "lad11cd")
-saveRDS(lad, (file.path(path_outputs_national, purpose, "lad.Rds")))
+saveRDS(lad, (file.path(path_outputs_national, purpose, "lad.Rds")) , version = 2)
 geojson_write(lad, file = file.path(path_outputs_national, purpose, "lad.geojson"))
 
 # MERGE REGION DATA TO REGION GEO FILE [SAME REGARDLESS OF MSOA/LSOA] 

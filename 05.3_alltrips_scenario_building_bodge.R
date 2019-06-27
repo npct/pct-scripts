@@ -18,12 +18,12 @@ rnet_codebook <- read_csv(file.path(path_outputs_regional_R, purpose, geography,
 z <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/z.Rds"))
 z@data <- dplyr::rename(z@data, geo_name = `geo_label`)
 z@data <- z@data[z_codebook$`Variable name`]
-saveRDS(z, file.path(path_outputs_regional_R, purpose, geography, region,  "z.Rds"))
+saveRDS(z, file.path(path_outputs_regional_R, purpose, geography, region,  "z.Rds"), version = 2)
 
 c <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/c.Rds"))
 c@data <- dplyr::rename(c@data, geo_name = `geo_label`)
 c@data <- c@data[c_codebook$`Variable name`]
-saveRDS(c, file.path(path_outputs_regional_R, purpose, geography, region,  "c.Rds"))
+saveRDS(c, file.path(path_outputs_regional_R, purpose, geography, region,  "c.Rds"), version = 2)
 
 l <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/l.Rds"))
 l@data <- dplyr::rename(l@data, geo_code1 = `msoa1`, geo_code2 = `msoa2`, geo_name1 = `geo_label1`, 
@@ -32,41 +32,21 @@ l@data <- dplyr::rename(l@data, geo_code1 = `msoa1`, geo_code2 = `msoa2`, geo_na
                         dist_rq_rf = `distq_f`, rf_avslope_perc = `avslope`,
                         rq_avslope_perc = `avslope_q`,  rf_time_min = `time_fast`, rq_time_min = `time_quiet`)
 l@data <- l@data[od_l_rf_codebook$`Variable name`]
-saveRDS(l, file.path(path_outputs_regional_R, purpose, geography, region,  "l.Rds"))
+saveRDS(l, file.path(path_outputs_regional_R, purpose, geography, region,  "l.Rds"), version = 2)
 
 rf <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/rf.Rds"))
 rf@data <- left_join(rf@data, l@data, by="id")
 rf@data <- rf@data[od_l_rf_codebook$`Variable name`]
-saveRDS(rf, file.path(path_outputs_regional_R, purpose, geography, region,  "rf.Rds"))
+saveRDS(rf, file.path(path_outputs_regional_R, purpose, geography, region,  "rf.Rds"), version = 2)
 
 rq <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/rq.Rds"))
 rq@data <- left_join(rq@data, l@data, by="id")
 rq@data <- rq@data[rq_codebook$`Variable name`]
-saveRDS(rq, file.path(path_outputs_regional_R, purpose, geography, region,  "rq.Rds"))
+saveRDS(rq, file.path(path_outputs_regional_R, purpose, geography, region,  "rq.Rds"), version = 2)
 
 rnet <- readRDS(file.path(path_outputs_regional_R, purpose, geography, region,  "github_originals/rnet.Rds"))
 rnet@data <- dplyr::rename(rnet@data, singlezone = `Singlezone`)
 rnet@data$local_id <- 1:nrow(rnet)
 rnet@data <- rnet@data[rnet_codebook$`Variable name`]
-saveRDS(rnet, file.path(path_outputs_regional_R, purpose, geography, region,  "rnet.Rds"))
+saveRDS(rnet, file.path(path_outputs_regional_R, purpose, geography, region,  "rnet.Rds"), version = 2)
 
-
-# ## MAKE AND ISLE OF WIGHT TEST VERSION, COPY FROM COMMUTE
-# region <- "isle-of-wight"
-# z <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "z.Rds"))
-# saveRDS(z, file.path(path_outputs_regional_R, purpose, geography, region,  "z.Rds"))
-# 
-# c <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "c.Rds"))
-# saveRDS(c, file.path(path_outputs_regional_R, purpose, geography, region,  "c.Rds"))
-# 
-# l <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "l.Rds"))
-# saveRDS(l, file.path(path_outputs_regional_R, purpose, geography, region,  "l.Rds"))
-# 
-# rf <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "rf.Rds"))
-# saveRDS(rf, file.path(path_outputs_regional_R, purpose, geography, region,  "rf.Rds"))
-# 
-# rq <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "rq.Rds"))
-# saveRDS(rq, file.path(path_outputs_regional_R, purpose, geography, region,  "rq.Rds"))
-# 
-# rnet <- readRDS(file.path(path_outputs_regional_R, "commute", geography, region,  "rnet.Rds"))
-# saveRDS(rnet, file.path(path_outputs_regional_R, purpose, geography, region,  "rnet.Rds"))

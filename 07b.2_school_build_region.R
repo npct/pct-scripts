@@ -98,23 +98,23 @@ if (region_build_param$to_rebuild_rnet=="1") {
 
 # SAVE OBJECTS
 write_csv(z@data, file.path(path_outputs_regional_notR, purpose, geography, region, "z_attributes.csv"))
-saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
+saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")) , version = 2)
 geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
 
-saveRDS(z_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "z.Rds")))
+saveRDS(z_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "z.Rds")) , version = 2)
 
 
 write_csv(d@data, file.path(path_outputs_regional_notR, purpose, geography, region, "d_attributes.csv"))
-saveRDS(d, (file.path(path_outputs_regional_R, purpose, geography, region, "d.Rds")))
+saveRDS(d, (file.path(path_outputs_regional_R, purpose, geography, region, "d.Rds")) , version = 2)
 geojson_write(d, file = file.path(path_outputs_regional_notR, purpose, geography, region, "d.geojson"))
 
-saveRDS(d_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "d.Rds")))
+saveRDS(d_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "d.Rds")) , version = 2)
 
 
 if (region_build_param$to_rebuild_rnet=="1") {
-  saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")))
+  saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")) , version = 2)
   geojson_write(rnet, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rnet.geojson"))
-  saveRDS(rnet_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "rnet.Rds")))
+  saveRDS(rnet_private, (file.path(path_outputs_regional_R, purpose_private, geography, region, "rnet.Rds")) , version = 2)
 }
 
 # SAVE UPDATED OUTPUT PARAMETERS TO CSV, AND RE-CREATE REGION PARAMS SO THEY ARE UPDATED

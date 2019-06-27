@@ -107,18 +107,18 @@ if (region_build_param$to_rebuild_rnet=="1") {
 # SAVE OBJECTS
 write_csv(od_attributes, file.path(path_outputs_regional_notR, purpose, geography, region, "od_attributes.csv"))
 write_csv(z@data, file.path(path_outputs_regional_notR, purpose, geography, region, "z_attributes.csv"))
-saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")))
+saveRDS(z, (file.path(path_outputs_regional_R, purpose, geography, region, "z.Rds")) , version = 2)
 geojson_write(z, file = file.path(path_outputs_regional_notR, purpose, geography, region, "z.geojson"))
-saveRDS(c, (file.path(path_outputs_regional_R, purpose, geography, region, "c.Rds")))
+saveRDS(c, (file.path(path_outputs_regional_R, purpose, geography, region, "c.Rds")) , version = 2)
 geojson_write(c, file = file.path(path_outputs_regional_notR, purpose, geography, region, "c.geojson"))
-saveRDS(l, (file.path(path_outputs_regional_R, purpose, geography, region, "l.Rds")))
+saveRDS(l, (file.path(path_outputs_regional_R, purpose, geography, region, "l.Rds")) , version = 2)
 geojson_write(l, file = file.path(path_outputs_regional_notR, purpose, geography, region, "l.geojson"))
-saveRDS(rf, (file.path(path_outputs_regional_R, purpose, geography, region, "rf.Rds")))
+saveRDS(rf, (file.path(path_outputs_regional_R, purpose, geography, region, "rf.Rds")) , version = 2)
 geojson_write(rf, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rf.geojson"))
-saveRDS(rq, (file.path(path_outputs_regional_R, purpose, geography, region, "rq.Rds")))
+saveRDS(rq, (file.path(path_outputs_regional_R, purpose, geography, region, "rq.Rds")) , version = 2)
 geojson_write(rq, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rq.geojson"))
 if (region_build_param$to_rebuild_rnet=="1") {
-  saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")))
+  saveRDS(rnet, (file.path(path_outputs_regional_R, purpose, geography, region, "rnet.Rds")) , version = 2)
   geojson_write(rnet, file = file.path(path_outputs_regional_notR, purpose, geography, region, "rnet.geojson"))
 }
 

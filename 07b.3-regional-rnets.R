@@ -68,9 +68,9 @@ for(k in 1:nrow(r)) {
     #   print("reducing rnet size")
     #   rmini = rmini[rmini$dutch_slc >= 20, ] 
     # } 
-    saveRDS(rmini_spatial, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.Rds"))) 
+    saveRDS(rmini_spatial, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet.Rds")), version = 2) 
     
-    saveRDS(r_spatial, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet_full.Rds"))) 
+    saveRDS(r_spatial, file.path("../pct-outputs-regional-R/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet_full.Rds")), version = 2) 
     
     geojsonio::geojson_write(r_spatial, file = file.path("../pct-outputs-regional-notR/", purpose, geography, paste0(as.character(r$region_name[k]), "/rnet_full.geojson"))) 
     

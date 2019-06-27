@@ -100,7 +100,7 @@ if (purpose=="commute")  {
 }
 lines_cs <- SpatialLinesDataFrame(sl = lines_cs_lines, data = lines_cs_data)
 proj4string(lines_cs) <- proj_4326
-saveRDS(lines_cs, (file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds")))
+saveRDS(lines_cs, (file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds")), version = 2)
 
 #########################
 ### PARTS 2 AND 3: ROUTING 
@@ -134,5 +134,5 @@ rfrq_all_data$dist_rf_e  <- rfrq_all_data$rf_dist_km / rfrq_all_data$e_dist_km  
 rfrq_all_data$dist_rq_rf <- rfrq_all_data$rq_dist_km / rfrq_all_data$rf_dist_km
 rfrq_all_data <- rfrq_all_data[, c(1:4, 5, 8, 11, 12, 6, 9, 7, 10)]
 write_csv(rfrq_all_data, file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rfrq_all_data.csv"))
-# saveRDS(rfrq_all_data,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rfrq_all_data.Rds"))
+# saveRDS(rfrq_all_data,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rfrq_all_data.Rds"), version = 2)
 

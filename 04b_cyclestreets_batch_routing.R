@@ -26,7 +26,7 @@ for(i in 1:nbatch){
   routes <- line2route(lines_cs_sub, route_fun = route_cyclestreet, plan = route_type, n_processes = 10, base_url = "http://pct.cyclestreets.net/api/")
   routes@data <- routes@data[,!names(routes@data) %in% c("plan","start","finish")] # drop fields not wanted
   routes@data <- left_join(routes@data, lines_cs_sub@data, by = "id")  # merge in data in lines file
-  saveRDS(routes,file = file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",i,"of",nbatch,".Rds")))
+  saveRDS(routes,file = file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_",i,"of",nbatch,".Rds")), version = 2)
   print(paste0("Batch ",i," of ",nbatch," finished at ",Sys.time()))
 }
 
@@ -73,7 +73,7 @@ if(any(is.na(stack_data$length))) {
   routes_redo@data <- left_join(routes_redo@data, stack_redo@data, by = "id")
   routes_redo <- routes_redo[routes_redo@data$id!=id1,] # REMOVE THE FIRST LINE, THAT WAS REPEATED JUST TO MAKE SURE LINE2ROUTE RAN OK
   row.names(routes_redo@data) <- sapply(1:length(routes_redo), function(j) routes_redo@lines[[j]]@ID)
-  saveRDS(routes_redo,file = file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_redo_of",nbatch,".Rds")))
+  saveRDS(routes_redo,file = file.path(path_temp_cs, purpose, geography, paste0("r",substr(route_type, 1, 1),"_",file_name,"_redo_of",nbatch,".Rds")), version = 2)
   routes_redo_data <- routes_redo@data
   stack_data <- rbind(stack_keep, routes_redo_data)
   stack_redo2 <- stack_data[is.na(stack_data$length) | is.na(stack_data$av_incline) | is.na(stack_data$time) | !is.na(stack_data$error), ]
@@ -84,7 +84,7 @@ if(any(is.na(stack_data$length))) {
 if (route_type == "fastest") {
   stack_data <- stack_data[(stack_data$length < (maxdist_scenario * 1000)),]  # NB length in metres, maxdist_scenario in km
 }
-saveRDS(stack_data, file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/r",substr(route_type, 1, 1),"_",file_name,"_data.Rds")))
+saveRDS(stack_data, file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/r",substr(route_type, 1, 1),"_",file_name,"_data.Rds")), version = 2)
 
 # REJOIN THE FILES FOR **ROUTES** (FASTEST ROUTE LENGTH < VISUALISE DISTANCE), MERGE IN ROUTES THAT INITIALLY FAILED, & SAVE SHAPE
 rf_data_visualise <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/rf_",file_name,"_data.Rds")))
@@ -138,5 +138,5 @@ if(file.exists(file.path(path_temp_cs, purpose, geography, paste0("r", substr(ro
 }
 stack@data <- stack@data["id"]
 
-saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/r",substr(route_type, 1, 1),"_",file_name,"_shape.Rds")))
-saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("r",substr(route_type, 1, 1),"_shape.Rds")))
+saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("archive/r",substr(route_type, 1, 1),"_",file_name,"_shape.Rds")), version = 2)
+saveRDS(stack,file = file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, paste0("r",substr(route_type, 1, 1),"_shape.Rds")), version = 2)
