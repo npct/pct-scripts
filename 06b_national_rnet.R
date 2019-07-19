@@ -5,27 +5,28 @@
 max_nrow_net = 20000 # max size of rnet to show (from 2/3 of what worked for schools)
 memfree <- as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern=TRUE))
 memfree / 1e6
-packageVersion("stplanr") # should be 0.2.8
+packageVersion("stplanr") # should be > 0.2.8 
 library(sf)
 library(stplanr)
-scenarios = c("bicycle", "govtarget_slc", "govnearmkt_slc", "gendereq_slc", 
-             "dutch_slc", "ebike_slc")
+purpose = "school"
+scenarios = c("bicycle", "govtarget_slc", "cambridge_slc", "dutch_slc") # commute
+# scenarios = c("bicycle", "govtarget_slc", "govnearmkt_slc", "gendereq_slc", "dutch_slc", "ebike_slc") # commute
+regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_highres.geojson")
 
 # preparation -------------------------------------------------------------
 
+# for commute data:
 # rf_all_sp = readRDS("../pct-largefiles/rf_shape.Rds")
 # rf_all_sf = sf::st_as_sf(rf_all_sp)
 # names(rf_all_sf) # id variable to join
 # rf_all_data = readr::read_csv("../pct-largefiles/od_raster_attributes.csv")
 # nrow(rf_all_sf) == nrow(rf_all_data) # not of equal number of rows, data has fewer...
 # summary({sel_has_data = rf_all_sf$id %in% rf_all_data$id}) # all data rows have an id in the routes
-# 
 # rf_all_sub = rf_all_sf[sel_has_data, ]
-# 
 # summary(rf_all_sub$id == rf_all_data$id) # they are identical
 # rf_all = sf::st_sf(rf_all_data, geometry = rf_all_sub$geometry)
-summary(rf_all$ebike_slc == 0) # only 120 with 0 score in data
-summary(rf_all) # looks good:
+# summary(rf_all$ebike_slc == 0) # only 120 with 0 score in data
+# summary(rf_all) # looks good:
 # id               bicycle         govtarget_slc      govnearmkt_slc      gendereq_slc        dutch_slc      
 # Length:2007710     Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.000  
 # Class :character   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  1.000  
@@ -41,19 +42,32 @@ summary(rf_all) # looks good:
 # 3rd Qu.:  2.000                          
 # Max.   :361.000
 # saveRDS(rf_all, "../pct-largefiles/rf_all.Rds", version = 2)
-
 # read-in cleaned file
-rf_all = readRDS("../pct-largefiles/rf_all.Rds")
-l_all = readRDS("../pct-outputs-national/commute/lsoa/l_all.Rds")
-regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_highres.geojson")
+# rf_all = readRDS("../pct-largefiles/rf_all.Rds")
+# l_all = readRDS("../pct-outputs-national/commute/lsoa/l_all.Rds")
+
+# for school data
+rf_all_sp = readRDS("../pct-largefiles/go-cambridge/rf_shape.Rds")
+rf_all_sf = sf::st_as_sf(rf_all_sp)
+names(rf_all_sf)
+od_attributes = readr::read_csv("../pct-largefiles/go-cambridge/od_raster_attributes.csv")
+summary(od_attributes)
+nrow(od_attributes)
+nrow(rf_all_sf)
+rf_all = dplyr::inner_join(rf_all_sf, od_attributes)
+nrow(rf_all)
+plot(rf_all[1:999, ])
+rnet_all_test = overline2(rf_all[1:999, ], attrib = scenarios)
+plot(rnet_all_test)
+rnet_all = overline2(rf_all, attrib = scenarios)
 
 # tests -------------------------------------------------------------------
 
-od_test = readr::read_csv("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/od_attributes.csv")
-od_test$id = paste(od_test$geo_code1, od_test$geo_code2)
-summary({sel_isle = rf_all$id %in% od_test$id}) # 110 not in there out of 1698, ~5%
-rf_isle = rf_all[sel_isle, ]
-nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time longer than test to run...
+# od_test = readr::read_csv("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/od_attributes.csv")
+# od_test$id = paste(od_test$geo_code1, od_test$geo_code2)
+# summary({sel_isle = rf_all$id %in% od_test$id}) # 110 not in there out of 1698, ~5%
+# rf_isle = rf_all[sel_isle, ]
+# nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time longer than test to run...
 
 log_data = data.frame(
   region_name = regions$region_name,
@@ -67,12 +81,13 @@ log_data = data.frame(
 # create_rnet_region = function(r = "isle-of-wight") {
 rs = c("isle-of-wight", "avon") # for testing...
 rs = regions$region_name
+r = rs[1]
 for(r in rs) {
   i = log_data$region_name == r
   message("Reading in data for ", r)
   log_data$build_start_time[i] = Sys.time()
   
-  l = pct::get_pct_lines(region = r, purpose = "commute", geography = "lsoa")
+  z = pct::get_pct_zones(region = r, purpose = purpose, geography = "lsoa")
   l_internal = l[regions, , op = st_within]
   
   rf_region = rf_all[rf_all$id %in% l$id, ]
