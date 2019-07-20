@@ -64,14 +64,20 @@ regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_
 # rnet_all_sp = as(rnet_all, "Spatial")
 # rnet_all_sp@data = cbind(local_id = 1:nrow(rnet_all), rnet_all_sp@data)
 # set low values to NA
+# saveRDS(rnet_all_sp, "../pct-largefiles/go-cambridge/rnet_schools_national_with_go_cambridge_sp.Rds")
 # https://stackoverflow.com/questions/11036989/replace-all-0-values-to-na
 # rnet_all_sp@data[2:ncol(rnet_all_sp@data)][rnet_all_sp@data[2:ncol(rnet_all_sp@data)] == 0] = NA
 # rnet_all_sp@data[2:ncol(rnet_all_sp@data)][rnet_all_sp@data[2:ncol(rnet_all_sp@data)] == 1] = NA
 # rnet_all_sp@data[2:ncol(rnet_all_sp@data)][rnet_all_sp@data[2:ncol(rnet_all_sp@data)] == 2] = NA
 # summary(rnet_all_sp$bicycle)
-rnet_all_sp = readRDS("../pct-outputs-national/school/lsoa/rnet_all.Rds")
-# saveRDS(rnet_all_sp, "../pct-largefiles/go-cambridge/rnet_schools_national_with_go_cambridge_sp.Rds")
+# rnet_all_sp@data$bicycle[rnet_all_sp@data$bicycle > 0 &
+#                            rnet_all_sp@data$bicycle <= 2] <- NA
+# for (i in c("govtarget_slc", "cambridge_slc", "dutch_slc")) {
+#   rnet_all_sp@data[[i]][is.na(rnet_all_sp@data$bicycle) &
+#                           rnet_all_sp@data[[i]] <= 2] <- NA
+# }
 # saveRDS(rnet_all_sp, "../pct-outputs-national/school/lsoa/rnet_all.Rds", version = 2)
+rnet_all_sp = readRDS("../pct-outputs-national/school/lsoa/rnet_all.Rds")
 # subset: test for one region
 plot(regions)
 region_name_single = "isle-of-wight"
