@@ -108,9 +108,20 @@ file.remove(rnet_file_geojson)
 sf::write_sf(sf::st_as_sf(rnet_single), rnet_file_geojson)
 
 # now in a loop:
+
+log_data = data.frame(
+  region_name = regions$region_name,
+  rnet_lsoa_shiny_dutch_slc_min = NA,
+  rnet_lsoa_shiny_n_row = NA,
+  rnet_lsoa_full_n_row = NA,
+  build_start_time = NA,
+  build_end_time = NA
+)
+
 all_region_names = regions$region_name
-# for(i in seq_len(nrow(regions))) {
-for(i in 20:21){
+# for(i in 20:21){
+for(i in seq_len(nrow(regions))) {
+  log_data$build_start_time[i] = Sys.time()
   region_name_single = all_region_names[i]
   region_single = regions %>%
     dplyr::filter(region_name == region_name_single) %>% 
@@ -133,7 +144,15 @@ for(i in 20:21){
   rnet_file_geojson = paste0(rnet_folder_geojson, "rnet_full.geojson")
   file.remove(rnet_file_geojson)
   sf::write_sf(sf::st_as_sf(rnet_single), rnet_file_geojson)
+  log_data$build_end_time[i] = Sys.time()
+  log_data$rnet_lsoa_shiny_dutch_slc_min[i] = dutch_slc_min
+  log_data$rnet_lsoa_shiny_n_row[i] = nrow(rnet_to_serve)
+  log_data$rnet_lsoa_full_n_row[i] = nrow(rnet_single)
+  message("Done for region ", region_name_single)
 }
+
+knitr::kable(log_data)
+readr::write_csv(log_data, "school-regional-rnet-build-log-2019-07-22.log")
 
 # tests -------------------------------------------------------------------
 
@@ -142,16 +161,6 @@ for(i in 20:21){
 # summary({sel_isle = rf_all$id %in% od_test$id}) # 110 not in there out of 1698, ~5%
 # rf_isle = rf_all[sel_isle, ]
 # nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time longer than test to run...
-
-log_data = data.frame(
-  region_name = regions$region_name,
-  rnet_lsoa_shiny_dutch_slc_min = NA,
-  rnet_lsoa_shiny_n_row = NA,
-  rnet_lsoa_full_n_row = NA,
-  build_start_time = NA,
-  build_end_time = NA
-)
-
 # create_rnet_region = function(r = "isle-of-wight") {
 rs = c("isle-of-wight", "avon") # for testing...
 rs = regions$region_name
