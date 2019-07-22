@@ -3,7 +3,7 @@
 # setup -------------------------------------------------------------------
 
 max_nrow_net = 20000 # max size of rnet to show (from 2/3 of what worked for schools)
-memfree <- as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern=TRUE))
+memfree = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern=TRUE))
 memfree / 1e6
 packageVersion("stplanr") # should be > 0.2.8 
 library(sf)
@@ -62,22 +62,25 @@ regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_
 # rnet_all = overline2(rf_all, attrib = scenarios)
 # plot(rnet_all[1:999, ])
 # rnet_all_sp = as(rnet_all, "Spatial")
-# rnet_all_sp@data = cbind(local_id = 1:nrow(rnet_all), rnet_all_sp@data)
 # set low values to NA
 # saveRDS(rnet_all_sp, "../pct-largefiles/go-cambridge/rnet_schools_national_with_go_cambridge_sp.Rds")
-# https://stackoverflow.com/questions/11036989/replace-all-0-values-to-na
-# rnet_all_sp@data[2:ncol(rnet_all_sp@data)][rnet_all_sp@data[2:ncol(rnet_all_sp@data)] == 0] = NA
-# rnet_all_sp@data[2:ncol(rnet_all_sp@data)][rnet_all_sp@data[2:ncol(rnet_all_sp@data)] == 1] = NA
-# rnet_all_sp@data[2:ncol(rnet_all_sp@data)][rnet_all_sp@data[2:ncol(rnet_all_sp@data)] == 2] = NA
+
+# preprocess rnet file
+# rnet_all_sp = readRDS("../pct-largefiles/go-cambridge/rnet_schools_national_with_go_cambridge_sp.Rds")
+# rnet_all_sp@data = cbind(local_id = 1:nrow(rnet_all_sp), rnet_all_sp@data)
 # summary(rnet_all_sp$bicycle)
-# rnet_all_sp@data$bicycle[rnet_all_sp@data$bicycle > 0 &
-#                            rnet_all_sp@data$bicycle <= 2] <- NA
+# rnet_all_sp@data$bicycle[rnet_all_sp@data$bicycle > 0 & rnet_all_sp@data$bicycle <= 2] = NA
 # for (i in c("govtarget_slc", "cambridge_slc", "dutch_slc")) {
 #   rnet_all_sp@data[[i]][is.na(rnet_all_sp@data$bicycle) &
-#                           rnet_all_sp@data[[i]] <= 2] <- NA
+#                           rnet_all_sp@data[[i]] <= 2] = NA
 # }
+# rnet_all_sp
+# summary(as.factor(rnet_all_sp$bicycle))
+# summary(as.factor(rnet_all_sp$govtarget_slc))
 # saveRDS(rnet_all_sp, "../pct-outputs-national/school/lsoa/rnet_all.Rds", version = 2)
 rnet_all_sp = readRDS("../pct-outputs-national/school/lsoa/rnet_all.Rds")
+
+
 # subset: test for one region
 plot(regions)
 region_name_single = "isle-of-wight"
@@ -99,10 +102,15 @@ summary(rnet_to_serve$dutch_slc)
 rnet_folder = paste0("../pct-outputs-regional-R/", purpose, "/lsoa/", region_name_single, "/")
 saveRDS(rnet_to_serve, paste0(rnet_folder, "rnet.Rds"), version = 2)
 saveRDS(rnet_single, paste0(rnet_folder, "rnet_full.Rds"), version = 2)
+rnet_folder_geojson = paste0("../pct-outputs-regional-notR/", purpose, "/lsoa/", region_name_single, "/")
+rnet_file_geojson = paste0(rnet_folder_geojson, "rnet_full.geojson")
+file.remove(rnet_file_geojson)
+sf::write_sf(sf::st_as_sf(rnet_single), rnet_file_geojson)
 
 # now in a loop:
 all_region_names = regions$region_name
-for(i in seq_len(nrow(regions))) {
+# for(i in seq_len(nrow(regions))) {
+for(i in 20:21){
   region_name_single = all_region_names[i]
   region_single = regions %>%
     dplyr::filter(region_name == region_name_single) %>% 
@@ -121,6 +129,10 @@ for(i in seq_len(nrow(regions))) {
   saveRDS(rnet_to_serve, paste0(rnet_folder, "rnet.Rds"), version = 2)
   plot(rnet_to_serve)
   saveRDS(rnet_single, paste0(rnet_folder, "rnet_full.Rds"), version = 2)
+  rnet_folder_geojson = paste0("../pct-outputs-regional-notR/", purpose, "/lsoa/", region_name_single, "/")
+  rnet_file_geojson = paste0(rnet_folder_geojson, "rnet_full.geojson")
+  file.remove(rnet_file_geojson)
+  sf::write_sf(sf::st_as_sf(rnet_single), rnet_file_geojson)
 }
 
 # tests -------------------------------------------------------------------
