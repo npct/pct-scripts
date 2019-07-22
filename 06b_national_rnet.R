@@ -3,29 +3,30 @@
 # setup -------------------------------------------------------------------
 
 max_nrow_net = 20000 # max size of rnet to show (from 2/3 of what worked for schools)
-memfree <- as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern=TRUE))
+memfree = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern=TRUE))
 memfree / 1e6
-packageVersion("stplanr") # should be 0.2.8
+packageVersion("stplanr") # should be > 0.2.8 
 library(sf)
 library(stplanr)
-scenarios = c("bicycle", "govtarget_slc", "govnearmkt_slc", "gendereq_slc", 
-             "dutch_slc", "ebike_slc")
+purpose = "school"
+scenarios = c("bicycle", "govtarget_slc", "cambridge_slc", "dutch_slc") # commute
+# scenarios = c("bicycle", "govtarget_slc", "govnearmkt_slc", "gendereq_slc", "dutch_slc", "ebike_slc") # commute
+regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_highres.geojson")
 
 # preparation -------------------------------------------------------------
 
+# for commute data:
 # rf_all_sp = readRDS("../pct-largefiles/rf_shape.Rds")
 # rf_all_sf = sf::st_as_sf(rf_all_sp)
 # names(rf_all_sf) # id variable to join
 # rf_all_data = readr::read_csv("../pct-largefiles/od_raster_attributes.csv")
 # nrow(rf_all_sf) == nrow(rf_all_data) # not of equal number of rows, data has fewer...
 # summary({sel_has_data = rf_all_sf$id %in% rf_all_data$id}) # all data rows have an id in the routes
-# 
 # rf_all_sub = rf_all_sf[sel_has_data, ]
-# 
 # summary(rf_all_sub$id == rf_all_data$id) # they are identical
 # rf_all = sf::st_sf(rf_all_data, geometry = rf_all_sub$geometry)
-summary(rf_all$ebike_slc == 0) # only 120 with 0 score in data
-summary(rf_all) # looks good:
+# summary(rf_all$ebike_slc == 0) # only 120 with 0 score in data
+# summary(rf_all) # looks good:
 # id               bicycle         govtarget_slc      govnearmkt_slc      gendereq_slc        dutch_slc      
 # Length:2007710     Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.000  
 # Class :character   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  1.000  
@@ -41,19 +42,106 @@ summary(rf_all) # looks good:
 # 3rd Qu.:  2.000                          
 # Max.   :361.000
 # saveRDS(rf_all, "../pct-largefiles/rf_all.Rds", version = 2)
-
 # read-in cleaned file
-rf_all = readRDS("../pct-largefiles/rf_all.Rds")
-l_all = readRDS("../pct-outputs-national/commute/lsoa/l_all.Rds")
-regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_highres.geojson")
+# rf_all = readRDS("../pct-largefiles/rf_all.Rds")
+# l_all = readRDS("../pct-outputs-national/commute/lsoa/l_all.Rds")
+
+# for school data
+# rf_all_sp = readRDS("../pct-largefiles/go-cambridge/rf_shape.Rds")
+# rf_all_sf = sf::st_as_sf(rf_all_sp)
+# names(rf_all_sf)
+# od_attributes = readr::read_csv("../pct-largefiles/go-cambridge/od_raster_attributes.csv")
+# summary(od_attributes)
+# nrow(od_attributes)
+# nrow(rf_all_sf)
+# rf_all = dplyr::inner_join(rf_all_sf, od_attributes)
+# nrow(rf_all)
+# plot(rf_all[1:999, ])
+# rnet_all_test = overline2(rf_all[1:999, ], attrib = scenarios)
+# plot(rnet_all_test)
+# rnet_all = overline2(rf_all, attrib = scenarios)
+# plot(rnet_all[1:999, ])
+# rnet_all_sp = as(rnet_all, "Spatial")
+# set low values to NA
+# saveRDS(rnet_all_sp, "../pct-largefiles/go-cambridge/rnet_schools_national_with_go_cambridge_sp.Rds")
+
+# preprocess rnet file
+# rnet_all_sp = readRDS("../pct-largefiles/go-cambridge/rnet_schools_national_with_go_cambridge_sp.Rds")
+# rnet_all_sp@data = cbind(local_id = 1:nrow(rnet_all_sp), rnet_all_sp@data)
+# summary(rnet_all_sp$bicycle)
+# rnet_all_sp@data$bicycle[rnet_all_sp@data$bicycle > 0 & rnet_all_sp@data$bicycle <= 2] = NA
+# for (i in c("govtarget_slc", "cambridge_slc", "dutch_slc")) {
+#   rnet_all_sp@data[[i]][is.na(rnet_all_sp@data$bicycle) &
+#                           rnet_all_sp@data[[i]] <= 2] = NA
+# }
+# rnet_all_sp
+# summary(as.factor(rnet_all_sp$bicycle))
+# summary(as.factor(rnet_all_sp$govtarget_slc))
+# saveRDS(rnet_all_sp, "../pct-outputs-national/school/lsoa/rnet_all.Rds", version = 2)
+rnet_all_sp = readRDS("../pct-outputs-national/school/lsoa/rnet_all.Rds")
+
+
+# subset: test for one region
+plot(regions)
+region_name_single = "isle-of-wight"
+region_single = regions %>%
+  dplyr::filter(region_name == region_name_single) %>% 
+  st_transform(27700) %>% 
+  st_buffer(dist = 3000) %>% 
+  st_transform(4326) %>% 
+  as("Spatial")
+rnet_single = rnet_all_sp[region_single, ]
+plot(rnet_single[rnet_single$dutch_slc > 100, ]) # works
+mapview::mapview(rnet_single[1:1000, ]) # works
+rnet_subset = rnet_single[tail(order(rnet_single$dutch_slc), max_nrow_net), ]
+dutch_slc_min = round(min(rnet_subset$dutch_slc / 10, na.rm = TRUE)) * 10
+rnet_to_serve = rnet_single[rnet_single$dutch_slc >= dutch_slc_min, ]
+summary(rnet_to_serve$dutch_slc)
+"../pct-outputs-regional-R/commute/lsoa/isle-of-wight/rnet.Rds"
+"../pct-outputs-regional-R/school/lsoa/isle-of-wight/"
+rnet_folder = paste0("../pct-outputs-regional-R/", purpose, "/lsoa/", region_name_single, "/")
+saveRDS(rnet_to_serve, paste0(rnet_folder, "rnet.Rds"), version = 2)
+saveRDS(rnet_single, paste0(rnet_folder, "rnet_full.Rds"), version = 2)
+rnet_folder_geojson = paste0("../pct-outputs-regional-notR/", purpose, "/lsoa/", region_name_single, "/")
+rnet_file_geojson = paste0(rnet_folder_geojson, "rnet_full.geojson")
+file.remove(rnet_file_geojson)
+sf::write_sf(sf::st_as_sf(rnet_single), rnet_file_geojson)
+
+# now in a loop:
+all_region_names = regions$region_name
+# for(i in seq_len(nrow(regions))) {
+for(i in 20:21){
+  region_name_single = all_region_names[i]
+  region_single = regions %>%
+    dplyr::filter(region_name == region_name_single) %>% 
+    st_transform(27700) %>% 
+    st_buffer(dist = 1000) %>% 
+    st_transform(4326) %>% 
+    as("Spatial")
+  rnet_single = rnet_all_sp[region_single, ]
+  plot(rnet_single[rnet_single$dutch_slc > 500, ]) # works
+  # mapview::mapview(rnet_single[1:1000, ]) # works
+  rnet_subset = rnet_single[tail(order(rnet_single$dutch_slc), max_nrow_net), ]
+  dutch_slc_min = round(min(rnet_subset$dutch_slc / 10, na.rm = TRUE)) * 10
+  rnet_to_serve = rnet_single[rnet_single$dutch_slc >= dutch_slc_min, ]
+  summary(rnet_to_serve$dutch_slc)
+  rnet_folder = paste0("../pct-outputs-regional-R/", purpose, "/lsoa/", region_name_single, "/")
+  saveRDS(rnet_to_serve, paste0(rnet_folder, "rnet.Rds"), version = 2)
+  plot(rnet_to_serve)
+  saveRDS(rnet_single, paste0(rnet_folder, "rnet_full.Rds"), version = 2)
+  rnet_folder_geojson = paste0("../pct-outputs-regional-notR/", purpose, "/lsoa/", region_name_single, "/")
+  rnet_file_geojson = paste0(rnet_folder_geojson, "rnet_full.geojson")
+  file.remove(rnet_file_geojson)
+  sf::write_sf(sf::st_as_sf(rnet_single), rnet_file_geojson)
+}
 
 # tests -------------------------------------------------------------------
 
-od_test = readr::read_csv("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/od_attributes.csv")
-od_test$id = paste(od_test$geo_code1, od_test$geo_code2)
-summary({sel_isle = rf_all$id %in% od_test$id}) # 110 not in there out of 1698, ~5%
-rf_isle = rf_all[sel_isle, ]
-nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time longer than test to run...
+# od_test = readr::read_csv("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/lsoa/isle-of-wight/od_attributes.csv")
+# od_test$id = paste(od_test$geo_code1, od_test$geo_code2)
+# summary({sel_isle = rf_all$id %in% od_test$id}) # 110 not in there out of 1698, ~5%
+# rf_isle = rf_all[sel_isle, ]
+# nrow(rf_isle) / nrow(rf_all) * 100 # less than 3% of data - should take ~10 time longer than test to run...
 
 log_data = data.frame(
   region_name = regions$region_name,
@@ -67,12 +155,13 @@ log_data = data.frame(
 # create_rnet_region = function(r = "isle-of-wight") {
 rs = c("isle-of-wight", "avon") # for testing...
 rs = regions$region_name
+r = rs[1]
 for(r in rs) {
   i = log_data$region_name == r
   message("Reading in data for ", r)
   log_data$build_start_time[i] = Sys.time()
   
-  l = pct::get_pct_lines(region = r, purpose = "commute", geography = "lsoa")
+  z = pct::get_pct_zones(region = r, purpose = purpose, geography = "lsoa")
   l_internal = l[regions, , op = st_within]
   
   rf_region = rf_all[rf_all$id %in% l$id, ]
@@ -183,7 +272,8 @@ rnet_egb = sf::st_buffer(rnet_all_27700, 10, endCapStyle = "FLAT", nQuadSegs = 2
 sf::write_sf(rnet_egb, "rnet_egb.gpkg")
 
 # create template raster - in bash
-wget https://github.com/npct/pct-outputs-national/raw/master/commute/lsoa/ras_bicycle_all.tif
+
+# wget https://github.com/npct/pct-outputs-national/raw/master/commute/lsoa/ras_bicycle_all.tif
 gdal_calc.py -A ras_bicycle_all.tif --outfile=empty.tif --calc "A*0" --NoDataValue=0 # takes a few minutes
 # gdal_translate -ot Int16 empty.tif empty16.tif
 i=0
@@ -195,13 +285,23 @@ ogrinfo rnet_egb.gpkg
 # gdalwarp -tr 30 -30 empty.tif empty30.tif # about 10 times smaller
 ls -hal | grep em
 
-gdal_rasterize -burn -a bicycle -at rnet_egb.gpkg empty1.tif # adds to existing layer
-mv empty1.tif ras_bicycle_all_new_10.tif
+# gdal_rasterize -burn -a bicycle -at rnet_egb.gpkg empty1.tif # adds to existing layer
+gdal_rasterize -burn -a govtarget_slc -at rnet_egb.gpkg empty2.tif # adds to existing layer
+gdal_rasterize -burn -a cambridge_slc -at rnet_egb.gpkg empty3.tif # adds to existing layer
+gdal_rasterize -burn -a dutch_slc -at rnet_egb.gpkg empty4.tif # adds to existing layer
+# mv empty1.tif school_bicycle_all_10.tif
+mv empty2.tif school_govtarget_slc_all_10.tif
+mv empty3.tif school_cambridge_slc_all_10.tif
+mv empty4.tif school_dutch_slc_all_10.tif
 ls -hal | grep bicycle_all
-zip("ras_bicycle_all_new_10.zip", "ras_bicycle_all_new_10.tif")
+zip(
+  "rschool_all_10.tif.zip",
+  c("school_bicycle_all_10.tif",  "school_govtarget_slc_all_10.tif",
+    "school_cambridge_slc_all_10.tif", "school_dutch_slc_all_10.tif")
+)
 
 # back in R
-piggyback::pb_upload("ras_bicycle_all_new_10.zip")
+piggyback::pb_upload("rschool_all_10.tif.zip")
 
 # remotes::install_github("rspatial/terra")
 # v1 = terra::vect("r1.gpkg")
