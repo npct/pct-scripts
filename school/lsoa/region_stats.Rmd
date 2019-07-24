@@ -52,7 +52,22 @@ There were `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` school chil
 
 There were `r prettyNum(sum(d$all), big.mark = ",", scientific = F)` school children attending a school in `r get_pretty_region_name(region)` recorded in the 2011 NSC. All of these children are included in the **destinations** data that are visualised on the map interface and available for download.  The interface pop-ups do not, however, present exact numbers for counts based on 1 to 5 children.
 
-Finally, the **Route Network (LSOA, clickable)** and the **Route Network (LSOA, image)** are  built from all origin-destination fast routes within the region. In the online version of the clickable route network, we only present route segments that contain at least `r region_build_param$mingodutch_rnet` cyclists in the Go Dutch scenario. The downloads include all route segments. The pop-ups and downloads do not present exact numbers for segments containing 1 to 2 cyclists in the NSC 2011 census.
+```{r, echo=FALSE}
+# Aim: explain route network filtering
+if(region_build_param$mingodutch_rnet==0) {
+  rnet_txt <- "The online version of the clickable route network and the downloads both include all route segments."
+} else if (region_build_param$mingodutch_rnet != 0) {
+  rnet_txt <- paste0(
+    "In the online version of the clickable route network we only present route segments that contain at least ",
+    region_build_param$mingodutch_rnet, 
+    " cyclists in the Go Dutch scenario. The downloads include all route segments."
+  )
+    }
+```
+
+Finally, the **Route Network (LSOA, clickable)** and the **Route Network (LSOA, image)** are built from all origin-destination fast routes that start in, end in or pass through `r get_pretty_region_name(region)`.  To provide context and highlight cross-region flows, the online clickable route network and the regional download also include the route network for 3km around the region boundary. 
+`r rnet_txt`
+The pop-ups and downloads do not present exact numbers for segments containing 1 to 2 cyclists in the NSC 2011 census.
 
 For more details of methods please see the User Manual.
 
