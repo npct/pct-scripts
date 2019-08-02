@@ -32,9 +32,9 @@ z_shape_private <- z_shape
 
 if(purpose == "commute") {
   c_shape <- spTransform(c_shape, proj_4326)
-  l_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds") , version = 2)
-  rf_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds") , version = 2)
-  rq_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rq_shape.Rds") , version = 2)
+  l_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "lines_cs.Rds"))
+  rf_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds"))
+  rq_shape <- readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rq_shape.Rds"))
 }
 if(purpose == "school") {
   d_shape <- readOGR(file.path(path_inputs,"02_intermediate/01_geographies/urn_cents.geojson"))

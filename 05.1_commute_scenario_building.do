@@ -585,7 +585,7 @@ x
 	***********************************
 	** SET GEOGRAPHY [ONCE FOR EACH]
 	***********************************
-		global geography = "lsoa" // "msoa" or "lsoa"
+		global geography = "msoa" // "msoa" or "lsoa"
 	
 	*****************
 	** PART pre5: PREPARE INDIVID FOR AGGREGATION [LSOA AND MSOA]
@@ -653,7 +653,7 @@ x
 			bysort geo_code_o: egen a_`var'=sum(`var')
 			}
 		* PERCENT TRIPS AND TRIP HILLINESS
-			recode rf_dist_km min/9.9999=1 10/max=0, gen(rf_u10km_dist)
+			recode rf_dist_km min/9.9999=1 10/max=0, gen(rf_u10km_dist) // NB for msoa layer this is actually based on LSOA distances
 			recode rf_u10km_dist .=0 if geo_code_d=="Other"
 				* NB keep as missing if no fixed work place - implicitly assume they have same distribution as everyone else. This exclusion is comparable to what ONS do
 			bysort geo_code_o: egen a_perc_rf_dist_u10km=mean(rf_u10km_dist*100)
@@ -729,12 +729,16 @@ x
 			}
 			order id geo_code1 geo_code2 geo_name1 geo_name2 lad11cd1 lad11cd2 lad_name1 lad_name2 all bicycle- taxi_other govtarget_slc- ebike_sico2
 		* MERGE IN OTHER CS DATA (BETWEEN-LINES ONLY)
+			rename rf_dist_km rf_dist_km_1 // identical for LSOA, different for MSOA
+			rename rf_avslope_perc rf_avslope_perc_1
 			merge 1:1 id using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\rfrq_all_data.dta"
-			recode e_dist_km .=0 if geo_code1==geo_code2 // within-zone
-			order e_dist_km, before(rf_dist_km)
 			drop if _m==2
-			count if _m!=3 & geo_code1!=geo_code2 & geo_code2!="Other" & geo_code2!="OD0000003" & geo_code2!="Under 3" // should be none
-			drop _m		
+			recode e_dist_km .=0 if geo_code1==geo_code2 // within-zone
+			replace rf_dist_km=rf_dist_km_1 if rf_dist_km==. // within-zone OR rf_dist just >30km so not in MSOA: use LSOA average here
+			replace rf_avslope_perc=rf_avslope_perc_1 if rf_avslope_perc==. // within-zone OR rf_dist just >30km so not in MSOA: use LSOA average here
+			count if _m!=3 & geo_code1!=geo_code2 & geo_code2!="Other" & geo_code2!="OD0000003" & geo_code2!="Under 3" // should be none for LSOA
+			count if _m!=3 & geo_code1!=geo_code2 & geo_code2!="Other" & geo_code2!="OD0000003" & rf_dist_km!=rf_dist_km_1 // should be none for MSOA
+			drop _m rf_dist_km_1 rf_avslope_perc_1
 		* SAVE + APPEND
 			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg`reg'.dta", replace
 		}
@@ -746,6 +750,7 @@ x
 			forval reg=1/11 {
 			erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg`reg'.dta"
 			}
+			* NB some 150 MSOA routes wirh rf_dist<20km, but missing rq_dist because the rf_dist<20km exists from LSOA level but the MSOA distance was >30km
 	
 	*****************
 	** PART 5C: AGGREGATE TO LA & PCT REGION LEVEL [LSOA ONLY]
