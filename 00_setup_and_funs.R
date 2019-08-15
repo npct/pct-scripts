@@ -51,6 +51,7 @@ path_temp_unzip <- "../pct-inputs/02_intermediate/x_temporary_files/unzip"
 path_outputs_national <- "../pct-outputs-national"
 path_outputs_regional_R <- "../pct-outputs-regional-R"
 path_outputs_regional_notR <- "../pct-outputs-regional-notR"
+path_outputs_regional_Rsmall <- "../pct-outputs-regional-Rsmall"
 path_scripts <- "../pct-scripts"
 path_shiny <- "../pct-shiny"
 path_codebooks <- "../pct-shiny/regions_www/www/static/02_codebooks"
@@ -143,4 +144,19 @@ init_outputs_national <- function(purpose, geography){
     assign("rf_shape", readRDS(file.path(path_inputs, "02_intermediate/02_travel_data", purpose, geography, "rf_shape.Rds")), envir = .GlobalEnv)
     assign("rnet_all_attributes", read_csv(file.path(path_temp_scenario, purpose, geography, "rnet_all_attributes.csv")), envir = .GlobalEnv)
   }
+}
+
+
+# Initiate R small dataset
+init_Rsmall <- function(purpose){
+  if(purpose == "commute") {
+    assign("c_codebook_small", read_csv(file.path(path_codebooks, purpose, "c_codebook_small.csv")), envir = .GlobalEnv)
+    assign("od_l_rf_codebook_small", read_csv(file.path(path_codebooks, purpose, "od_l_rf_codebook_small.csv")), envir = .GlobalEnv)
+    assign("rq_codebook_small", read_csv(file.path(path_codebooks, purpose, "rq_codebook_small.csv")), envir = .GlobalEnv)
+    assign("z_codebook_small", read_csv(file.path(path_codebooks, purpose, "z_codebook_small.csv")), envir = .GlobalEnv)
+  }
+  if(purpose == "school") {
+    assign("d_codebook_small", read_csv(file.path(path_codebooks, purpose, "d_codebook_small.csv")), envir = .GlobalEnv)
+    assign("z_codebook_small", read_csv(file.path(path_codebooks, purpose, "z_codebook_small.csv")), envir = .GlobalEnv)
+  }  
 }

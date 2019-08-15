@@ -9,6 +9,7 @@ purpose_private <- paste0(purpose, "_private")
 geography <- "lsoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
 init_outputs_national(purpose, geography) # Load national data
+init_Rsmall(purpose) # Load R small codebooks
 
 
 #########################
@@ -30,8 +31,11 @@ for(k in 1:length(regions_tobuild)){
   #region_build_param$to_rebuild_rnet <- 0 # uncomment to forcibly skip rnet
   if (purpose=="commute") {
     source("07b.1_commute_build_region.R") # comment out to skip build entirely
+    rsmall_maxdist <- 10
+    source("07b.2_commute_Rsmall.R") 
   } else if (purpose=="school") {
-    source("07b.2_school_build_region.R") # comment out to skip build entirely
+    source("07c.1_school_build_region.R") # comment out to skip build entirely
+    source("07c.2_school_Rsmall.R") 
   }
   
   # WRITE REGION STATS FILE
