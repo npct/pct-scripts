@@ -28,14 +28,11 @@ for(k in 1:length(regions_tobuild)){
 
   # BUILD THE REGION
   message(paste0("Building for ", region, " (region ", k, ") at ",Sys.time()))
-  #region_build_param$to_rebuild_rnet <- 0 # uncomment to forcibly skip rnet
   if (purpose=="commute") {
-    source("07b.1_commute_build_region.R") # comment out to skip build entirely
-    rsmall_maxdist <- 10
-    source("07b.2_commute_Rsmall.R") 
+    maxdist_online <- 10
+    source("07b_commute_build_region.R") # comment out to skip build entirely
   } else if (purpose=="school") {
-    source("07c.1_school_build_region.R") # comment out to skip build entirely
-    source("07c.2_school_Rsmall.R") 
+    source("07c_school_build_region.R") # comment out to skip build entirely
   }
   
   # WRITE REGION STATS FILE
