@@ -102,6 +102,13 @@ x
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\msoa\rfrq_all_data.dta", replace
 		import delimited "pct-inputs\02_intermediate\02_travel_data\commute\lsoa\rfrq_all_data.csv", clear
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\rfrq_all_data.dta", replace
+
+	**********************************	
+	* PREPARE HILLINESS MMET/SPEED DATA - SAVE AS STATA 
+	**********************************	
+		import excel "C:\Users\Anna Goodman\Dropbox\GitHub\pct-inputs\02_intermediate\03_hilliness_calculations\EngWales_mmetspeed_hilliness.xlsx", sheet("Hilliness_pct-scripts_input") firstrow clear
+		destring *, replace
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta", replace
 	*/	
 
 	*****************
@@ -502,68 +509,85 @@ x
 			}
 			
 	*****************
-	** STEP 4: DO HEAT AND CARBON
+	** STEP 4: DO TAG AND CARBON
 	*****************
-		** INPUT PARAMETERS HEAT + CARBON [APPENDIX TABLE]
+ save "C:\Users\Anna Goodman\AnnaDesktop\temp_full.dta"
+ gen random=uniform()
+ keep if random<0.01
+ drop random
+  save "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta"
+ 
+  use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
+  
+		** MERGE IN GRADIENT
+			gen gradient=0.25* (round(rf_avslope_perc*4))
+			recode gradient 7/max=7
+			merge m:1 gradient using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta"
+			count if _m==1 & rf_avslope_perc!=. // should be zero
+			drop _merge
+  
+  		** INPUT PARAMETERS HEAT + CARBON [APPENDIX TABLE]
 			gen cyclecommute_tripspertypicalweek = .
 				replace cyclecommute_tripspertypicalweek = 7.24 if female==0 & agecat<=3
 				replace cyclecommute_tripspertypicalweek = 7.32 if female==0 & agecat>=4
 				replace cyclecommute_tripspertypicalweek = 6.31 if female==1 & agecat<=3
 				replace cyclecommute_tripspertypicalweek = 7.23 if female==1 & agecat>=4
-			gen cspeed = 14	
-			gen wspeed = 4.8
-			gen ebikespeed = 16.4
-			gen ebikemetreduction = 0.648
-			recode cyc_dist_km min/4.9999999=.07 5/9.9999999=.13 10/19.999999=.23 20/max=.23, gen(percentebike_dutch)
-			recode cyc_dist_km min/4.9999999=.71 5/9.9999999=.91 10/19.999999=.93 20/max=1, gen(percentebike_ebike)	
-			gen crr_heat=0.9 
-			gen cdur_ref_heat=100	
-			gen wrr_heat=0.89 
-			gen wdur_ref_heat=168
-			gen vsl= 1888675		// VALUE IN POUNDS [TAB 'A4.1.1', AFTER SETTING YEAR AS 2017 IN 'USER PARAMETERS' IN WEBTAG BOOK]
-
 			gen cyclecommute_tripsperweek = .
 				replace cyclecommute_tripsperweek = 5.46 if female==0 & agecat<=3
 				replace cyclecommute_tripsperweek = 5.23 if female==0 & agecat>=4
 				replace cyclecommute_tripsperweek = 4.13 if female==1 & agecat<=3
 				replace cyclecommute_tripsperweek = 4.88 if female==1 & agecat>=4
+			recode cyc_dist_km min/4.9999999=.07 5/9.9999999=.13 10/19.999999=.23 20/max=.23, gen(percentebike_dutch)
+			recode cyc_dist_km min/4.9999999=.71 5/9.9999999=.91 10/19.999999=.93 20/max=1, gen(percentebike_ebike)				
+				
+			gen rr_ref=0.9 
+			gen mmet_ref=8.75	
+			gen yll_per_death=female*10 + agecat
+			recode yll_per_death 1=40.88 2/3=34.06 4=23.73 5=15.13 6=12.02 11=40.78 12/13=33.55 14=23.73 15=14.34 16=11.49
+			
+			*gen vsl= 1888675		// VALUE IN POUNDS [TAB 'A4.1.1', AFTER SETTING YEAR AS 2017 IN 'USER PARAMETERS' IN WEBTAG BOOK]
+			gen vsly = 60000
+
 			gen co2kg_km=0.182
 	
-		** DURATION OF CYCLING/WALKING [THE DUTCH/EBIKE DURATION INCORPORATES LOWER INTENSITY]
-			gen cdur_obs = 60*((cyc_dist_km*cyclecommute_tripspertypicalweek)/cspeed) // TIME CYCLING PER WEEK IN MINUTES AMONG NEW CYCLISTS
-			gen cdur_obs_dutch=((1-percentebike_dutch)*cdur_obs)+(percentebike_dutch*cdur_obs*ebikemetreduction*(cspeed/ebikespeed))
-			gen cdur_obs_ebike=((1-percentebike_ebike)*cdur_obs)+(percentebike_ebike*cdur_obs*ebikemetreduction*(cspeed/ebikespeed))
-			gen wdur_obs = 60*((cyc_dist_km*cyclecommute_tripspertypicalweek)/wspeed) // TIME WALKING PER WEEK IN MINUTES AMONG THOSE NOW SWITCHING TO CYCLING
-
+		** WEEKLY mMETS OF CYCLING/WALKING [THE DUTCH/EBIKE DURATION INCORPORATES LOWER INTENSITY]
+			foreach x in cycle ebike walk {
+			gen wkmmets_`x' = mmet_`x' * ((cyc_dist_km*cyclecommute_tripspertypicalweek)/speed_`x') // mMETS OF CYCLING PER WEEK IN MINUTES AMONG NEW CYCLISTS
+			}
+			gen wkmmets_cycle_dutch=((1-percentebike_dutch)*wkmmets_cycle)+(percentebike_dutch*wkmmets_ebike)
+			gen wkmmets_cycle_ebike=((1-percentebike_ebike)*wkmmets_cycle)+(percentebike_ebike*wkmmets_ebike)
+	
 		** MORTALITY PROTECTION
-			gen cprotection_govtarget= (1-crr_heat)*(cdur_obs/cdur_ref_heat)	// SCALE RR DEPENDING ON HOW DURATION IN THIS POP COMPARES TO REF
+			gen cprotection_govtarget= 1-(rr_ref^(wkmmets_cycle/mmet_ref))
 			gen cprotection_nocyclists=cprotection_govtarget
 			gen cprotection_govnearmkt=cprotection_govtarget
 			gen cprotection_gendereq=cprotection_govtarget
-			gen cprotection_dutch= (1-crr_heat)*(cdur_obs_dutch/cdur_ref_heat) // GO DUTCH AND EBIKE USE SCALING INCORPORATING FACT SOME EBIKES
-			gen cprotection_ebike= (1-crr_heat)*(cdur_obs_ebike/cdur_ref_heat)
+			gen cprotection_dutch= 1-(rr_ref^(wkmmets_cycle_dutch/mmet_ref))
+			gen cprotection_ebike= 1-(rr_ref^(wkmmets_cycle_ebike/mmet_ref))
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			recode cprotection_`x' 0.45/max=0.45			
 			}
-			gen wprotection_heat= (1-wrr_heat)*(wdur_obs/wdur_ref_heat)
-			recode wprotection_heat 0.30/max=0.30		
+			gen wprotection= 1-(rr_ref^(wkmmets_walk/mmet_ref))
+			recode wprotection 0.30/max=0.30		
 
-		** DEATHS AND VALUES
+		** DEATHS AVOIDED + YLL
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			gen `x'_sic_death=`x'_sic*mortrate*cprotection_`x'*-1
 			gen `x'_siw_death=`x'_siw*mortrate*wprotection*-1
-			gen `x'_sideath_heat=`x'_sic_death+`x'_siw_death
-			gen `x'_sivalue_heat=`x'_sideath_heat*vsl*-1 // here and for CO2, not 'gen long' as individual
+			gen `x'_sideath_tag=`x'_sic_death+`x'_siw_death 		// here and for CO2, not 'gen long' as individual
 			drop `x'_sic_death `x'_siw_death
 			}
-			gen base_sldeath_heat=-1*nocyclists_sideath_heat	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
-			gen base_slvalue_heat=-1*nocyclists_sivalue_heat			
+			gen base_sldeath_tag = -1 * nocyclists_sideath_tag			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			gen base_slyll_tag = base_sldeath_tag * yll_per_death		
 			foreach x in govtarget govnearmkt gendereq dutch ebike {			
-			gen `x'_sldeath_heat=`x'_sideath_heat+base_sldeath_heat
-			gen `x'_slvalue_heat=`x'_sivalue_heat+base_slvalue_heat
-			order `x'_sideath_heat `x'_sivalue_heat, after(`x'_slvalue_heat)
+			gen `x'_sldeath_tag=`x'_sideath_tag+base_sldeath_tag
+			gen `x'_slyll_tag=`x'_sldeath_tag * yll_per_death
+			gen `x'_siyll_tag=`x'_sideath_tag * yll_per_death
+			gen `x'_slyll_value_tag=`x'_slyll_tag * vsly
+			gen `x'_siyll_value_tag=`x'_siyll_tag * vsly
+			order `x'_sideath_tag `x'_slyll_tag `x'_siyll_tag `x'_slyll_value_tag `x'_siyll_value_tag, after(`x'_sldeath_tag)
 			}
-			
+
 		** CO2
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_sicartrips	=`x'_sid * cyclecommute_tripsperweek * 52.2 	// NO. CYCLISTS * COMMUTE PER DAY 
@@ -575,7 +599,7 @@ x
 			gen `x'_slco2=`x'_sico2+base_slco2
 			order `x'_sicartrips `x'_slco2 , before(`x'_sico2)
 			}
-			drop mortrate nocyclists* cyclecommute_tripspertypicalweek- wprotection_heat
+			drop mortrate nocyclists* gradient- wprotection
 			
 		** SAVE
 			compress
