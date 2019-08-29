@@ -1,9 +1,8 @@
 clear
 clear matrix
 cd "C:\Users\Anna Goodman\Dropbox\GitHub"
-		
-x
 
+x
 	/***********************
 	* PREPARE THE INPUT INDIVIDUAL-LEVEL SYNTHETIC POP FROM CENSUS [overlap with metahit work] (INPUT 1)
 	***********************
@@ -103,10 +102,72 @@ x
 		import delimited "pct-inputs\02_intermediate\02_travel_data\commute\lsoa\rfrq_all_data.csv", clear
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\rfrq_all_data.dta", replace
 
+	****************************
+	* PREPARE APS SICK HOURS / YEAR
+	****************************
+		use "pct-inputs\01_raw\04_other_data\APS_2016-2018\stata\stata11\aps_3yr_jan16dec18_eul.dta", clear
+		rename *, lower
+		
+		** SELECT SAMPLE
+			drop if gor9d=="N99999999" | gor9d=="S99999999" // Eng + Wales
+			keep if ilodefr==1								// in work
+			keep if home==3 | home==4 						// commuters
+			keep if illwk!=-9 & home!=-9 & tothrs!=-9 & ttushr>=0 & tothrs>=0	// has all needed data
+
+		** PREPARE AGE/SEX/REGION
+			recode age 16/24=1 25/34=2 35/49=3 50/64=4 65/74=5 75/max=5, gen(agecat5)  // over 75 recoded as too small
+			recode sex 1=0 2=1, gen(female)
+			gen home_gor=substr(gor9d,-2,2)
+			destring home_gor, replace
+			recode home_gor 99=10
+			
+		** GENERATE HOURS LOST TO SICKNESS AND TOTAL HOURS
+			* https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/labourproductivity/articles/sicknessabsenceinthelabourmarket/2014-02-25
+			gen hrsoffsick=ttushr - ttachr
+			replace hrsoffsick=0 if yless6!=6
+			gen tothours=ttachr
+			replace tothours=ttushr if yless6==6 
+			
+		/** FOOTNOTE IN TEXT ON FEMALES
+			bysort female: egen npeople=sum(pwta18c)
+			bysort female: egen tot_hrsoffsick=sum(hrsoffsick*pwta18c*52)
+			bysort female: egen tot_tothours=sum(tothours*pwta18c*52)
+			gen sickness_rate = tot_hrsoffsick*100/tot_tothours
+			gen hours_year=tot_tothours/npeople
+			gen sickness_hours_year=tot_hrsoffsick/npeople
+			keep female hours_year sickness_rate sickness_hours_year
+			duplicates drop	
+			list
+		*/
+		
+		** GENERATE SICKNESS HOURS PER YEAR AND SICKNESS RATE AVERAGES BY GROUP
+			bysort female agecat5 home_gor : egen npeople=sum(pwta18c)
+			bysort female agecat5 home_gor: egen tot_hrsoffsick=sum(hrsoffsick*pwta18c*52/1000000)
+			bysort female agecat5 home_gor: egen tot_tothours=sum(tothours*pwta18c*52/1000000)
+			gen sickness_rate = tot_hrsoffsick*100/tot_tothours
+			gen sickness_hours_year=tot_hrsoffsick*1000000/npeople
+			keep npeople female agecat5 home_gor tot_hrsoffsick sickness_rate sickness_hours_year
+			duplicates drop
+			/* close though not identical (diff years/subsample) to https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/labourproductivity/articles/sicknessabsenceinthelabourmarket/2016
+			ta female [fw=npeople], sum(sickness_rate)
+			ta agecat5 [fw=npeople], sum(sickness_rate)
+			ta home_gor [fw=npeople], sum(sickness_rate)
+			*/ 
+			keep female agecat5 home_gor sickness_hours_year
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_sickness_hours_year.dta", replace version(12)
+		
 	**********************************	
-	* PREPARE HILLINESS MMET/SPEED DATA - SAVE AS STATA 
+	* IMPORT PREPARED REGIONAL SALARY DATA - SAVE AS STATA 
 	**********************************	
-		import excel "C:\Users\Anna Goodman\Dropbox\GitHub\pct-inputs\02_intermediate\03_hilliness_calculations\EngWales_mmetspeed_hilliness.xlsx", sheet("Hilliness_pct-scripts_input") firstrow clear
+		import excel "pct-inputs\01_raw\04_other_data\Salaries\earnings by region.xlsx", sheet("TAG_scaled_salary") cellrange(E1:H11) firstrow clear
+		destring *, replace
+		keep home_gor salary_hourly
+		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_salary_hourly.dta", replace
+
+	**********************************	
+	* IMPORT PREPARED HILLINESS MMET/SPEED DATA - SAVE AS STATA 
+	**********************************	
+		import excel "pct-inputs\02_intermediate\03_hilliness_calculations\EngWales_mmetspeed_hilliness.xlsx", sheet("Hilliness_pct-scripts_input") firstrow clear
 		destring *, replace
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta", replace
 	*/	
@@ -519,14 +580,19 @@ x
  
   use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
   
-		** MERGE IN GRADIENT
+		** MERGE IN GRADIENT + SICKNESS ABSENCE + SALARY
 			gen gradient=0.25* (round(rf_avslope_perc*4))
 			recode gradient 7/max=7
 			merge m:1 gradient using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta"
 			count if _m==1 & rf_avslope_perc!=. // should be zero
 			drop _merge
+
+			recode agecat 6=5, gen(agecat5)
+			merge m:1 female agecat5 home_gor using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_sickness_hours_year.dta", nogen
+
+			merge m:1 home_gor using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_salary_hourly.dta", nogen
   
-  		** INPUT PARAMETERS HEAT + CARBON [APPENDIX TABLE]
+  		** INPUT PARAMETERS TAG + CARBON [APPENDIX TABLE]
 			gen cyclecommute_tripspertypicalweek = .
 				replace cyclecommute_tripspertypicalweek = 7.24 if female==0 & agecat<=3
 				replace cyclecommute_tripspertypicalweek = 7.32 if female==0 & agecat>=4
@@ -540,14 +606,15 @@ x
 			recode cyc_dist_km min/4.9999999=.07 5/9.9999999=.13 10/19.999999=.23 20/max=.23, gen(percentebike_dutch)
 			recode cyc_dist_km min/4.9999999=.71 5/9.9999999=.91 10/19.999999=.93 20/max=1, gen(percentebike_ebike)				
 				
-			gen rr_ref=0.9 
+			gen rr_ref_pa=0.9 
 			gen mmet_ref=8.75	
 			gen yll_per_death=female*10 + agecat
-			recode yll_per_death 1=40.88 2/3=34.06 4=23.73 5=15.13 6=12.02 11=40.78 12/13=33.55 14=23.73 15=14.34 16=11.49
-			
+			recode yll_per_death 1=40.88 2/3=34.06 4=23.73 5=15.13 6=12.02 11=40.78 12/13=33.55 14=23.73 15=14.34 16=11.49			
 			*gen vsl= 1888675		// VALUE IN POUNDS [TAB 'A4.1.1', AFTER SETTING YEAR AS 2017 IN 'USER PARAMETERS' IN WEBTAG BOOK]
 			gen vsly = 60000
-
+			
+			gen rr_ref_sick=0.75
+	
 			gen co2kg_km=0.182
 	
 		** WEEKLY mMETS OF CYCLING/WALKING [THE DUTCH/EBIKE DURATION INCORPORATES LOWER INTENSITY]
@@ -557,23 +624,28 @@ x
 			gen wkmmets_cycle_dutch=((1-percentebike_dutch)*wkmmets_cycle)+(percentebike_dutch*wkmmets_ebike)
 			gen wkmmets_cycle_ebike=((1-percentebike_ebike)*wkmmets_cycle)+(percentebike_ebike*wkmmets_ebike)
 	
-		** MORTALITY PROTECTION
-			gen cprotection_govtarget= 1-(rr_ref^(wkmmets_cycle/mmet_ref))
-			gen cprotection_nocyclists=cprotection_govtarget
-			gen cprotection_govnearmkt=cprotection_govtarget
-			gen cprotection_gendereq=cprotection_govtarget
-			gen cprotection_dutch= 1-(rr_ref^(wkmmets_cycle_dutch/mmet_ref))
-			gen cprotection_ebike= 1-(rr_ref^(wkmmets_cycle_ebike/mmet_ref))
-			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
-			recode cprotection_`x' 0.45/max=0.45			
+		** MORTALITY / SICKNESS PROTECTION
+			foreach x in pa sick {
+			gen cprotection_`x'_govtarget= 1-(rr_ref_`x'^(wkmmets_cycle/mmet_ref))
+			gen cprotection_`x'_nocyclists=cprotection_`x'_govtarget
+			gen cprotection_`x'_govnearmkt=cprotection_`x'_govtarget
+			gen cprotection_`x'_gendereq=cprotection_`x'_govtarget
+			gen cprotection_`x'_dutch= 1-(rr_ref_`x'^(wkmmets_cycle_dutch/mmet_ref))
+			gen cprotection_`x'_ebike= 1-(rr_ref_`x'^(wkmmets_cycle_ebike/mmet_ref))
+
+			gen wprotection_`x'= 1-(rr_ref_`x'^(wkmmets_walk/mmet_ref))
 			}
-			gen wprotection= 1-(rr_ref^(wkmmets_walk/mmet_ref))
-			recode wprotection 0.30/max=0.30		
+			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
+			recode cprotection_pa_`x' 0.45/max=0.45			
+			recode cprotection_sick_`x' 0.5/max=0.5			
+			}
+			recode wprotection_pa 0.3/max=0.3	
+			recode wprotection_sick 0.5/max=0.5			
 
 		** DEATHS AVOIDED + YLL
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
-			gen `x'_sic_death=`x'_sic*mortrate*cprotection_`x'*-1
-			gen `x'_siw_death=`x'_siw*mortrate*wprotection*-1
+			gen `x'_sic_death=`x'_sic*mortrate*cprotection_pa_`x'*-1
+			gen `x'_siw_death=`x'_siw*mortrate*wprotection_pa*-1
 			gen `x'_sideath_tag=`x'_sic_death+`x'_siw_death 		// here and for CO2, not 'gen long' as individual
 			drop `x'_sic_death `x'_siw_death
 			}
@@ -583,9 +655,22 @@ x
 			gen `x'_sldeath_tag=`x'_sideath_tag+base_sldeath_tag
 			gen `x'_slyll_tag=`x'_sldeath_tag * yll_per_death
 			gen `x'_siyll_tag=`x'_sideath_tag * yll_per_death
-			gen `x'_slyll_value_tag=`x'_slyll_tag * vsly
-			gen `x'_siyll_value_tag=`x'_siyll_tag * vsly
-			order `x'_sideath_tag `x'_slyll_tag `x'_siyll_tag `x'_slyll_value_tag `x'_siyll_value_tag, after(`x'_sldeath_tag)
+			gen `x'_slvaluedeath_tag=`x'_slyll_tag * vsly * -1
+			gen `x'_sivaluedeath_tag=`x'_siyll_tag * vsly * -1
+			order `x'_slyll_tag `x'_slvaluedeath_tag `x'_sideath_tag `x'_siyll_tag `x'_sivaluedeath_tag, after(`x'_sldeath_tag)
+			}
+			
+		** SICKNESS ABSENCE COST
+			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
+			gen `x'_sic_sick=`x'_sic*sickness_hours_year*salary_hourly*cprotection_sick_`x'
+			gen `x'_siw_sick=`x'_siw*sickness_hours_year*salary_hourly*wprotection_sick
+			gen `x'_sivaluesick_tag=`x'_sic_sick+`x'_siw_sick 		// here and for CO2, not 'gen long' as individual
+			drop `x'_sic_sick `x'_siw_sick
+			}
+			gen base_slvaluesick_tag = -1 * nocyclists_sivaluesick_tag			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			foreach x in govtarget govnearmkt gendereq dutch ebike {			
+			gen `x'_slvaluesick_tag=`x'_sivaluesick_tag+base_slvaluesick_tag
+			order `x'_sivaluesick_tag , after(`x'_slvaluesick_tag)
 			}
 
 		** CO2
@@ -599,9 +684,9 @@ x
 			gen `x'_slco2=`x'_sico2+base_slco2
 			order `x'_sicartrips `x'_slco2 , before(`x'_sico2)
 			}
-			drop mortrate nocyclists* gradient- wprotection
-			
+xx			
 		** SAVE
+			drop mortrate sickness_hours_year salary_hourly nocyclists* gradient- wprotection_sick
 			compress
 		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\CommuteSP_individual.dta", replace
 
