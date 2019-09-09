@@ -539,21 +539,39 @@ x
 	*****************			
 			recode commute_mainmode9 1=0 2=1 3/max=0,gen(foot)
 			recode commute_mainmode9 1/2=0 3=1 4/max=0,gen(car_driver)
+			recode commute_mainmode9 1/3=0 4=1 5/max=0,gen(car_passenger)
+			recode commute_mainmode9 1/4=0 5=1 6/max=0,gen(motorbike)
+			recode commute_mainmode9 1/5=0 6/7=1 8/max=0,gen(public_transport)
 			bysort home_lsoa work_lsoa: gen od_all=_N
-			bysort home_lsoa work_lsoa: egen od_bicycle=sum(bicycle)
-			bysort home_lsoa work_lsoa: egen od_foot=sum(foot)
-			bysort home_lsoa work_lsoa: egen od_car_driver=sum(car_driver)
+			foreach x in bicycle foot car_driver car_passenger motorbike public_transport {
+			bysort home_lsoa work_lsoa: egen od_`x'=sum(`x')
+			}
 
 		* NO CYCLISTS
 			gen nocyclists_slw=foot
 			replace nocyclists_slw=od_foot/(od_all-od_bicycle) if bicycle==1	// Cyclists get walk mode share equal to flow mode share among non-cyclists
-			replace nocyclists_slw=0.31 if od_bicycle==od_all	// Flows with pure bicycles at baseline - make walking 31% of new flows [from Lovelae 2017, based on MSOA mode pairs with 50%-99% cycling]
+			replace nocyclists_slw=0.31 if od_bicycle==od_all	// Flows with pure bicycles at baseline - make walking 31% of new flows [from Lovelace 2017, based on MSOA mode pairs with 50%-99% cycling]
 			gen nocyclists_siw=nocyclists_slw-foot
-			
+
 			gen nocyclists_sld=car_driver
 			replace nocyclists_sld=od_car_driver/(od_all-od_bicycle) if bicycle==1	// Cyclists get walk mode share equal to flow mode share among non-cyclists
-			replace nocyclists_sld=0.35 if od_bicycle==od_all	// Flows with pure bicycles at baseline - make driving 35% of new flows [from Lovelae 2017, based on MSOA mode pairs with 50%-99% cycling]
+			replace nocyclists_sld=0.35 if od_bicycle==od_all	// Flows with pure bicycles at baseline - make driving 35% of new flows [from Lovelace 2017, based on MSOA mode pairs with 50%-99% cycling]
 			gen nocyclists_sid=nocyclists_sld-car_driver
+
+			gen nocyclists_slp=car_passenger
+			replace nocyclists_slp=od_car_passenger/(od_all-od_bicycle) if bicycle==1	// Cyclists get walk mode share equal to flow mode share among non-cyclists
+			replace nocyclists_slp=0.04 if od_bicycle==od_all	// Flows with pure bicycles at baseline - make car pass 4% of new flows [same approach as Lovelace 2017, based on MSOA mode pairs with 50%-99% cycling]
+			gen nocyclists_sip=nocyclists_slp-car_passenger
+
+			gen nocyclists_slm=motorbike
+			replace nocyclists_slm=od_motorbike/(od_all-od_bicycle) if bicycle==1	// Cyclists get walk mode share equal to flow mode share among non-cyclists
+			replace nocyclists_slm=0.02 if od_bicycle==od_all	// Flows with pure bicycles at baseline - make mbike 2% of new flows [same approach as Lovelace 2017, based on MSOA mode pairs with 50%-99% cycling]
+			gen nocyclists_sim=nocyclists_slm-motorbike			
+
+			gen nocyclists_slpt=public_transport
+			replace nocyclists_slpt=od_public_transport/(od_all-od_bicycle) if bicycle==1	// Cyclists get walk mode share equal to flow mode share among non-cyclists
+			replace nocyclists_slpt=0.28 if od_bicycle==od_all	// Flows with pure bicycles at baseline - make pub transport 28% of new flows [same approach as Lovelace 2017, based on MSOA mode pairs with 50%-99% cycling]
+			gen nocyclists_sipt=nocyclists_slpt-public_transport
 			
 		* BY SCENARIO
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
@@ -561,26 +579,24 @@ x
 			gen `x'_slw=foot+`x'_siw
 			gen `x'_sid=car_driver*`x'_sic*-1
 			gen `x'_sld=car_driver+`x'_sid
+			gen `x'_sip=car_passenger*`x'_sic*-1
+			gen `x'_slp=car_passenger+`x'_sip
+			gen `x'_sim=motorbike*`x'_sic*-1
+			gen `x'_slm=motorbike+`x'_sim
+			gen `x'_sipt=public_transport*`x'_sic*-1
+			gen `x'_slpt=public_transport+`x'_sipt
 			}
 		* ORDER + DROP EXCESS VARIABLES
 			drop pred_basegt pred_dutch pred_ebike pred_basenmorig pred_basenm
-			drop bicycle foot- od_car_driver
+			drop bicycle foot- od_public_transport
 			foreach x in ebike dutch gendereq govnearmkt govtarget nocyclists {
-			order `x'_slc `x'_sic `x'_slw `x'_siw `x'_sld `x'_sid, after(incomedecile)
+			order `x'_slc `x'_sic `x'_slw `x'_siw `x'_sld `x'_sid `x'_slp `x'_sip `x'_slm `x'_sim `x'_slpt `x'_sipt, after(incomedecile)
 			}
 			
 	*****************
 	** STEP 4: DO TAG AND CARBON
 	*****************
- save "C:\Users\Anna Goodman\AnnaDesktop\temp_full.dta"
- gen random=uniform()
- keep if random<0.01
- drop random
-  save "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta"
- 
-  use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
-  
-		** MERGE IN GRADIENT + SICKNESS ABSENCE + SALARY
+  		** MERGE IN GRADIENT + SICKNESS ABSENCE + SALARY
 			gen gradient=0.25* (round(rf_avslope_perc*4))
 			recode gradient 7/max=7
 			merge m:1 gradient using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta"
@@ -647,50 +663,63 @@ x
 			gen `x'_sic_death=`x'_sic*mortrate*cprotection_pa_`x'*-1
 			gen `x'_siw_death=`x'_siw*mortrate*wprotection_pa*-1
 			gen `x'_sideath_tag=`x'_sic_death+`x'_siw_death 		// here and for CO2, not 'gen long' as individual
-			drop `x'_sic_death `x'_siw_death
+			*drop `x'_sic_death `x'_siw_death
 			}
 			gen base_sldeath_tag = -1 * nocyclists_sideath_tag			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 			gen base_slyll_tag = base_sldeath_tag * yll_per_death		
-			foreach x in govtarget govnearmkt gendereq dutch ebike {			
+			gen base_slvalueyll_tag = base_slyll_tag * vsly	* -1	
+			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			gen `x'_sldeath_tag=`x'_sideath_tag+base_sldeath_tag
 			gen `x'_slyll_tag=`x'_sldeath_tag * yll_per_death
 			gen `x'_siyll_tag=`x'_sideath_tag * yll_per_death
-			gen `x'_slvaluedeath_tag=`x'_slyll_tag * vsly * -1
-			gen `x'_sivaluedeath_tag=`x'_siyll_tag * vsly * -1
-			order `x'_slyll_tag `x'_slvaluedeath_tag `x'_sideath_tag `x'_siyll_tag `x'_sivaluedeath_tag, after(`x'_sldeath_tag)
+			gen `x'_slvalueyll_tag=`x'_slyll_tag * vsly * -1
+			gen `x'_sivalueyll_tag=`x'_siyll_tag * vsly * -1
 			}
 			
 		** SICKNESS ABSENCE COST
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
-			gen `x'_sic_sick=`x'_sic*sickness_hours_year*salary_hourly*cprotection_sick_`x'
-			gen `x'_siw_sick=`x'_siw*sickness_hours_year*salary_hourly*wprotection_sick
-			gen `x'_sivaluesick_tag=`x'_sic_sick+`x'_siw_sick 		// here and for CO2, not 'gen long' as individual
-			drop `x'_sic_sick `x'_siw_sick
+			gen `x'_sic_sick=`x'_sic*sickness_hours_year*cprotection_sick_`x'
+			gen `x'_siw_sick=`x'_siw*sickness_hours_year*wprotection_sick
+			gen `x'_sisickdays_tag=(`x'_sic_sick+`x'_siw_sick)/-7.5		// here and for CO2, not 'gen long' as individual
+			gen `x'_sivaluesick_tag=`x'_sisickdays_tag*salary_hourly*-7.5		// here and for CO2, not 'gen long' as individual	
+			gen `x'_sivaluecomb_tag=`x'_sivaluesick_tag+`x'_sivalueyll_tag		// here and for CO2, not 'gen long' as individual	
+			*drop `x'_sic_sick `x'_siw_sick
 			}
-			gen base_slvaluesick_tag = -1 * nocyclists_sivaluesick_tag			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			gen base_slsickdays_tag = -1 * nocyclists_sisickdays_tag			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			gen base_slvaluesick_tag = -1 * nocyclists_sivaluesick_tag			
+			gen base_slvaluecomb_tag = base_slvaluesick_tag + base_slvalueyll_tag	
 			foreach x in govtarget govnearmkt gendereq dutch ebike {			
+			gen `x'_slsickdays_tag=`x'_sisickdays_tag+base_slsickdays_tag
 			gen `x'_slvaluesick_tag=`x'_sivaluesick_tag+base_slvaluesick_tag
-			order `x'_sivaluesick_tag , after(`x'_slvaluesick_tag)
+			gen `x'_slvaluecomb_tag=`x'_slvaluesick_tag+`x'_slvalueyll_tag
+			order `x'_slyll_tag `x'_slvalueyll_tag `x'_slsickdays_tag `x'_slvaluesick_tag `x'_slvaluecomb_tag  /*
+			*/ `x'_sideath_tag `x'_siyll_tag `x'_sivalueyll_tag `x'_sisickdays_tag `x'_sivaluesick_tag `x'_sivaluecomb_tag, after(`x'_sldeath_tag)
 			}
+			order base_sldeath_tag base_slyll_tag base_slvalueyll_tag base_slsickdays_tag base_slvaluesick_tag base_slvaluecomb_tag, after(ebike_sipt)
 
 		** CO2
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_sicartrips	=`x'_sid * cyclecommute_tripsperweek * 52.2 	// NO. CYCLISTS * COMMUTE PER DAY 
 			gen `x'_sico2		=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km * co2kg_km 	// NO. CAR TRIPS * DIST * CO2 EMISSIONS FACTOR
 			}
-			gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
-			order base_slco2, before(govtarget_sicartrips)
+			gen base_slcartrips=-1*nocyclists_sicartrips	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			gen base_slco2=-1*nocyclists_sico2	
+			order base_slcartrips base_slco2, before(govtarget_sicartrips)
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_slco2=`x'_sico2+base_slco2
 			order `x'_sicartrips `x'_slco2 , before(`x'_sico2)
 			}
-xx			
 		** SAVE
 			drop mortrate sickness_hours_year salary_hourly nocyclists* gradient- wprotection_sick
+			foreach x in govtarget govnearmkt gendereq dutch ebike {
+			foreach y in death_tag yll_tag valueyll_tag sickdays_tag valuesick_tag valuecomb_tag co2{
+			drop `x'_sl`y'
+			}
+			}
 			compress
 		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\CommuteSP_individual.dta", replace
 
-		
+
 	***********************************
 	** SET GEOGRAPHY [ONCE FOR EACH]
 	***********************************
@@ -879,8 +908,10 @@ xx
 			rename a_* *
 			duplicates drop
 		* CHANGE UNITS
-			foreach x in base_sl govtarget_sl govtarget_si govnearmkt_sl govnearmkt_si gendereq_sl gendereq_si dutch_sl dutch_si ebike_sl ebike_si{
-			replace `x'value_heat=`x'value_heat/1000000 // convert to millions of pounds
+			foreach x in base_sl govtarget_si govnearmkt_si gendereq_si dutch_si ebike_si{
+			replace `x'valueyll_tag=`x'valueyll_tag/1000000 // convert to millions of pounds
+			replace `x'valuesick_tag=`x'valuesick_tag/1000000 // convert to millions of pounds
+			replace `x'valuecomb_tag=`x'valuecomb_tag/1000000 // convert to millions of pounds
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lad_all_attributes_unrounded.csv", replace
