@@ -115,7 +115,7 @@ x
 			keep if illwk!=-9 & home!=-9 & tothrs!=-9 & ttushr>=0 & tothrs>=0	// has all needed data
 
 		** PREPARE AGE/SEX/REGION
-			recode age 16/24=1 25/34=2 35/49=3 50/64=4 65/74=5 75/max=5, gen(agecat5)  // over 75 recoded as too small
+			recode age 16/24=1 25/34=2 35/49=3 50/64=4 65/74=5 75/max=5, gen(agecat5) // over 75 recoded as too small
 			recode sex 1=0 2=1, gen(female)
 			gen home_gor=substr(gor9d,-2,2)
 			destring home_gor, replace
@@ -593,10 +593,11 @@ x
 			order `x'_slc `x'_sic `x'_slw `x'_siw `x'_sld `x'_sid `x'_slp `x'_sip `x'_slm `x'_sim `x'_slpt `x'_sipt, after(incomedecile)
 			}
 			
+use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear			
 	*****************
 	** STEP 4: DO TAG AND CARBON
 	*****************
-  		** MERGE IN GRADIENT + SICKNESS ABSENCE + SALARY
+ 		** MERGE IN GRADIENT + SICKNESS ABSENCE + SALARY
 			gen gradient=0.25* (round(rf_avslope_perc*4))
 			recode gradient 7/max=7
 			merge m:1 gradient using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta"
@@ -607,8 +608,8 @@ x
 			merge m:1 female agecat5 home_gor using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_sickness_hours_year.dta", nogen
 
 			merge m:1 home_gor using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_salary_hourly.dta", nogen
-  
-  		** INPUT PARAMETERS TAG + CARBON [APPENDIX TABLE]
+ 
+ 		** INPUT PARAMETERS TAG + CARBON [APPENDIX TABLE]
 			gen cyclecommute_tripspertypicalweek = .
 				replace cyclecommute_tripspertypicalweek = 7.24 if female==0 & agecat<=3
 				replace cyclecommute_tripspertypicalweek = 7.32 if female==0 & agecat>=4
@@ -626,7 +627,6 @@ x
 			gen mmet_ref=8.75	
 			gen yll_per_death=female*10 + agecat
 			recode yll_per_death 1=40.88 2/3=34.06 4=23.73 5=15.13 6=12.02 11=40.78 12/13=33.55 14=23.73 15=14.34 16=11.49			
-			*gen vsl= 1888675		// VALUE IN POUNDS [TAB 'A4.1.1', AFTER SETTING YEAR AS 2017 IN 'USER PARAMETERS' IN WEBTAG BOOK]
 			gen vsly = 60000
 			
 			gen rr_ref_sick=0.75
@@ -662,44 +662,45 @@ x
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			gen `x'_sic_death=`x'_sic*mortrate*cprotection_pa_`x'*-1
 			gen `x'_siw_death=`x'_siw*mortrate*wprotection_pa*-1
-			gen `x'_sideath_tag=`x'_sic_death+`x'_siw_death 		// here and for CO2, not 'gen long' as individual
-			*drop `x'_sic_death `x'_siw_death
+			gen `x'_sideath=`x'_sic_death+`x'_siw_death 		// here and for CO2, not 'gen long' as individual
+			drop `x'_sic_death `x'_siw_death
 			}
-			gen base_sldeath_tag = -1 * nocyclists_sideath_tag			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
-			gen base_slyll_tag = base_sldeath_tag * yll_per_death		
-			gen base_slvalueyll_tag = base_slyll_tag * vsly	* -1	
+			gen base_sldeath = -1 * nocyclists_sideath			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			gen base_slyll = base_sldeath * yll_per_death		
+			gen base_slvalueyll = base_slyll * vsly	* -1	
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
-			gen `x'_sldeath_tag=`x'_sideath_tag+base_sldeath_tag
-			gen `x'_slyll_tag=`x'_sldeath_tag * yll_per_death
-			gen `x'_siyll_tag=`x'_sideath_tag * yll_per_death
-			gen `x'_slvalueyll_tag=`x'_slyll_tag * vsly * -1
-			gen `x'_sivalueyll_tag=`x'_siyll_tag * vsly * -1
+			gen `x'_sldeath=`x'_sideath+base_sldeath
+			gen `x'_slyll=`x'_sldeath * yll_per_death
+			gen `x'_siyll=`x'_sideath * yll_per_death
+			gen `x'_slvalueyll=`x'_slyll * vsly * -1
+			gen `x'_sivalueyll=`x'_siyll * vsly * -1
 			}
 			
 		** SICKNESS ABSENCE COST
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			gen `x'_sic_sick=`x'_sic*sickness_hours_year*cprotection_sick_`x'
 			gen `x'_siw_sick=`x'_siw*sickness_hours_year*wprotection_sick
-			gen `x'_sisickdays_tag=(`x'_sic_sick+`x'_siw_sick)/-7.5		// here and for CO2, not 'gen long' as individual
-			gen `x'_sivaluesick_tag=`x'_sisickdays_tag*salary_hourly*-7.5		// here and for CO2, not 'gen long' as individual	
-			gen `x'_sivaluecomb_tag=`x'_sivaluesick_tag+`x'_sivalueyll_tag		// here and for CO2, not 'gen long' as individual	
-			*drop `x'_sic_sick `x'_siw_sick
+			gen `x'_sisickdays=(`x'_sic_sick+`x'_siw_sick)/-7.5		// here and for CO2, not 'gen long' as individual
+			gen `x'_sivaluesick=`x'_sisickdays*salary_hourly*-7.5		// here and for CO2, not 'gen long' as individual	
+			gen `x'_sivaluecomb=`x'_sivaluesick+`x'_sivalueyll		// here and for CO2, not 'gen long' as individual	
+			drop `x'_sic_sick `x'_siw_sick
 			}
-			gen base_slsickdays_tag = -1 * nocyclists_sisickdays_tag			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
-			gen base_slvaluesick_tag = -1 * nocyclists_sivaluesick_tag			
-			gen base_slvaluecomb_tag = base_slvaluesick_tag + base_slvalueyll_tag	
+			gen base_slsickdays = -1 * nocyclists_sisickdays			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			gen base_slvaluesick = -1 * nocyclists_sivaluesick			
+			gen base_slvaluecomb = base_slvaluesick + base_slvalueyll	
 			foreach x in govtarget govnearmkt gendereq dutch ebike {			
-			gen `x'_slsickdays_tag=`x'_sisickdays_tag+base_slsickdays_tag
-			gen `x'_slvaluesick_tag=`x'_sivaluesick_tag+base_slvaluesick_tag
-			gen `x'_slvaluecomb_tag=`x'_slvaluesick_tag+`x'_slvalueyll_tag
-			order `x'_slyll_tag `x'_slvalueyll_tag `x'_slsickdays_tag `x'_slvaluesick_tag `x'_slvaluecomb_tag  /*
-			*/ `x'_sideath_tag `x'_siyll_tag `x'_sivalueyll_tag `x'_sisickdays_tag `x'_sivaluesick_tag `x'_sivaluecomb_tag, after(`x'_sldeath_tag)
+			gen `x'_slsickdays=`x'_sisickdays+base_slsickdays
+			gen `x'_slvaluesick=`x'_sivaluesick+base_slvaluesick
+			gen `x'_slvaluecomb=`x'_slvaluesick+`x'_slvalueyll
+			order `x'_slyll `x'_slvalueyll `x'_slsickdays `x'_slvaluesick `x'_slvaluecomb /*
+			*/ `x'_sideath `x'_siyll `x'_sivalueyll `x'_sisickdays `x'_sivaluesick `x'_sivaluecomb, after(`x'_sldeath)
 			}
-			order base_sldeath_tag base_slyll_tag base_slvalueyll_tag base_slsickdays_tag base_slvaluesick_tag base_slvaluecomb_tag, after(ebike_sipt)
+			order base_sldeath base_slyll base_slvalueyll base_slsickdays base_slvaluesick base_slvaluecomb, after(ebike_sipt)
 
 		** CO2
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_sicartrips	=`x'_sid * cyclecommute_tripsperweek * 52.2 	// NO. CYCLISTS * COMMUTE PER DAY 
+gen `x'_sicardistance=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km 
 			gen `x'_sico2		=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km * co2kg_km 	// NO. CAR TRIPS * DIST * CO2 EMISSIONS FACTOR
 			}
 			gen base_slcartrips=-1*nocyclists_sicartrips	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
@@ -708,11 +709,12 @@ x
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_slco2=`x'_sico2+base_slco2
 			order `x'_sicartrips `x'_slco2 , before(`x'_sico2)
+order `x'_sicardistance , before(`x'_slco2)
 			}
 		** SAVE
 			drop mortrate sickness_hours_year salary_hourly nocyclists* gradient- wprotection_sick
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
-			foreach y in death_tag yll_tag valueyll_tag sickdays_tag valuesick_tag valuecomb_tag co2{
+			foreach y in death yll valueyll sickdays valuesick valuecomb co2{
 			drop `x'_sl`y'
 			}
 			}
@@ -909,9 +911,9 @@ x
 			duplicates drop
 		* CHANGE UNITS
 			foreach x in base_sl govtarget_si govnearmkt_si gendereq_si dutch_si ebike_si{
-			replace `x'valueyll_tag=`x'valueyll_tag/1000000 // convert to millions of pounds
-			replace `x'valuesick_tag=`x'valuesick_tag/1000000 // convert to millions of pounds
-			replace `x'valuecomb_tag=`x'valuecomb_tag/1000000 // convert to millions of pounds
+			replace `x'valueyll=`x'valueyll/1000000 // convert to millions of pounds
+			replace `x'valuesick=`x'valuesick/1000000 // convert to millions of pounds
+			replace `x'valuecomb=`x'valuecomb/1000000 // convert to millions of pounds
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lad_all_attributes_unrounded.csv", replace
