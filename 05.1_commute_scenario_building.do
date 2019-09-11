@@ -633,9 +633,24 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 	
 			gen co2kg_km=0.182
 	
-		** WEEKLY mMETS OF CYCLING/WALKING [THE DUTCH/EBIKE DURATION INCORPORATES LOWER INTENSITY]
+		** ANNUAL DURATION OF CYCLING PER CYCLIST
+			foreach x in cycle ebike {
+			gen hrs_`x' = ((cyc_dist_km*cyclecommute_tripspertypicalweek)/speed_`x') * 52.2 // CYCLING PER YEAR IN HOURS AMONG NEW CYCLISTS
+*cyclecommute_tripspertypicalweek
+			}
+			foreach x in nocyclists govtarget govnearmkt gendereq {
+			gen `x'_sicyclehours = `x'_sic *  hrs_cycle
+			}
+			foreach x in dutch ebike {
+			gen `x'_sicyclehours=`x'_sic *(((1-percentebike_`x')*hrs_cycle)+(percentebike_`x'*hrs_ebike))
+			}
+			gen base_slcyclehours = -1 * nocyclists_sicyclehours
+			order base_slcyclehours, before(govtarget_sicyclehours)
+		
+		** WEEKLY mMETS OF CYCLING/WALKING
 			foreach x in cycle ebike walk {
-			gen wkmmets_`x' = mmet_`x' * ((cyc_dist_km*cyclecommute_tripspertypicalweek)/speed_`x') // mMETS OF CYCLING PER WEEK IN MINUTES AMONG NEW CYCLISTS
+			gen wkmmets_`x' = mmet_`x' * ((cyc_dist_km*cyclecommute_tripspertypicalweek)/speed_`x') // mMETS OF CYCLING PER WEEK IN HOURS AMONG NEW CYCLISTS
+*cyclecommute_tripspertypicalweek
 			}
 			gen wkmmets_cycle_dutch=((1-percentebike_dutch)*wkmmets_cycle)+(percentebike_dutch*wkmmets_ebike)
 			gen wkmmets_cycle_ebike=((1-percentebike_ebike)*wkmmets_cycle)+(percentebike_ebike*wkmmets_ebike)
@@ -695,24 +710,24 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 			order `x'_slyll `x'_slvalueyll `x'_slsickdays `x'_slvaluesick `x'_slvaluecomb /*
 			*/ `x'_sideath `x'_siyll `x'_sivalueyll `x'_sisickdays `x'_sivaluesick `x'_sivaluecomb, after(`x'_sldeath)
 			}
-			order base_sldeath base_slyll base_slvalueyll base_slsickdays base_slvaluesick base_slvaluecomb, after(ebike_sipt)
+			order base_sldeath base_slyll base_slvalueyll base_slsickdays base_slvaluesick base_slvaluecomb, after(ebike_sicyclehours)
 
 		** CO2
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_sicartrips	=`x'_sid * cyclecommute_tripsperweek * 52.2 	// NO. CYCLISTS * COMMUTE PER DAY 
-gen `x'_sicardistance=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km 
-			gen `x'_sico2		=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km * co2kg_km 	// NO. CAR TRIPS * DIST * CO2 EMISSIONS FACTOR
+			gen `x'_sicarkm=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km 	// NO. CAR TRIPS * DIST
+			gen `x'_sico2		= `x'_sicarkm * co2kg_km  
 			}
 			gen base_slcartrips=-1*nocyclists_sicartrips	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+			gen base_slcarkm=-1*nocyclists_sicarkm	
 			gen base_slco2=-1*nocyclists_sico2	
 			order base_slcartrips base_slco2, before(govtarget_sicartrips)
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_slco2=`x'_sico2+base_slco2
-			order `x'_sicartrips `x'_slco2 , before(`x'_sico2)
-order `x'_sicardistance , before(`x'_slco2)
+			order `x'_sicartrips `x'_sicarkm `x'_slco2 , before(`x'_sico2)
 			}
 		** SAVE
-			drop mortrate sickness_hours_year salary_hourly nocyclists* gradient- wprotection_sick
+			drop mortrate sickness_hours_year salary_hourly nocyclists* gradient-hrs_ebike  wkmmets_cycle - wprotection_sick
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			foreach y in death yll valueyll sickdays valuesick valuecomb co2{
 			drop `x'_sl`y'
@@ -914,6 +929,8 @@ order `x'_sicardistance , before(`x'_slco2)
 			replace `x'valueyll=`x'valueyll/1000000 // convert to millions of pounds
 			replace `x'valuesick=`x'valuesick/1000000 // convert to millions of pounds
 			replace `x'valuecomb=`x'valuecomb/1000000 // convert to millions of pounds
+			replace `x'cyclehours=`x'cyclehours/1000	// convert to thousands hours
+			replace `x'carkm=`x'carkm/1000	// convert to thousands km
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lad_all_attributes_unrounded.csv", replace
