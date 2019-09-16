@@ -100,7 +100,8 @@ summary(rnet_to_serve$dutch_slc)
 "../pct-outputs-regional-R/commute/lsoa/isle-of-wight/rnet.Rds"
 "../pct-outputs-regional-R/school/lsoa/isle-of-wight/"
 rnet_folder = paste0("../pct-outputs-regional-R/", purpose, "/lsoa/", region_name_single, "/")
-saveRDS(rnet_to_serve, paste0(rnet_folder, "rnet.Rds"), version = 2)
+rnet_folder_small = paste0("../pct-outputs-regional-Rsmall/", purpose, "/lsoa/", region_name_single, "/")
+saveRDS(rnet_to_serve, paste0(rnet_folder_small, "rnet.Rds"), version = 2)
 saveRDS(rnet_single, paste0(rnet_folder, "rnet_full.Rds"), version = 2)
 rnet_folder_geojson = paste0("../pct-outputs-regional-notR/", purpose, "/lsoa/", region_name_single, "/")
 rnet_file_geojson = paste0(rnet_folder_geojson, "rnet_full.geojson")
@@ -137,7 +138,8 @@ for(i in seq_len(nrow(regions))) {
   rnet_to_serve = rnet_single[rnet_single$dutch_slc >= dutch_slc_min, ]
   summary(rnet_to_serve$dutch_slc)
   rnet_folder = paste0("../pct-outputs-regional-R/", purpose, "/lsoa/", region_name_single, "/")
-  saveRDS(rnet_to_serve, paste0(rnet_folder, "rnet.Rds"), version = 2)
+  rnet_folder_small = paste0("../pct-outputs-regional-Rsmall/", purpose, "/lsoa/", region_name_single, "/")
+  saveRDS(rnet_to_serve, paste0(rnet_folder_small, "rnet.Rds"), version = 2)
   plot(rnet_to_serve)
   saveRDS(rnet_single, paste0(rnet_folder, "rnet_full.Rds"), version = 2)
   rnet_folder_geojson = paste0("../pct-outputs-regional-notR/", purpose, "/lsoa/", region_name_single, "/")
