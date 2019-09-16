@@ -635,8 +635,7 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 	
 		** ANNUAL DURATION OF CYCLING PER CYCLIST
 			foreach x in cycle ebike {
-			gen hrs_`x' = ((cyc_dist_km*cyclecommute_tripspertypicalweek)/speed_`x') * 52.2 // CYCLING PER YEAR IN HOURS AMONG NEW CYCLISTS
-*cyclecommute_tripspertypicalweek
+			gen hrs_`x' = ((cyc_dist_km*cyclecommute_tripsperweek)/speed_`x') * 52.2 // CYCLING PER YEAR IN HOURS AMONG NEW CYCLISTS
 			}
 			foreach x in nocyclists govtarget govnearmkt gendereq {
 			gen `x'_sicyclehours = `x'_sic *  hrs_cycle
@@ -650,7 +649,6 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 		** WEEKLY mMETS OF CYCLING/WALKING
 			foreach x in cycle ebike walk {
 			gen wkmmets_`x' = mmet_`x' * ((cyc_dist_km*cyclecommute_tripspertypicalweek)/speed_`x') // mMETS OF CYCLING PER WEEK IN HOURS AMONG NEW CYCLISTS
-*cyclecommute_tripspertypicalweek
 			}
 			gen wkmmets_cycle_dutch=((1-percentebike_dutch)*wkmmets_cycle)+(percentebike_dutch*wkmmets_ebike)
 			gen wkmmets_cycle_ebike=((1-percentebike_ebike)*wkmmets_cycle)+(percentebike_ebike*wkmmets_ebike)
