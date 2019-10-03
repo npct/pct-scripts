@@ -37,7 +37,6 @@ l <- l_all[l_geo_code1 | l_geo_code2, ]  # Inter-regional
 
 # Additional sub-setting of lines for minflow for visualisation / download, and maxdist for online
 l <- l[l$all >= region_build_param$minflow_visualise, ] # for download
-
 lsmall <- l[l@data$rf_dist_km<=maxdist_online,]
 lsmall <- lsmall[od_l_rf_codebook_small$`Variable name`] # for online
 
