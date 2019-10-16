@@ -144,6 +144,8 @@ sf11$easting[sf11$urn==120753] <- 494887
 sf11$northing[sf11$urn==120753] <- 369344	
 sf11$easting[sf11$urn==134971] <- 636019
 sf11$northing[sf11$urn==134971] <- 166570	
+sf11$easting[sf11$urn==125254] <- 482925  # NB not yet implemented as of Oct 2019 - for next nat build
+sf11$northing[sf11$urn==125254] <- 145265	# NB not yet implemented as of Oct 2019 - for next nat build
 
 #Adjust school easting/northing if is (after snapping to road) too close to LSOA centroid to route (<4m): (manual checking in pct-inputs\01_raw\02_travel_data\school\x-manual_extras\3_shorttrips_adjust_manual.csv)
 adjust_ne <- read_csv(file.path(path_inputs, "01_raw/02_travel_data/school/lsoa/x-manual_extras", "3_adjust_urn_near_cents_manual.csv"))
