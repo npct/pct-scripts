@@ -479,8 +479,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 		gen long `x'_sicarkm = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * cyc_dist_km  	// NO TRIPS CHANGED * DIST 
 		gen long `x'_sico2 = `x'_sicarkm * co2kg_km 	// NO TRIPS CHANGED * DIST * CO2 EMISSIONS FACOTR
 		}
-		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 		gen base_slcarkm=-1*nocyclists_sicarkm	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 		foreach x in govtarget cambridge dutch {
 		gen long `x'_slco2=`x'_sico2+base_slco2
 		order `x'_sicartrips `x'_sicarkm , before(`x'_slco2)
@@ -504,7 +504,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			bysort geo_code_o: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
-			foreach var of varlist base_slco2- dutch_sico2 {
+			foreach var of varlist base_slcarkm- dutch_sico2 {
 			bysort geo_code_o: egen a_`var'=sum(`var')
 			}
 		* PERCENT TRIPS AND TRIP HILLINESS
@@ -555,7 +555,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			bysort urn: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
-			foreach var of varlist base_slco2- dutch_sico2 {
+			foreach var of varlist base_slcarkm- dutch_sico2 {
 			bysort urn: egen a_`var'=sum(`var')
 			}
 		* PERCENT TRIPS AND TRIP HILLINESS
@@ -639,7 +639,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			bysort lad11cd: egen temp_`var'=sum(`var'*all)
 			gen a_`var'=temp_`var'/a_all
 			}
-			foreach var of varlist base_slco2- dutch_sico2 {
+			foreach var of varlist base_slcarkm- dutch_sico2 {
 			bysort lad11cd: egen a_`var'=sum(`var')
 			}		
 			foreach var of varlist perc_rf_dist_u5km avslope_perc_u5km {
@@ -676,7 +676,7 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			list if bicycle_perc==. 
 			drop if bicycle_perc==. // Wales
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\pct_regions_all_attributes.csv", replace
-
+x
 	*****************
 	** FILE FOR 1) RNET and 2) RASTER WITH NUMBERS ROUNDED (BUT CORRECT TOTALS MAINTAINED), AND NO FILTERING OF LINES <3
 	*****************			
