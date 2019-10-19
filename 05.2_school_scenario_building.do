@@ -476,12 +476,15 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 				
 		foreach x in nocyclists govtarget cambridge dutch {
 		gen long `x'_sicartrips = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 	// NO DRIVERS CHANGED * CHILD TRIPS/WEEK * ADULT CAR DRIVER ESCORT TRIPS PER CHILD TRIP 
-		gen long `x'_sico2 = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * cyc_dist_km * co2kg_km 	// NO TRIPS CHANGED * DIST * CO2 EMISSIONS FACOTR
+		gen long `x'_sicarkm = `x'_sid * cycleeduc_cycletripsperweek * cardrivertrips_perchildcaruser * 52.2 * cyc_dist_km  	// NO TRIPS CHANGED * DIST 
+		gen long `x'_sico2 = `x'_sicarkm * co2kg_km 	// NO TRIPS CHANGED * DIST * CO2 EMISSIONS FACOTR
 		}
 		gen base_slco2=-1*nocyclists_sico2	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
+		gen base_slcarkm=-1*nocyclists_sicarkm	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 		foreach x in govtarget cambridge dutch {
 		gen long `x'_slco2=`x'_sico2+base_slco2
-		order `x'_sico2 , after(`x'_slco2)
+		order `x'_sicartrips `x'_sicarkm , before(`x'_slco2)
+		order `x'_sico2, after(`x'_slco2)
 		}
 		drop nocyclists* cycleeduc_cycletripsperweek- carothereduc_walktripsperweek cardrivertrips_perchildcaruser co2kg_km 
 		
@@ -647,7 +650,8 @@ cd "C:\Users\Anna Goodman\Dropbox\GitHub"
 			rename a_* *
 			duplicates drop
 		* CHANGE UNITS
-			foreach x in base_sl govtarget_sl govtarget_si dutch_sl dutch_si {
+			foreach x in base_sl govtarget_si dutch_si {
+			replace `x'carkm=`x'carkm/1000	// convert to thousands km
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
 		export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\school\lad_all_attributes_unrounded.csv", replace
