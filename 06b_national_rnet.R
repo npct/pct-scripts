@@ -78,6 +78,7 @@ regions = sf::read_sf("../pct-inputs/02_intermediate/01_geographies/pct_regions_
 # summary(as.factor(rnet_all_sp$bicycle))
 # summary(as.factor(rnet_all_sp$govtarget_slc))
 # saveRDS(rnet_all_sp, "../pct-outputs-national/school/lsoa/rnet_all.Rds", version = 2)
+# geojson_write(rnet_all_sp, "../pct-outputs-national/school/lsoa/rnet_all.geojson") # save as geojson
 rnet_all_sp = readRDS("../pct-outputs-national/school/lsoa/rnet_all.Rds")
 
 
