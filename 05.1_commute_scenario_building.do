@@ -592,8 +592,7 @@ x
 			foreach x in ebike dutch gendereq govnearmkt govtarget nocyclists {
 			order `x'_slc `x'_sic `x'_slw `x'_siw `x'_sld `x'_sid `x'_slp `x'_sip `x'_slm `x'_sim `x'_slpt `x'_sipt, after(incomedecile)
 			}
-			
-use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear			
+
 	*****************
 	** STEP 4: DO TAG AND CARBON
 	*****************
@@ -609,6 +608,8 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 
 			merge m:1 home_gor using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_salary_hourly.dta", nogen
  
+			merge m:1 female agecat home_gor using "pct-inputs\01_raw\04_other_data\GBD_YLLdeaths\GBD_YLLperDeath.dta" 
+
  		** INPUT PARAMETERS TAG + CARBON [APPENDIX TABLE]
 			gen cyclecommute_tripspertypicalweek = .
 				replace cyclecommute_tripspertypicalweek = 7.24 if female==0 & agecat<=3
@@ -625,9 +626,8 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 				
 			gen rr_ref_pa=0.9 
 			gen mmet_ref=8.75	
-			gen yll_per_death=female*10 + agecat
-			recode yll_per_death 1=40.88 2/3=34.06 4=23.73 5=15.13 6=12.02 11=40.78 12/13=33.55 14=23.73 15=14.34 16=11.49			
-			gen vsly = 60000
+
+			gen vsly = 57965
 			
 			gen rr_ref_sick=0.75
 	
@@ -679,12 +679,12 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 			drop `x'_sic_death `x'_siw_death
 			}
 			gen base_sldeath = -1 * nocyclists_sideath			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
-			gen base_slyll = base_sldeath * yll_per_death		
+			gen base_slyll = base_sldeath * yll_per_death_discounted		
 			gen base_slvalueyll = base_slyll * vsly	* -1	
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {			
 			gen `x'_sldeath=`x'_sideath+base_sldeath
-			gen `x'_slyll=`x'_sldeath * yll_per_death
-			gen `x'_siyll=`x'_sideath * yll_per_death
+			gen `x'_slyll=`x'_sldeath * yll_per_death_discounted
+			gen `x'_siyll=`x'_sideath * yll_per_death_discounted
 			gen `x'_slvalueyll=`x'_slyll * vsly * -1
 			gen `x'_sivalueyll=`x'_siyll * vsly * -1
 			}
@@ -698,6 +698,7 @@ use "C:\Users\Anna Goodman\AnnaDesktop\temp_small.dta", clear
 			gen `x'_sivaluecomb=`x'_sivaluesick+`x'_sivalueyll		// here and for CO2, not 'gen long' as individual	
 			drop `x'_sic_sick `x'_siw_sick
 			}
+			
 			gen base_slsickdays = -1 * nocyclists_sisickdays			// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 			gen base_slvaluesick = -1 * nocyclists_sivaluesick			
 			gen base_slvaluecomb = base_slvaluesick + base_slvalueyll	
