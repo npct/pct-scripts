@@ -1,6 +1,6 @@
 clear
 clear matrix
-cd "C:\Users\Anna Goodman\Dropbox\GitHub"
+cd "F:\Github_Maxtor"
 
 	/** SAVE CSV FILES IN STATA FORMAT
 		import delimited "pct-inputs\02_intermediate\02_travel_data\school\lsoa\flows_2011.csv", delimiter(comma) varnames(1) clear

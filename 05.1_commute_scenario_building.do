@@ -1,6 +1,6 @@
 clear
 clear matrix
-cd "C:\Users\Anna Goodman\Dropbox\GitHub"
+cd "F:\Github_Maxtor"
 
 x
 	/***********************
@@ -720,7 +720,7 @@ x
 			gen base_slcartrips=-1*nocyclists_sicartrips	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 			gen base_slcarkm=-1*nocyclists_sicarkm	
 			gen base_slco2=-1*nocyclists_sico2	
-			order base_slcartrips base_slco2, before(govtarget_sicartrips)
+			order base_slcartrips base_slcarkm base_slco2, before(govtarget_sicartrips)
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_slco2=`x'_sico2+base_slco2
 			order `x'_sicartrips `x'_sicarkm `x'_slco2 , before(`x'_sico2)
@@ -924,11 +924,12 @@ x
 			rename a_* *
 			duplicates drop
 		* CHANGE UNITS
-			foreach x in base_sl govtarget_si govnearmkt_si gendereq_si dutch_si ebike_si{
+			foreach x in base_sl govtarget_si govnearmkt_si gendereq_si dutch_si ebike_si {
 			replace `x'valueyll=`x'valueyll/1000000 // convert to millions of pounds
 			replace `x'valuesick=`x'valuesick/1000000 // convert to millions of pounds
 			replace `x'valuecomb=`x'valuecomb/1000000 // convert to millions of pounds
 			replace `x'cyclehours=`x'cyclehours/1000	// convert to thousands hours
+			replace `x'cartrips=`x'cartrips/1000	// convert to thousands trips
 			replace `x'carkm=`x'carkm/1000	// convert to thousands km
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
