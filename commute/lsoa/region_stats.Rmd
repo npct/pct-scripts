@@ -80,7 +80,7 @@ if(region_build_param$mingodutch_rnet==0) {
  
 Finally, the **Route Network (LSOA, clickable)** and the **Route Network (LSOA, image)** are  built from all between-zone LSOA fast routes (including any that start *or* end in `r get_pretty_region_name(region)`).
 `r rnet_txt`
- For more details please see User Manual C.
+ For more details please see User Manual C1.
 
 See <a target="_blank" href="https://www.jtlu.org/index.php/jtlu/article/view/862">Lovelace et al. (2017)</a> for details of the methods used to estimate the cycling, health and carbon impacts of each scenario, and the methods used to visualise results at the area, line, route and route network level.
 
@@ -161,12 +161,12 @@ Table 2 illustrates the health and carbon impacts of the different scenarios in 
 
 | Scenario | Comparison	| Change in YLLs/year  | Change in days sick leave/year | Combined value of YLL + sick leave changes (million pounds)  | Change in tonnes CO2e/year |
 | -------- |:----------:|:-----------------: |:----------:| :----------:| :---------------:|
-| Census 2011 |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$base_slyll) , 1)))` |  `r (sprintf('%.2f', round(sum(z$base_slsickday) , 1)))` | `r (sprintf('%.2f', round(sum(z$base_slvaluecomb) / 1000000  , 2)))` | `r (round(sum(z$base_slco2) / 1000))` |
-| Government Target (equality)   |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govtarget_siyll) , 1)))` | `r (sprintf('%.2f', round(sum(z$govtarget_sisickday) , 1)))` |`r (sprintf('%.2f', round(sum(z$govtarget_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govtarget_sico2) / 1000))` |
-| Government Target (near market) |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govnearmkt_siyll) , 1)))` | `r (sprintf('%.2f', round(sum(z$govnearmkt_sisickday) , 1)))` `r (sprintf('%.2f', round(sum(z$govnearmkt_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govnearmkt_sico2) / 1000))` |
-| Gender Equality |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$gendereq_siyll) , 1)))` | `r (sprintf('%.2f', round(sum(z$gendereq_sisickday) , 1)))` `r (sprintf('%.2f', round(sum(z$gendereq_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$gendereq_sico2) / 1000))` |
-| Go Dutch |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$dutch_siyll) , 1)))` | `r (sprintf('%.2f', round(sum(z$dutch_sisickday) , 1)))` `r (sprintf('%.2f', round(sum(z$dutch_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$dutch_sico2) / 1000))` |
-| Ebikes  |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$ebike_siyll) , 1)))` | `r (sprintf('%.2f', round(sum(z$ebike_sisickday) , 1)))` `r (sprintf('%.2f', round(sum(z$ebike_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$ebike_sico2) / 1000))` |
+| Census 2011 |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$base_slyll) , 1)))` |  `r (round(sum(z$base_slsickdays)))` | `r (sprintf('%.2f', round(sum(z$base_slvaluecomb) / 1000000  , 2)))` | `r (round(sum(z$base_slco2) / 1000))` |
+| Government Target (equality)   |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govtarget_siyll) , 1)))` | `r (round(sum(z$govtarget_sisickdays)))` |`r (sprintf('%.2f', round(sum(z$govtarget_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govtarget_sico2) / 1000))` |
+| Government Target (near market) |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govnearmkt_siyll) , 1)))` | `r (round(sum(z$govnearmkt_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$govnearmkt_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govnearmkt_sico2) / 1000))` |
+| Gender Equality |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$gendereq_siyll) , 1)))` | `r (round(sum(z$gendereq_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$gendereq_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$gendereq_sico2) / 1000))` |
+| Go Dutch |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$dutch_siyll) , 1)))` | `r (round(sum(z$dutch_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$dutch_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$dutch_sico2) / 1000))` |
+| Ebikes  |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$ebike_siyll) , 1)))` | `r (round(sum(z$ebike_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$ebike_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$ebike_sico2) / 1000))` |
 YLL = Years of Life Lost
 
 <br>
