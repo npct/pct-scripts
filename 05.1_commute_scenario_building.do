@@ -929,7 +929,6 @@ x
 			replace `x'valuesick=`x'valuesick/1000000 // convert to millions of pounds
 			replace `x'valuecomb=`x'valuecomb/1000000 // convert to millions of pounds
 			replace `x'cyclehours=`x'cyclehours/1000	// convert to thousands hours
-			replace `x'cartrips=`x'cartrips/1000	// convert to thousands trips
 			replace `x'carkm=`x'carkm/1000	// convert to thousands km
 			replace `x'co2=`x'co2/1000	// convert to tonnes
 			}
