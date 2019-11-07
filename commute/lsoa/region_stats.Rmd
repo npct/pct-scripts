@@ -159,7 +159,7 @@ Table 2 illustrates the health and carbon impacts of the different scenarios in 
 
 *Table 2: Health and carbon impacts at baseline and in the scenarios among `r prettyNum(sum(z$all), big.mark = ",", scientific = F)` commuters living in `r get_pretty_region_name(region)`*
 
-| Scenario | Comparison	| Change in YLLs/year  | Change in days sick leave/year | Combined value of YLL + sick leave changes (million pounds)  | Change in tonnes CO2e/year |
+| Scenario | Comparison	| Change in YLLs/year  | Change in days sick leave/year | Value of YLL+sick leave changes (million pounds)  | Change in tonnes CO2e/year |
 | -------- |:----------:|:-----------------: |:----------:| :----------:| :---------------:|
 | Census 2011 |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$base_slyll) , 1)))` |  `r (round(sum(z$base_slsickdays)))` | `r (sprintf('%.2f', round(sum(z$base_slvaluecomb) / 1000000  , 2)))` | `r (round(sum(z$base_slco2) / 1000))` |
 | Government Target (equality)   |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govtarget_siyll) , 1)))` | `r (round(sum(z$govtarget_sisickdays)))` |`r (sprintf('%.2f', round(sum(z$govtarget_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govtarget_sico2) / 1000))` |
