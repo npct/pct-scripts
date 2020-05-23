@@ -241,29 +241,35 @@ x
 				* HILLINESS = MEAN HILLINESS OF SHORTEST 3 FLOWS
 			recode rf_dist_km .=0.79 if (home_lsoa=="E02006781" | home_lsoa=="E01019077") & home_lsoa==work_lsoa 		//ISLES OF SCILLY [msoa/lsoa] - ESTIMATED FROM DISTANCE DISTRIBUTION
 			recode rf_avslope_perc .=0.2 if (home_lsoa=="E02006781" | home_lsoa=="E01019077") & home_lsoa==work_lsoa //ISLES OF SCILLY [msoa/lsoa] - ESTIMATED FROM CYCLE STREET 
-			drop littlen1 littlen2 rf_dist_kmtemp rf_dist_kmtemp2 rf_avslope_perctemp rf_avslope_perctemp2 
-			
-		** ASSIGN DISTANCE *AMONG CYCLISTS* VALUES IF NO FIXED PLACE : MEAN DIST AMONG CYCLISTS TRAVELLING <15KM
-			gen cyc_dist_km=rf_dist_km
-			foreach x in 15 30 {
-			gen rf_dist_km`x'=rf_dist_km
-			replace rf_dist_km`x'=. if rf_dist_km>`x' | flowtype>2
-			gen bicycle`x'=(commute_mainmode9==1)
-			replace bicycle`x'=. if rf_dist_km`x'==.
-			}
-			bysort home_lsoa: egen numnrf_dist_km15=sum(rf_dist_km15*bicycle15)
-			bysort home_lsoa: egen denrf_dist_km15=sum(bicycle15)
-			gen meanrf_dist_km15=numnrf_dist_km15/denrf_dist_km15
-			replace cyc_dist_km=meanrf_dist_km15 if flowtype==3 
+			drop littlen1 littlen2 rf_dist_kmtemp rf_dist_kmtemp2 rf_avslope_perctemp rf_avslope_perctemp2 			
 
-		** ASSIGN DISTANCE *AMONG CYCLISTS* VALUES IF OUTSIDE ENG/WALES OR >30KM: MEAN DIST AMONG CYCLISTS TRAVELLING <30KM
-			egen numnrf_dist_km30=sum(rf_dist_km30*bicycle30)
-			egen denrf_dist_km30=sum(bicycle30)
-			gen meanrf_dist_km30=numnrf_dist_km30/denrf_dist_km30
-			replace cyc_dist_km=meanrf_dist_km30 if flowtype==4 
-			replace cyc_dist_km=meanrf_dist_km30 if flowtype==3 & cyc_dist_km==.	// USE 30KM if NO LOCAL CYCLIST GOING <15KM
+		** ASSIGN DISTANCE + HILLINESS *AMONG CYCLISTS* VALUES IF NO FIXED PLACE : MEAN DIST AMONG CYCLISTS TRAVELLING <15KM
+			foreach x in 15 30 {
+			gen bicycle`x'=(commute_mainmode9==1)
+			replace bicycle`x'=. if rf_dist_km>`x' | flowtype>2
+			}
+			foreach var in dist_km avslope_perc {
+			gen cyc_`var'=rf_`var'
+			foreach x in 15 30 {
+			gen rf_`var'`x'=rf_`var'
+			replace rf_`var'`x'=. if bicycle`x'==.
+			}
+			bysort home_lsoa: egen numnrf_`var'15=sum(rf_`var'15*bicycle15)
+			bysort home_lsoa: egen denrf_`var'15=sum(bicycle15)
+			gen meanrf_`var'15=numnrf_`var'15/denrf_`var'15
+			replace cyc_`var'=meanrf_`var'15 if flowtype==3 
+			}
+			
+		** ASSIGN DISTANCE + HILLINESS *AMONG CYCLISTS* VALUES IF OUTSIDE ENG/WALES OR >30KM: MEAN DIST AMONG CYCLISTS TRAVELLING <30KM
+			foreach var in dist_km avslope_perc {
+			egen numnrf_`var'30=sum(rf_`var'30*bicycle30)
+			egen denrf_`var'30=sum(bicycle30)
+			gen meanrf_`var'30=numnrf_`var'30/denrf_`var'30
+			replace cyc_`var'=meanrf_`var'30 if flowtype==4 
+			replace cyc_`var'=meanrf_`var'30 if flowtype==3 & cyc_`var'==.	// USE 30KM if NO LOCAL CYCLIST GOING <15KM
+			}
 		
-		order home_lsoa- work_msoa flowtype rf_dist_km rf_avslope_perc cyc_dist_km mortrate commute_mainmode9 female agecat nonwhite nocar urbancat5 sparse incomedecile
+		order home_lsoa- work_msoa flowtype rf_dist_km rf_avslope_perc cyc_dist_km cyc_avslope_perc mortrate commute_mainmode9 female agecat nonwhite nocar urbancat5 sparse incomedecile
 		keep home_lsoa-incomedecile
 		compress
 		saveold "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\CommuteSPTemp1.dta", replace
@@ -586,6 +592,11 @@ x
 			gen `x'_sipt=public_transport*`x'_sic*-1
 			gen `x'_slpt=public_transport+`x'_sipt
 			}
+		* NO INCREASE IN DRIVING FLOW TYPE 4 (TOO LONG/OUTSIDE EW) - SO GET RIGHT FOR INCREASE
+			foreach x in govtarget govnearmkt gendereq dutch ebike {
+			replace `x'_sld=car_driver if flowtype==4	
+			replace `x'_sid=0 if flowtype==4
+			}
 		* ORDER + DROP EXCESS VARIABLES
 			drop pred_basegt pred_dutch pred_ebike pred_basenmorig pred_basenm
 			drop bicycle foot- od_public_transport
@@ -597,18 +608,16 @@ x
 	** STEP 4: DO TAG AND CARBON
 	*****************
  		** MERGE IN GRADIENT + SICKNESS ABSENCE + SALARY
-			gen gradient=0.25* (round(rf_avslope_perc*4))
+			gen gradient=0.25* (round(cyc_avslope_perc*4))
 			recode gradient 7/max=7
-			merge m:1 gradient using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta"
-			count if _m==1 & rf_avslope_perc!=. // should be zero
-			drop _merge
+			merge m:1 gradient using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_mmetspeed_hilliness.dta", nogen
 
 			recode agecat 6=5, gen(agecat5)
 			merge m:1 female agecat5 home_gor using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_sickness_hours_year.dta", nogen
 
 			merge m:1 home_gor using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\0temp\EngWales_salary_hourly.dta", nogen
  
-			merge m:1 female agecat home_gor using "pct-inputs\01_raw\04_other_data\GBD_YLLdeaths\GBD_YLLperDeath.dta" 
+			merge m:1 female agecat home_gor using "pct-inputs\01_raw\04_other_data\GBD_YLLdeaths\GBD_YLLperDeath.dta" ,nogen
 
  		** INPUT PARAMETERS TAG + CARBON [APPENDIX TABLE]
 			gen cyclecommute_tripspertypicalweek = .
@@ -638,7 +647,7 @@ x
 			gen hrs_`x' = ((cyc_dist_km*cyclecommute_tripsperweek)/speed_`x') * 52.2 // CYCLING PER YEAR IN HOURS AMONG NEW CYCLISTS
 			}
 			foreach x in nocyclists govtarget govnearmkt gendereq {
-			gen `x'_sicyclehours = `x'_sic *  hrs_cycle
+			gen `x'_sicyclehours = `x'_sic * hrs_cycle
 			}
 			foreach x in dutch ebike {
 			gen `x'_sicyclehours=`x'_sic *(((1-percentebike_`x')*hrs_cycle)+(percentebike_`x'*hrs_ebike))
@@ -715,7 +724,7 @@ x
 			foreach x in nocyclists govtarget govnearmkt gendereq dutch ebike {
 			gen `x'_sicartrips	=`x'_sid * cyclecommute_tripsperweek * 52.2 	// NO. CYCLISTS * COMMUTE PER DAY 
 			gen `x'_sicarkm=`x'_sid * cyclecommute_tripsperweek * 52.2 * cyc_dist_km 	// NO. CAR TRIPS * DIST
-			gen `x'_sico2		= `x'_sicarkm * co2kg_km  
+			gen `x'_sico2		= `x'_sicarkm * co2kg_km 
 			}
 			gen base_slcartrips=-1*nocyclists_sicartrips	// BASELINE LEVEL IS INVERSE OF 'NO CYCLISTS' SCENARIO INCREASE
 			gen base_slcarkm=-1*nocyclists_sicarkm	
@@ -726,20 +735,21 @@ x
 			order `x'_sicartrips `x'_sicarkm `x'_slco2 , before(`x'_sico2)
 			}
 		** SAVE
-			drop mortrate sickness_hours_year salary_hourly nocyclists* gradient-hrs_ebike  wkmmets_cycle - wprotection_sick
+			drop mortrate sickness_hours_year salary_hourly nocyclists* gradient-hrs_ebike wkmmets_cycle - wprotection_sick
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
 			foreach y in death yll valueyll sickdays valuesick valuecomb co2{
 			drop `x'_sl`y'
 			}
 			}
 			compress
+			
 		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\CommuteSP_individual.dta", replace
 
 
 	***********************************
 	** SET GEOGRAPHY [ONCE FOR EACH]
 	***********************************
-		global geography = "msoa" // "msoa" or "lsoa"
+		global geography = "lsoa" // "msoa" or "lsoa"
 	
 	*****************
 	** PART pre5: PREPARE INDIVID FOR AGGREGATION [LSOA AND MSOA]
@@ -758,8 +768,8 @@ x
 			gen bus=(commute_mainmode9==7)
 			gen taxi_other=(commute_mainmode9==8)
 			
-			drop home*soa work*soa home_lad11cd home_laname home_gor // home_gordet
-			drop flowtype commute_mainmode9- incomedecile
+			drop home*soa work*soa home_lad11cd home_laname home_gor
+			drop flowtype commute_mainmode9- incomedecile cyc_dist_km cyc_avslope_perc *cartrips
 		* MAKE BIDIRECTIONAL OD AND SAVE TEMPORARY DATASET, PRE-AGGREGATION
 			gen osub1=substr(geo_code_o,1,1)
 			gen dsub1=substr(geo_code_d,1,1)
@@ -779,7 +789,7 @@ x
 			gen geo_code2=geo_code_d
 			replace geo_code2=geo_code_o if homefirst==0
 			drop osub1 dsub1 osub2 dsub2 homefirst
-		* MAKE DATASET OF GORDET
+		/* MAKE DATASET OF GORDET [ONLY NEED HASHED OUT BIT ONCE NOT EACH TIME]
 			preserve
 			keep geo_code_o home_gordet
 			rename geo_code_o geo_code
@@ -787,9 +797,25 @@ x
 			duplicates drop
 			save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", replace
 			restore
-			drop home_gordet
+			*/
+			rename home_gordet gordet_o
+			rename geo_code1 geo_code
+			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", nogen
+			rename geo_code geo_code1
+			rename gordet gordet_1
+		* IDENTIFY VARIABLES WHERE 'ALL' IS TOO SMALL (for lsoa combine <3 flows to 'under 3')
+			bysort geo_code1 geo_code2: gen f_all_temp=_N
+			replace geo_code_d="Under 3" if f_all_temp<3 & "$geography"=="lsoa"
+			replace gordet_1=gordet_o if geo_code_d=="Under 3"
+			replace geo_code1=geo_code_o if geo_code_d=="Under 3"
+			replace geo_code2=geo_code_d if geo_code_d=="Under 3"
+			foreach var of varlist rf_dist_km rf_avslope_perc {
+			replace `var'=. if geo_code_d=="Under 3"
+			}
+			drop f_all_temp
+			gen id = geo_code1+" "+geo_code2
 		
-		order geo_code1 geo_code2 geo_code_o geo_code_d all- taxi_other
+		order id geo_code1 geo_code2 geo_code_o geo_code_d gordet_o gordet_1 all- taxi_other
 		save "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\CommuteSP_preaggregate_temp.dta", replace
 
 	*****************
@@ -798,10 +824,7 @@ x
 		forval reg=1/11 {
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\CommuteSP_preaggregate_temp.dta", clear
 		* RESTRICT TO HOME REGION
-			rename geo_code_o geo_code
-			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", nogen
-			rename geo_code geo_code_o
-			keep if gordet==`reg'
+			keep if gordet_o==`reg'
 		* AGGREGATE UP AREA FIGURES
 			foreach var of varlist all- taxi_other govtarget_slc- ebike_sico2 {
 			bysort geo_code_o: egen a_`var'=sum(`var')
@@ -840,22 +863,8 @@ x
 	*****************
 		forval reg=1/11 {
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\CommuteSP_preaggregate_temp.dta", clear
-			drop *cartrips	
 		* RESTRICT TO STARTING ZONE REGION
-			rename geo_code1 geo_code
-			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", nogen
-			rename geo_code geo_code1
-			keep if gordet==`reg'
-		* IDENTIFY VARIABLES WHERE 'ALL' IS TOO SMALL (for lsoa combine <3 flows to 'under 3')
-			bysort geo_code1 geo_code2: gen f_all_temp=_N
-			replace geo_code_d="Under 3" if f_all_temp<3 & "$geography"=="lsoa"
-			replace geo_code1=geo_code_o if geo_code_d=="Under 3"
-			replace geo_code2=geo_code_d if geo_code_d=="Under 3"
-			foreach var of varlist rf_dist_km rf_avslope_perc {
-			replace `var'=. if geo_code_d=="Under 3"
-			}
-			gen id = geo_code1+" "+geo_code2
-			drop f_all_temp
+			keep if gordet_1==`reg'
 		* AGGREGATE UP FLOW FIGURES
 			foreach var of varlist all- taxi_other govtarget_slc- ebike_sico2 {
 			bysort id: egen f_`var'=sum(`var')
@@ -900,6 +909,7 @@ x
 			forval reg=2/11 {
 			append using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg`reg'.dta"
 			}
+			codebook id // check no duplicates
 			export delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_attributes_unrounded.csv", replace
 			forval reg=1/11 {
 			erase "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\od_all_reg`reg'.dta"
@@ -911,7 +921,6 @@ x
 	*****************
 	** LA
 		import delimited using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\z_all_attributes_unrounded.csv", clear
-		drop *cartrips
 		* AGGREGATE
 			foreach var of varlist all- taxi_other govtarget_slc- ebike_sico2 {
 			bysort lad11cd: egen a_`var'=sum(`var')
@@ -961,7 +970,6 @@ x
 		use "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\lsoa\CommuteSP_preaggregate_temp.dta", clear
 		* SUBSET BY DISTANCE AND TO SCENARIO VARIABLES
 			keep if rf_dist_km<20 & geo_code1!=geo_code2
-			gen id = geo_code1+" "+geo_code2
 			keep id bicycle *_slc	
 		* AGGREGATE UP FLOW FIGURES
 			foreach var of varlist bicycle- ebike_slc {
