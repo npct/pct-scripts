@@ -769,7 +769,7 @@ x
 			gen taxi_other=(commute_mainmode9==8)
 			
 			drop home*soa work*soa home_lad11cd home_laname home_gor
-			drop flowtype commute_mainmode9- incomedecile cyc_dist_km cyc_avslope_perc *cartrips
+			drop commute_mainmode9- incomedecile cyc_dist_km cyc_avslope_perc *cartrips
 		* MAKE BIDIRECTIONAL OD AND SAVE TEMPORARY DATASET, PRE-AGGREGATION
 			gen osub1=substr(geo_code_o,1,1)
 			gen dsub1=substr(geo_code_d,1,1)
@@ -803,16 +803,13 @@ x
 			merge m:1 geo_code using "pct-inputs\02_intermediate\x_temporary_files\scenario_building\commute\\$geography\geo_code_gordet.dta", nogen
 			rename geo_code geo_code1
 			rename gordet gordet_1
-		* IDENTIFY VARIABLES WHERE 'ALL' IS TOO SMALL (for lsoa combine <3 flows to 'under 3')
+		* IDENTIFY VARIABLES WHERE 'ALL' IS TOO SMALL (for lsoa combine <3 flows to 'under 3' for flowtype 1 and 2)
 			bysort geo_code1 geo_code2: gen f_all_temp=_N
-			replace geo_code_d="Under 3" if f_all_temp<3 & "$geography"=="lsoa"
+			replace geo_code_d="Under 3" if f_all_temp<3 & "$geography"=="lsoa" & flowtype<=2
 			replace gordet_1=gordet_o if geo_code_d=="Under 3"
 			replace geo_code1=geo_code_o if geo_code_d=="Under 3"
 			replace geo_code2=geo_code_d if geo_code_d=="Under 3"
-			foreach var of varlist rf_dist_km rf_avslope_perc {
-			replace `var'=. if geo_code_d=="Under 3"
-			}
-			drop f_all_temp
+			drop f_all_temp flowtype
 			gen id = geo_code1+" "+geo_code2
 		
 		order id geo_code1 geo_code2 geo_code_o geo_code_d gordet_o gordet_1 all- taxi_other
@@ -831,7 +828,7 @@ x
 			}
 		* PERCENT TRIPS AND TRIP HILLINESS
 			recode rf_dist_km min/9.9999=1 10/max=0, gen(rf_u10km_dist) // NB for msoa layer this is actually based on LSOA distances
-			recode rf_u10km_dist .=0 if geo_code_d=="Other"
+			recode rf_u10km_dist .=0 if geo_code_d=="Other" 
 				* NB keep as missing if no fixed work place - implicitly assume they have same distribution as everyone else. This exclusion is comparable to what ONS do
 			bysort geo_code_o: egen a_perc_rf_dist_u10km=mean(rf_u10km_dist*100)
 			gen rf_u10km_avslope_perc=rf_avslope_perc
@@ -870,7 +867,8 @@ x
 			bysort id: egen f_`var'=sum(`var')
 			}
 			foreach var of varlist rf_dist_km rf_avslope_perc {
-			bysort id: egen f_`var'=mean(`var') // redundant for lsoa, useful for msoa
+			replace `var'=. if geo_code_d=="Under 3"	// as combining multiple together
+			bysort id: egen f_`var'=mean(`var') 		// redundant for lsoa, useful for msoa
 			}
 		* FLOW FILE KEEP/RENAME + MERGE IN NAMES/LA + ORDER
 			keep id geo_code1 geo_code2 f_* 
