@@ -161,12 +161,12 @@ Table 2 illustrates the health and carbon impacts of the different scenarios in 
 
 | Scenario | Comparison	| Change in YLLs/year  | Change in days sick leave/year | Value of YLL+sick leave changes (million pounds)  | Change in tonnes CO2e/year |
 | -------- |:----------:|:-----------------: |:----------:| :----------:| :---------------:|
-| Census 2011 |	'No Cyclists' |  `r (sprintf('%.2f', round(sum(z$base_slyll) , 1)))` |  `r (round(sum(z$base_slsickdays)))` | `r (sprintf('%.2f', round(sum(z$base_slvaluecomb) / 1000000  , 2)))` | `r (round(sum(z$base_slco2) / 1000))` |
-| Government Target (equality)   |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govtarget_siyll) , 1)))` | `r (round(sum(z$govtarget_sisickdays)))` |`r (sprintf('%.2f', round(sum(z$govtarget_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govtarget_sico2) / 1000))` |
-| Government Target (near market) |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$govnearmkt_siyll) , 1)))` | `r (round(sum(z$govnearmkt_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$govnearmkt_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govnearmkt_sico2) / 1000))` |
-| Gender Equality |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$gendereq_siyll) , 1)))` | `r (round(sum(z$gendereq_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$gendereq_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$gendereq_sico2) / 1000))` |
-| Go Dutch |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$dutch_siyll) , 1)))` | `r (round(sum(z$dutch_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$dutch_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$dutch_sico2) / 1000))` |
-| Ebikes  |	Census 2011 |  `r (sprintf('%.2f', round(sum(z$ebike_siyll) , 1)))` | `r (round(sum(z$ebike_sisickdays)))` | `r (sprintf('%.2f', round(sum(z$ebike_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$ebike_sico2) / 1000))` |
+| Census 2011 |	'No Cyclists' |  `r (sprintf('%.1f', round(sum(z$base_slyll) , 1)))` |  `r (sprintf('%.1f', round((sum(z$base_slsickdays) / 365.25), 1)))` | `r (sprintf('%.2f', round(sum(z$base_slvaluecomb) / 1000000  , 2)))` | `r (round(sum(z$base_slco2) / 1000))` |
+| Government Target (equality)   |	Census 2011 |  `r (sprintf('%.1f', round(sum(z$govtarget_siyll) , 1)))` | `r (sprintf('%.1f', round((sum(z$govtarget_sisickdays) / 365.25), 1)))` |`r (sprintf('%.2f', round(sum(z$govtarget_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govtarget_sico2) / 1000))` |
+| Government Target (near market) |	Census 2011 |  `r (sprintf('%.1f', round(sum(z$govnearmkt_siyll) , 1)))` | `r (sprintf('%.1f', round((sum(z$govnearmkt_sisickdays) / 365.25), 1)))` | `r (sprintf('%.2f', round(sum(z$govnearmkt_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$govnearmkt_sico2) / 1000))` |
+| Gender Equality |	Census 2011 |  `r (sprintf('%.1f', round(sum(z$gendereq_siyll) , 1)))` | `r (sprintf('%.1f', round((sum(z$gendereq_sisickdays) / 365.25), 1)))` | `r (sprintf('%.2f', round(sum(z$gendereq_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$gendereq_sico2) / 1000))` |
+| Go Dutch |	Census 2011 |  `r (sprintf('%.1f', round(sum(z$dutch_siyll) , 1)))` | `r (sprintf('%.1f', round((sum(z$dutch_sisickdays) / 365.25), 1)))` | `r (sprintf('%.2f', round(sum(z$dutch_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$dutch_sico2) / 1000))` |
+| Ebikes  |	Census 2011 |  `r (sprintf('%.1f', round(sum(z$ebike_siyll) , 1)))` | `r (sprintf('%.1f', round(sum((z$ebike_sisickdays) / 365.25), 1)))` | `r (sprintf('%.2f', round(sum(z$ebike_sivaluecomb) / 1000000  , 2)))` | `r (round( sum(z$ebike_sico2) / 1000))` |
 YLL = Years of Life Lost
 
 <br>
