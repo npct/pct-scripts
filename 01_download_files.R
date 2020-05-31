@@ -5,7 +5,7 @@ source("00_setup_and_funs.R")
 #########################
 ### CREATE FOLDER STRUCTURE 
 #########################
-
+ 
 if(!dir.exists(file.path(path_inputs))) { dir.create(file.path(path_inputs)) }
 if(!dir.exists(file.path(path_inputs, "01_raw"))) { dir.create(file.path(path_inputs, "01_raw")) }
 if(!dir.exists(file.path(path_inputs, "01_raw/01_geographies"))) { dir.create(file.path(path_inputs, "01_raw/01_geographies")) }
