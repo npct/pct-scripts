@@ -56,7 +56,6 @@ for(k in 1:length(regions_tobuild)){
       # Change 'Wales region' to 'Wales'
       if (region == "wales") {
         region_stats <- gsub("The Wales region", "Wales", region_stats)
-        region_stats <- gsub("the Wales region", "Wales", region_stats)
       }
 
       write(region_stats, file.path(path_shiny, "regions_www/tabs/region_stats", purpose, geography, region, "region_stats.html"))
