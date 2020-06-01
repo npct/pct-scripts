@@ -1,6 +1,6 @@
 clear
 clear matrix
-cd "F:\Github_Maxtor"
+cd "I:\Github_Maxtor"
 
 x
 	/***********************
