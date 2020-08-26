@@ -499,7 +499,7 @@ x
 			foreach x in basegt basenm {
 			bysort home_lsoa work_lsoa: egen odcyclist_all`x'=sum(pred_`x') // NO. PREDICTED NEW CYCLISTS IN FLOW IN SCENARIO IN TOTAL
 			bysort home_lsoa work_lsoa: egen odcyclist_noncyclist`x'=sum((1-bicycle)*pred_`x') // NO. PREDICTED NEW CYCLISTS IN FLOW IN SCENARIO IF RESTRICTED TO CURRENT NONCYCLISTS	
-			gen `x'_sic=pred_`x'*(odcyclist_all`x'/odcyclist_noncyclist`x') // SCALING FACTOR - INCREASE THE SIC AMONG NON-CYCLISTS SO THAT CAN BE ZERO IN CURRENT CYCLISTS
+			gen `x'_sic=pred_`x'*(odcyclist_all`x'/odcyclist_noncyclist`x') // SCALING FACTOR - INCREASE THE SIC AMONG NON-CYCLISTS SO THAT CAN BE ZERO IN CURRENT CYCLISTS		
 			replace `x'_sic=0 if bicycle==1	// NO SIC IN CYCLISTS
 			recode `x'_sic 1/max=1 		// A SMALL NUMBER OF FLOWS WHICH ARE ALMOST ALL CYCLISTS OTHERWISE HAVE THIS >1
 			gen `x'_slc=`x'_sic+bicycle
@@ -524,15 +524,16 @@ x
 			drop bicycle_all- male_all gendereq_totalslc
 	
 		* DUTCH + EBIKE - CALC SLC, THEN MINUS BASELINE TO GET SIC
+			bysort home_lsoa work_lsoa: gen odall=_N // NO. COMMUTERS IN FLOW
+			bysort home_lsoa work_lsoa: egen odbicycle=sum(bicycle) // NO. CYCLISTS IN FLOW
 			foreach x in dutch ebike {
 			bysort home_lsoa work_lsoa: egen odcyclist_all`x'=sum(pred_`x') // NO. PREDICTED NEW CYCLISTS IN FLOW IN SCENARIO IN TOTAL
-			bysort home_lsoa work_lsoa: egen odcyclist_cyclist`x'=sum(bicycle*(bicycle-pred_`x')) // NO. CYCLISTS ALREADY HAVE AMONG EXISTING OVER AND ABOVE THEIR PREDICTIONS
-			gen `x'_slc=pred_`x'*((odcyclist_all`x'-odcyclist_cyclist`x')/odcyclist_all`x') // SCALING FACTOR - DECREASE THE SLC AMONG NON-CYCLISTS SO THAT CAN BE 1 IN CURRENT CYCLISTS
+			gen `x'_slc=(odcyclist_all`x'-odbicycle)/(odall-odbicycle)		// INCREASE IN NON-CYCLISTS TO GIVE RIGHT TOTAL
 			replace `x'_slc=1 if bicycle==1	// SLC = BASELINE CYCLING IN CYCLISTS
-			replace `x'_slc=bicycle if `x'_slc<=bicycle 	// NO CHANGE IF SLC < BASELINE
 			gen `x'_sic=`x'_slc-bicycle
-			drop odcyclist_all`x' odcyclist_cyclist`x'
+			drop odcyclist_all`x'
 			}
+			drop odall odbicycle
 			
 		* NO INCREASE IN FLOW TYPE 4 (TOO LONG/OUTSIDE EW)
 			foreach x in govtarget govnearmkt gendereq dutch ebike {
