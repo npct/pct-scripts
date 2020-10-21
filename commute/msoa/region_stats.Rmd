@@ -42,12 +42,12 @@ if (region_aspect>=1.9 & region_aspect<2.3) {region_figwidth <- 3.5}
 if (region_aspect>=2.3) {region_figwidth <- 2.5}
 
 # Prepare data for Fig 3 line graph
-dfscen <- dplyr::select(od_attributes, all, bicycle, contains("slc"), -contains("co2"), rf_dist_km)
+dfscen <- dplyr::select(od_attributes, all, bicycle, govtarget_slc,govnearmkt_slc, gendereq_slc, dutch_slc, ebike_slc, rf_dist_km)
 dfscen <- dfscen[!is.na(dfscen$rf_dist_km),]  # Exclude no fixed workplace / Other
 dfsp <- gather(dfscen, key = scenario, value = slc, -rf_dist_km)
 dfsp$scenario <- factor(dfsp$scenario)
-dfsp$scenario <- factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(1, 4, 3, 6, 5, 2)])
-levels(dfsp$scenario)[1:6] <- c("Total no. commuters", "Cyclists in Ebikes", "Cyclists in Go Dutch",  "Cyclists in Government Target (equality)", "Cyclists in Government Target (near market)", "Cyclists in Gender Equality", "Cyclists in Census 2011")
+dfsp$scenario <- factor(dfsp$scenario, levels = levels(dfsp$scenario)[c(1, 4, 3, 7, 6, 5, 2)]) # default = alphabetical. re-order
+levels(dfsp$scenario)[1:7] <- c("Total no. commuters", "Cyclists in Ebikes", "Cyclists in Go Dutch",  "Cyclists in Government Target (equality)", "Cyclists in Government Target (near market)", "Cyclists in Gender Equality", "Cyclists in Census 2011")
 
 ```
 
