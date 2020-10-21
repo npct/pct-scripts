@@ -8,7 +8,7 @@ purpose <- "commute"
 purpose_private <- paste0(purpose, "_private")
 geography <- "lsoa"  
 init_region("pct_regions", geography, purpose) # Define region type and projection, import local authorities
-init_outputs_national(purpose, geography) # Load national data
+init_outputs_national(purpose, geography) # Load national data. NB only need z_all if just doing region stats file
 init_Rsmall(purpose) # Load R small codebooks
 
 
