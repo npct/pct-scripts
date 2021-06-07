@@ -4,8 +4,7 @@ source("00_setup_and_funs.R")
 
 #########################
 ### CREATE LOCAL AUTHORITIES AND PCT REGIONS FROM MSOA
-#########################
-
+######################### 
 # LOAD FILES
 unzip(file.path(path_inputs, "01_raw/01_geographies/geography_lookups/OA11_LSOA11_MSOA11_LAD11_EW_LU.zip"), files = "OA11_LSOA11_MSOA11_LAD11_EW_LUv2.csv", exdir = path_temp_unzip)
 msoa_lad_lookup <- read_csv(file.path(path_temp_unzip, "OA11_LSOA11_MSOA11_LAD11_EW_LUv2.csv"))[ ,c('MSOA11CD', 'LAD11CD', 'LAD11NM')]
